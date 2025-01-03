@@ -1,0 +1,17 @@
+/Users/samwan/projects/irtool/Irt.Infrastructure/bin/Release/net8.0/Irt.Infrastructure.deps.json
+/Users/samwan/projects/irtool/Irt.Infrastructure/bin/Release/net8.0/Irt.Infrastructure.dll
+/Users/samwan/projects/irtool/Irt.Infrastructure/bin/Release/net8.0/Irt.Infrastructure.pdb
+/Users/samwan/projects/irtool/Irt.Infrastructure/bin/Release/net8.0/Irt.Application.dll
+/Users/samwan/projects/irtool/Irt.Infrastructure/bin/Release/net8.0/Irt.Core.dll
+/Users/samwan/projects/irtool/Irt.Infrastructure/bin/Release/net8.0/Irt.Core.pdb
+/Users/samwan/projects/irtool/Irt.Infrastructure/bin/Release/net8.0/Irt.Application.pdb
+/Users/samwan/projects/irtool/Irt.Infrastructure/obj/Release/net8.0/Irt.Infrastructure.csproj.AssemblyReference.cache
+/Users/samwan/projects/irtool/Irt.Infrastructure/obj/Release/net8.0/Irt.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+/Users/samwan/projects/irtool/Irt.Infrastructure/obj/Release/net8.0/Irt.Infrastructure.AssemblyInfoInputs.cache
+/Users/samwan/projects/irtool/Irt.Infrastructure/obj/Release/net8.0/Irt.Infrastructure.AssemblyInfo.cs
+/Users/samwan/projects/irtool/Irt.Infrastructure/obj/Release/net8.0/Irt.Infrastructure.csproj.CoreCompileInputs.cache
+/Users/samwan/projects/irtool/Irt.Infrastructure/obj/Release/net8.0/Irt.Infr.F50DACF4.Up2Date
+/Users/samwan/projects/irtool/Irt.Infrastructure/obj/Release/net8.0/Irt.Infrastructure.dll
+/Users/samwan/projects/irtool/Irt.Infrastructure/obj/Release/net8.0/refint/Irt.Infrastructure.dll
+/Users/samwan/projects/irtool/Irt.Infrastructure/obj/Release/net8.0/Irt.Infrastructure.pdb
+/Users/samwan/projects/irtool/Irt.Infrastructure/obj/Release/net8.0/ref/Irt.Infrastructure.dll

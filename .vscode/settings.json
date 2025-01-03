@@ -1,0 +1,13 @@
+{
+    "dotnet-test-explorer.autoExpandTree": true,
+    "dotnet-test-explorer.autoWatch": true,
+    "dotnet-test-explorer.runInParallel": true,
+    "csharp.inlayHints.enableInlayHintsForImplicitObjectCreation": true,
+    "csharp.inlayHints.enableInlayHintsForImplicitVariableTypes": true,
+    "csharp.inlayHints.enableInlayHintsForLambdaParameterTypes": true,
+    "csharp.inlayHints.enableInlayHintsForTypes": true,
+    "csharp.debug.logging.diagnosticsLog.dispatcherMessages": "error",
+    "dotnetAcquisitionExtension.enablePreviewFeatures": true,
+    "dotnet-test-explorer.testProjectPath": "*Test*",
+    "csharp.preview.improvedLaunchExperience": true
+}

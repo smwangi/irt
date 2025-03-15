@@ -1,0 +1,24 @@
+@IrtWeb_HostAddress = https://localhost:5001
+
+### GET Datasets
+GET {{IrtWeb_HostAddress}}/irt/api/v1/datasets/
+Content-Type: application/json
+Accept: application/json
+###
+
+### POST Datasets
+POST {{IrtWeb_HostAddress}}/irt/api/v1/datasets/
+Content-Type: application/json
+Accept: application/json
+    
+    {
+    "name": "Dataset 1",
+    "description": "Dataset 1 Description"
+    }
+###
+
+### Delete Datasets
+DELETE {{IrtWeb_HostAddress}}/irt/api/v1/datasets/
+Content-Type: application/json
+Accept: application/json
+###

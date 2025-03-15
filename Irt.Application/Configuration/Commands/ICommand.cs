@@ -1,14 +1,11 @@
-using MediatR;
 
 namespace Irt.Application.Configuration.Commands
 {
-    public interface ICommand : IRequest
+    public interface ICommand<TResult>
     {
         string Id { get; }
     }
-
-    public interface ICommand<out TResult> : IRequest<TResult>
-    {
-        string Id { get; }
-    }
+    
+    // For commands without result
+    public interface ICommand {}
 }

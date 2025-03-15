@@ -1,4 +1,6 @@
-using MongoDB.Bson;
+// Code Created: 2021-01-07 3:00 PM
+
+using Irt.Core.SharedKernel;
 
 namespace Irt.Application.Configuration.Commands
 {
@@ -18,7 +20,7 @@ namespace Irt.Application.Configuration.Commands
 
         protected InternalCommandBase()
         {
-            this.Id = ObjectId.GenerateNewId().ToString();
+            this.Id = UniqueIdGenerator.NextId();
         }
 
         protected InternalCommandBase(string id)

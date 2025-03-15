@@ -6,6 +6,9 @@ namespace Irt.Core.ValueObjects
     {
         public string Value { get; }
 
+        private LastModifiedBy()
+        {
+        }
         public LastModifiedBy(string value)
         {
             Value = value;
@@ -15,7 +18,7 @@ namespace Irt.Core.ValueObjects
 
         public static implicit operator LastModifiedBy(string value) => new LastModifiedBy(value);
 
-        protected IEnumerable<object> GetEqualityComponents()
+        protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Value;
         }

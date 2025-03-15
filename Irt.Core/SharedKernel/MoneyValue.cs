@@ -3,16 +3,10 @@ using Irt.Core.SeedWork;
 
 namespace Irt.Core.SharedKernel
 {
-    public class MoneyValue : ValueObject
+    public class MoneyValue(decimal amount, string currency) : ValueObject
     {
-        public MoneyValue(decimal amount, string currency)
-        {
-            Amount = amount;
-            Currency = currency;
-        }
-
-        public decimal Amount { get; }
-        public string Currency { get; }
+        private decimal Amount { get; } = amount;
+        public string Currency { get; } = currency;
 
         public static MoneyValue Of(decimal amount, string currency) => new(amount, currency);
         public static MoneyValue Of(MoneyValue moneyValue) => new(moneyValue.Amount, moneyValue.Currency);
@@ -26,6 +20,11 @@ namespace Irt.Core.SharedKernel
             CheckRule(new MoneyValueOperationMustBePerformedOnTheSameCurrencyRule(valueLeft, valueRight));
 
             return new MoneyValue(valueLeft.Amount + valueRight.Amount, valueLeft.Currency);
+        }
+
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            throw new NotImplementedException();
         }
     }
 

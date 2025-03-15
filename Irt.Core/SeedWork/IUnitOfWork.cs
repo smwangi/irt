@@ -1,9 +1,14 @@
 using System;
+using Irt.Core.SharedKernel;
 
 namespace Irt.Core.SeedWork
 {
     public interface IUnitOfWork : IDisposable
     {
-        Task<int> CommitAsync(CancellationToken cancellationToken = default(CancellationToken));
+        IGenericRepository<T> Repository<T>() where T : class;
+        Task<int> SaveChangesAsync();
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
     }
 }

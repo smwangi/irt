@@ -1,13 +1,12 @@
 
 using Irt.Core.SharedKernel;
+using Irt.Core.ValueObjects;
 using Moq;
 
 namespace Irt.UnitTest.Domain
 {
     public class DatasourceTest
     {
-        private readonly INameValidationChecker<Datasource> _nameValidationChecker = new Mock<INameValidationChecker<Datasource>>().Object;
-
         [Fact]
         public void CreateDatasource()
         {
@@ -31,12 +30,12 @@ namespace Irt.UnitTest.Domain
             var datasource = CreateTestDatasource();
 
             // Act
-            var updatedDatasourceName = "UpdatedDatasourceName";
+            var updatedDatasourceName = Name.Of("UpdatedDSName");
             var updatedDatasourceDescription = "UpdatedDatasourceDescription";
-            datasource.UpdateDatasource(updatedDatasourceName, updatedDatasourceDescription, datasource.Id, _nameValidationChecker);
+            datasource.UpdateDatasource(updatedDatasourceName, updatedDatasourceDescription, datasource.Id);
 
             // Assert
-            Assert.Equal(updatedDatasourceName, datasource.Name.Value);
+            Assert.Equal(updatedDatasourceName.Value, datasource.Name.Value);
             Assert.Equal(updatedDatasourceDescription, datasource.Description);
         }
 
@@ -50,12 +49,11 @@ namespace Irt.UnitTest.Domain
             var description = "description";
             var source = "src";
             var datasourceType = DatasourceType.File;
-            var nameValidationChecker = _nameValidationChecker;
             var expectedMessage = $"The length of the name must be between {MinLength} and {MaxLength} characters. (Parameter 'value')";
 
             // Act
             //var testDelegate = () => Datasource.CreateDatasource(name, description, source, datasourceType, nameValidationChecker);
-            Datasource testDelegate() => Datasource.CreateDatasource(name, description, source, datasourceType, nameValidationChecker);
+            Datasource testDelegate() => Datasource.CreateDatasource(Name.Of(name), description, source, datasourceType);
 
             // Assert
             var ex = Assert.Throws<ArgumentException>((Func<Datasource>)testDelegate);
@@ -66,11 +64,10 @@ namespace Irt.UnitTest.Domain
         private Datasource CreateTestDatasource()
         {
             return Datasource.CreateDatasource(
-                $"{Guid.NewGuid()}-DatasourceName",
+                Name.Of($"{Guid.NewGuid()}-DatasourceName"),
                 "DatasourceDescription",
                 source: "unep",
-                DatasourceType.Csv,
-                _nameValidationChecker);
+                DatasourceType.Csv);
         }
     }
 }

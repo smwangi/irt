@@ -12,6 +12,7 @@
 /Users/samwan/projects/irtool/Irt.UnitTests/obj/Debug/net8.0/Irt.UnitTests.AssemblyInfoInputs.cache
 /Users/samwan/projects/irtool/Irt.UnitTests/obj/Debug/net8.0/Irt.UnitTests.AssemblyInfo.cs
 /Users/samwan/projects/irtool/Irt.UnitTests/obj/Debug/net8.0/Irt.UnitTests.csproj.CoreCompileInputs.cache
+/Users/samwan/projects/irtool/Irt.UnitTests/obj/Debug/net8.0/Irt.UnitTests.sourcelink.json
 /Users/samwan/projects/irtool/Irt.UnitTests/obj/Debug/net8.0/Irt.Unit.657AB3AC.Up2Date
 /Users/samwan/projects/irtool/Irt.UnitTests/obj/Debug/net8.0/Irt.UnitTests.dll
 /Users/samwan/projects/irtool/Irt.UnitTests/obj/Debug/net8.0/refint/Irt.UnitTests.dll

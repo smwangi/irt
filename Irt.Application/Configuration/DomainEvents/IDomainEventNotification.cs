@@ -1,4 +1,3 @@
-using MediatR;
 
 namespace Irt.Application.Configuration.DomainEvents
 {
@@ -7,7 +6,7 @@ namespace Irt.Application.Configuration.DomainEvents
         TEventType DomainEvent { get; }
     }
 
-    public interface IDomainEventNotification : INotification
+    public interface IDomainEventNotification 
     {
         Guid Id { get; }
     }

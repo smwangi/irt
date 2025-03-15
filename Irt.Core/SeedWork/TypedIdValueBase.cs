@@ -1,64 +1,59 @@
-using System;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+
 
 namespace Irt.Core.SeedWork
 {
-    public class TypedIdValueBase : IEquatable<TypedIdValueBase>
+    public abstract class TypedIdValueBase<T> : IEquatable<TypedIdValueBase<T>>
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.String)]
-        public string Id { get; }
-        protected TypedIdValueBase(string id)
+        public string Value { get; }
+        protected TypedIdValueBase(string value)
         {
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrEmpty(value))
             {
-                throw new ArgumentException("Id cannot be empty", nameof(id));
+                throw new ArgumentException("Id cannot be empty", nameof(value));
             }
             
-            Id = id;
+            Value = value;
         }
 
         public override bool Equals(object? obj)
         {
             if (obj is null) return false;
-            return obj is TypedIdValueBase other && Equals(other);
+            return obj is TypedIdValueBase<T> other && Equals(other);
         }
 
-        public bool Equals(TypedIdValueBase? other)
+        public bool Equals(TypedIdValueBase<T>? other)
         {
             if (other is null) return false;
-            return Id == other.Id;
+            return Value == other.Value;
         }
 
-        public static implicit operator string(TypedIdValueBase typedId)
+        public static implicit operator string(TypedIdValueBase<T> typedId)
         {
-            return typedId.Id;
+            return typedId.Value;
         }
 
-        public static implicit operator TypedIdValueBase(string value)
+        /*public static implicit operator TypedIdValueBase(string value)
         {
             return new TypedIdValueBase(value);
-        }     
-
+        }*/
+        
         public override int GetHashCode()
         {
-            return Id.GetHashCode();
+            return Value.GetHashCode();
         }
 
-        public static bool operator ==(TypedIdValueBase a, TypedIdValueBase b)
+        public static bool operator ==(TypedIdValueBase<T> a, TypedIdValueBase<T> b)
         {
             if (ReferenceEquals(a, b)) return true;
-            if (ReferenceEquals(a, null)) return false;
-            return a.Equals(b);
+            return !ReferenceEquals(a, null) && a.Equals(b);
         }
 
-        public static bool operator !=(TypedIdValueBase a, TypedIdValueBase b)
+        public static bool operator !=(TypedIdValueBase<T> a, TypedIdValueBase<T> b)
         {
             return !(a == b);
         }
 
-        public static TypedIdValueBase Of(string id)
+        /*public static TypedIdValueBase Of(string id)
         {
             ArgumentNullException.ThrowIfNull(id, nameof(id));
 
@@ -73,11 +68,8 @@ namespace Irt.Core.SeedWork
         public static TypedIdValueBase FromString(string id)
         {
             return new TypedIdValueBase(id);
-        }
+        }*/
 
-        public override string ToString()
-        {
-            return Id;
-        }
+        public override string ToString() => Value;
     }
 }

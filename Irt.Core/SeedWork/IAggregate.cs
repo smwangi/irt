@@ -1,6 +1,6 @@
 namespace Irt.Core.SeedWork
 {
-    public interface IAggregate<T> : IAggregate, IEntity<T> where T : TypedIdValueBase
+    public interface IAggregate<T> : IAggregate, IEntity where T : TypedIdValueBase<T>
     {
     }
 

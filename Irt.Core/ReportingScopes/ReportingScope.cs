@@ -1,7 +1,6 @@
 using Irt.Core.SeedWork;
 using Irt.Core.SharedKernel;
 using Irt.Core.ValueObjects;
-using MongoDB.Bson;
 
 namespace Irt.Core.ReportingScopes
 {
@@ -10,17 +9,21 @@ namespace Irt.Core.ReportingScopes
         public string Description { get; private set; }
         public Name ReportingScopeName { get; private set; }
 
-        private ReportingScope(ReportingScopeId id, Name name, string description)
+        private ReportingScope(ReportingScopeId id, Name name, string description) : base(id)
         {
             Id = id;
             ReportingScopeName = name;
             Description = description;
         }
 
-        public static ReportingScope CreateReportingScope(Name name, string description, INameValidationChecker<ReportingScope> nameValidationChecker)
+        public static ReportingScope CreateReportingScope(
+            Name name,
+            string description)
         {
-            CheckRule(new NameUniquenessChecker<ReportingScope>(nameValidationChecker, name, null));
-            return new ReportingScope(new ReportingScopeId(ObjectId.GenerateNewId().ToString()), name, description);
+            return new ReportingScope(
+                new ReportingScopeId(UniqueIdGenerator.NextId()),
+                name,
+                description);
         }
     }
 }

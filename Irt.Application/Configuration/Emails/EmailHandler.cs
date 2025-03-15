@@ -1,9 +1,7 @@
 using Irt.Application.Configuration.Notifications;
-using MediatR;
-
 namespace Irt.Application.Configuration.Emails
 {
-    public class EmailHandler : INotificationHandler<DatasourceAddedNotification>
+    public class EmailHandler 
     {
         IEmailSender _emailSender;
         public EmailHandler(IEmailSender emailSender) => _emailSender = emailSender;

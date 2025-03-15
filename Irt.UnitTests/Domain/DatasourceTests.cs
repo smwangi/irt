@@ -1,17 +1,11 @@
 using Irt.Core.Datasources;
-using Irt.Core.SharedKernel;
+using Irt.Core.ValueObjects;
 using Xunit;
 
 namespace Irt.UnitTests.Domain
 {
-    public class DatasourceTests
+    public class DatasourceTests()
     {
-        private readonly INameValidationChecker<Datasource> _datasourceUniqueChecker;
-        public DatasourceTests(INameValidationChecker<Datasource> datasourceUniqueChecker)
-        {
-            _datasourceUniqueChecker = datasourceUniqueChecker;
-        }
-
         [Fact]
         public void CreateDatasource()
         {
@@ -36,19 +30,21 @@ namespace Irt.UnitTests.Domain
             var datasource = CreateTestDatasource();
 
             // Act
-            var updatedDatasourceName = "UpdatedDatasourceName";
+            var updatedDatasourceName = Name.Of("UpdatedDatasourceName") ;
             var updatedDatasourceDescription = "UpdatedDatasourceDescription";
-            datasource.UpdateDatasource(updatedDatasourceName, updatedDatasourceDescription, datasource.Id, _datasourceUniqueChecker);
+            datasource.UpdateDatasource(updatedDatasourceName, updatedDatasourceDescription, datasource.Id);
 
             // Assert
-            Assert.Equal(updatedDatasourceName, datasource.Name?.Value);
+            Assert.Equal(updatedDatasourceName.Value, datasource.Name?.Value);
             Assert.Equal(updatedDatasourceDescription, datasource.Description);
         }
 
         private Datasource CreateTestDatasource()
         {
             return Datasource.CreateDatasource(
-                "DatasourceName", "DatasourceDescription", source: "unep", DatasourceType.Csv, _datasourceUniqueChecker);
+                Name.Of("DatasourceName"),
+                "DatasourceDescription",
+                source: "unep", DatasourceType.Csv);
         }
     }
 }

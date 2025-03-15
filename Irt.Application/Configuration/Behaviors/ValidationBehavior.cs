@@ -1,17 +1,17 @@
+using Irt.Application.Configuration.Commands;
+
 namespace Irt.Application.Configuration.Behaviors
 {
     using System.Threading;
     using System.Threading.Tasks;
     using FluentValidation;
-    using Irt.Application.Configuration.Commands;
-    using MediatR;
 
     public class ValidationBehavior<TRequest, TResponse>
-        (IEnumerable<IValidator<TRequest>> validators)
-        : IPipelineBehavior<TRequest, TResponse>
+        (IEnumerable<IValidator<TRequest>> validators,
+            ICommandHandler<TRequest, TResponse> next) : ICommandHandler<TRequest, TResponse>
         where TRequest : ICommand<TResponse>
     {
-        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        public async Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken)
         {
             var context = new ValidationContext<TRequest>(request);
 
@@ -29,7 +29,7 @@ namespace Irt.Application.Configuration.Behaviors
                 throw new ValidationException(failures);
             }
 
-            return await next();
+            return await next.HandleAsync(request, cancellationToken);
         }
     }
 }

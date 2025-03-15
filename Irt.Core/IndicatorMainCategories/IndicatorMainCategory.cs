@@ -1,7 +1,6 @@
 using Irt.Core.SeedWork;
 using Irt.Core.SharedKernel;
 using Irt.Core.ValueObjects;
-using MongoDB.Bson;
 
 namespace Irt.Core.IndicatorMainCategories
 {
@@ -12,7 +11,7 @@ namespace Irt.Core.IndicatorMainCategories
         private IndicatorMainCategory(
             IndicatorMainCategoryId id,
             Name indicatorMainCategoryName,
-            string description)
+            string description) : base(id)
         {
             Id = id;
             Name = indicatorMainCategoryName;
@@ -21,11 +20,13 @@ namespace Irt.Core.IndicatorMainCategories
 
         public static IndicatorMainCategory Create(
             Name name,
-            string description,
-            INameValidationChecker<IndicatorMainCategory> nameValidationChecker)
+            string description)
         {
-            CheckRule(new NameUniquenessChecker<IndicatorMainCategory>(nameValidationChecker, name, null));
-            return new IndicatorMainCategory(new IndicatorMainCategoryId(ObjectId.GenerateNewId().ToString()), name, description);
+            return new IndicatorMainCategory(
+                new IndicatorMainCategoryId(
+                    UniqueIdGenerator.NextId()),
+                name,
+                description);
         }
     }
 }

@@ -2,17 +2,16 @@ using Irt.Core.SeedWork;
 
 namespace Irt.Core.SharedKernel
 {
-    public class MoneyValueMustHaveCurrencyRule : IBusinessRule
+    public class MoneyValueMustHaveCurrencyRule(string currency) : IBusinessRule
     {
-        private readonly string _currency;
+        public string Message => "Money value must have currency specified.";
+        public Task<string> ErrorMessage => Task.FromResult($"Money value must have currency specified");
 
-        public MoneyValueMustHaveCurrencyRule(string currency)
+        public bool IsBroken()
         {
-            _currency = currency;
+            throw new NotImplementedException();
         }
 
-        public string Message => "Money value must have currency specified.";
-
-        public Task<bool> IsBroken() => Task.FromResult(string.IsNullOrWhiteSpace(_currency));
+        public Task<bool> IsBrokenAsync() => Task.FromResult(string.IsNullOrWhiteSpace(currency));
     }
 }

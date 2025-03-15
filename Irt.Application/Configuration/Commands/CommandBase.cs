@@ -1,5 +1,6 @@
 // Code Created: 2020-07-19 1:00 PM
-using MongoDB.Bson;
+
+using Irt.Core.SharedKernel;
 
 namespace Irt.Application.Configuration.Commands
 {
@@ -9,7 +10,7 @@ namespace Irt.Application.Configuration.Commands
 
         public CommandBase()
         {
-            this.Id = ObjectId.GenerateNewId().ToString();
+            this.Id = UniqueIdGenerator.NextId();
         }
 
         protected CommandBase(string id)
@@ -24,7 +25,7 @@ namespace Irt.Application.Configuration.Commands
 
         protected CommandBase()
         {
-            this.Id = ObjectId.GenerateNewId().ToString();
+            this.Id = UniqueIdGenerator.NextId();
         }
 
         protected CommandBase(string id)

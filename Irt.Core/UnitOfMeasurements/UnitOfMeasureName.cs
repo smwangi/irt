@@ -1,5 +1,4 @@
 using Irt.Core.SeedWork;
-using MongoDB.Bson.Serialization.Attributes;
 
 namespace Irt.Core.UnitOfMeasurements
 {
@@ -8,10 +7,8 @@ namespace Irt.Core.UnitOfMeasurements
         private const int MaxLength = 100;
         private const int MinLength = 2;
 
-        [BsonElement("value")]
         public string Value { get; }
 
-        [BsonConstructor]
         private UnitOfMeasureName(string value) => Value = value;
 
         public static UnitOfMeasureName Of(string value)
@@ -41,7 +38,7 @@ namespace Irt.Core.UnitOfMeasurements
             return Value;
         }
         
-        protected IEnumerable<object> GetEqualityComponents()
+        protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Value;
         }

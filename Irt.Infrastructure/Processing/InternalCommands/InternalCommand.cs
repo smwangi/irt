@@ -1,8 +1,4 @@
-using System;
-using System.Threading.Tasks;
-using Irt.Infrastructure.Database;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+
 
 namespace Irt.Infrastructure.Processing.InternalCommands
 {

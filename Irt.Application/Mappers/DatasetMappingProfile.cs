@@ -9,8 +9,26 @@ public class DatasetMappingProfile : Profile
     public DatasetMappingProfile()
     {
         CreateMap<Dataset, DatasetDto>()
-            .ForMember(dest => dest.Description, opt => opt.MapFrom(src => string.IsNullOrEmpty(src.Description) ? "N/A" : src.Description))
-            .ForMember(dest => dest.DatasetType, opt => opt.MapFrom(src => ParseDatasetType(src.DatasetType.ToString())));
+            .ForMember(dest =>
+                dest.Description, opt =>
+                opt.MapFrom(src =>
+                    string.IsNullOrEmpty(src.Description) ? "N/A" : src.Description))
+            .ForMember(dest =>
+                dest.DatasetType, opt =>
+                opt.MapFrom(src =>
+                    ParseDatasetType(src.DatasetType.ToString())));
+        /*.ForMember(dest =>
+            dest.CreatedAt, opt =>
+                opt.MapFrom(src =>
+                    src.CreatedAt))
+        .ForMember(dest =>
+            dest.LastModifiedAt, opt =>
+                opt.MapFrom(src => src.LastModifiedAt))
+        .ForMember(dest =>
+            dest.Name, opt =>
+                opt.MapFrom(src =>
+                    src.Name));*/
+
 
 
     }

@@ -1,36 +1,31 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Irt.Core.SeedWork;
 using Irt.Core.SharedKernel;
 using Irt.Core.ValueObjects;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 
 namespace Irt.Core.Datasources
 {
-    [BsonIgnoreExtraElements]
     public sealed class Datasource : Entity<DatasourceId> //, IAggregateRoot
     {
-        //[Required]
-        //public new Name Name { get; private set; }
 
         public string? Description { get; private set; } = string.Empty;
 
         public string? Source { get; private set; } = string.Empty;
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        [BsonRepresentation(BsonType.String)]
         public DatasourceType DatasourceType { get; private set; }
 
-        [BsonConstructor]
+        // for migration
+        private Datasource():base(id: new DatasourceId(""))
+        {
+        }
         private Datasource(
             DatasourceId id,
             Name name,
             string description,
             string? source,
-            DatasourceType datasourceType)
+            DatasourceType datasourceType) : base(id)
         {
-            Name = name;
             Description = description;
             Id = id;
             Source = source;
@@ -39,17 +34,14 @@ namespace Irt.Core.Datasources
         }
 
         public static Datasource CreateDatasource(
-            string name,
+            Name name,
             string description,
             string source,
-            DatasourceType datasourceType,
-            INameValidationChecker<Datasource> nameUniqueChecker)
+            DatasourceType datasourceType)
         {
-            Name nam = Name.Of(name);
-            CheckRule(new NameUniquenessChecker<Datasource>(nameUniqueChecker, nam, null));
             return new Datasource(
-                new DatasourceId(ObjectId.GenerateNewId().ToString()),
-                nam,
+                new DatasourceId(UniqueIdGenerator.NextId()),
+                name,
                 description,
                 source,
                 datasourceType
@@ -57,15 +49,11 @@ namespace Irt.Core.Datasources
         }
 
         public void UpdateDatasource(
-            string name,
+            Name name,
             string description,
-            DatasourceId datasourceId,
-            INameValidationChecker<Datasource> nameUniqueChecker)
+            DatasourceId datasourceId)
         {
-            Name nam = Name.Of(name);
-            CheckRule(new NameUniquenessChecker<Datasource>(nameUniqueChecker, nam, datasourceId.Id));
-            //Validate(name, description, nameValidationChecker);
-            Name = nam;
+            Name = name;
             Description = description;
             SetModified();
 

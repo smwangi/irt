@@ -1,14 +1,8 @@
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using FluentValidation;
-using MediatR;
-
 namespace Irt.Application.Configuration.Validation
 {
-    public class CommandValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse>
+    public class CommandValidationBehavior<TRequest, TResponse> 
     {
         private readonly IList<IValidator<TRequest>> _validators;
 
@@ -17,7 +11,7 @@ namespace Irt.Application.Configuration.Validation
             this._validators = validators;
         }
 
-        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken )
+        public Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken )
         {
             var errors = _validators
                 .Select(v => v.Validate(request))
@@ -38,7 +32,7 @@ namespace Irt.Application.Configuration.Validation
                 throw new InvalidCommandException(errorBuilder.ToString(), ""); // Fix: Pass an empty string as the second argument
             }
 
-            return next();
+            return null;
         }
     }
 }

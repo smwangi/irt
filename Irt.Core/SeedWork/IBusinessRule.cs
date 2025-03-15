@@ -2,8 +2,9 @@ namespace Irt.Core.SeedWork
 {
     public interface IBusinessRule
     {
-        Task<bool> IsBroken();
+        Task<bool> IsBrokenAsync(); // Evaluates whether the rule is broken asynchronously
 
-        string Message { get; }
+        string Message { get; } // error message for the broken rule
+        Task<string> ErrorMessage { get; }
     }
 }

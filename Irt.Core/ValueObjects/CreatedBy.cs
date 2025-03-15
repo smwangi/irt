@@ -14,12 +14,14 @@ namespace Irt.Core.ValueObjects
 
             UserId = userId;
         }
+        
+        private CreatedBy(){}
 
         public static implicit operator string(CreatedBy createdBy) => createdBy is not null ? createdBy.Value : string.Empty;
 
         public static implicit operator CreatedBy(string value) => new CreatedBy(value);
 
-        protected IEnumerable<object> GetEqualityComponents()
+        protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Value;
         }

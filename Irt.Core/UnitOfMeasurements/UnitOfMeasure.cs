@@ -1,8 +1,6 @@
 using Irt.Core.SeedWork;
 using Irt.Core.SharedKernel;
 using Irt.Core.ValueObjects;
-using MongoDB.Bson;
-
 namespace Irt.Core.UnitOfMeasurements
 {
     public class UnitOfMeasure : Entity<UnitOfMeasureId>
@@ -12,7 +10,7 @@ namespace Irt.Core.UnitOfMeasurements
         private UnitOfMeasure(
             Name name,
             string description,
-            UnitOfMeasureId id)
+            UnitOfMeasureId id) : base(id)
         {
             Name = name;
             Description = description;
@@ -21,21 +19,19 @@ namespace Irt.Core.UnitOfMeasurements
 
         public static UnitOfMeasure CreateUnitOfMeasure(
             Name name,
-            string description,
-            INameValidationChecker<UnitOfMeasure> nameUniqueChecker)
+            string description)
         {
-            CheckRule(new NameUniquenessChecker<UnitOfMeasure>(nameUniqueChecker, name, null));
             return new UnitOfMeasure(
-                name,
+                name, 
                 description,
-                new UnitOfMeasureId(ObjectId.GenerateNewId().ToString()));
+                new UnitOfMeasureId(UniqueIdGenerator.NextId()));
         }
 
         public void UpdateUnitOfMeasure(
-            Name name,
+            string name,
             string description)
         {
-            Name = name;
+            Name = Name.Of(name);
             Description = description;
         }
 

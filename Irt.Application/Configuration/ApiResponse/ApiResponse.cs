@@ -24,13 +24,13 @@ namespace Irt.Application.Configuration.ApiResponse
             bool isSuccess,
             string message,
             T? data = default(T),
-            List<ApiError> errors = null,
-            Dictionary<string, object> metadata = null)
+            List<ApiError>? errors = null,
+            Dictionary<string, object>? metadata = null)
         {
             this.Message = message;
             this.Data = data;
             this.IsSuccess = isSuccess;
-            Errors = errors ?? new List<ApiError>();
+            Errors = errors ?? [];
             Metadata = metadata ?? new Dictionary<string, object>();
         }
 
@@ -71,21 +71,7 @@ namespace Irt.Application.Configuration.ApiResponse
             Metadata[key] = value;
             return this;
         }
-
-        /**
-         * var response = ApiResponse<object>.Error("Validation error")
-            .AddError("Another error")
-            .AddMetadata("Timestamp", DateTime.UtcNow);
-
-            var errors = new List<ApiError>
-            {
-                new ApiError { Code = "ERR001", Message = "Validation failed" },
-                new ApiError { Code = "ERR002", Message = "Resource not found" }
-            };
-
-            var response = ApiResponse<object>.Error(errors);
-
-         */
+        
     }
 
     public class ApiError

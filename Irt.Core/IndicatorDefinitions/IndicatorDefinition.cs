@@ -1,11 +1,8 @@
 using Irt.Core.IndicatorCategories;
 using Irt.Core.ReportingScopes;
 using Irt.Core.SeedWork;
-using Irt.Core.SharedKernel;
 using Irt.Core.UnitOfMeasurements;
 using Irt.Core.ValueObjects;
-using MongoDB.Bson;
-
 namespace Irt.Core.IndicatorDefinitions
 {
     public class IndicatorDefinition : Entity<IndicatorDefinitionId>
@@ -34,10 +31,9 @@ namespace Irt.Core.IndicatorDefinitions
             string formula,
             string formulaDescription,
             string metadata,
-            string dpsir)
+            string dpsir) : base(id)
         {
             Id = id;
-            IndicatorDefinitionName = name;
             Description = description;
             ReportingScope = reportingScope;
             UnitOfMeasure = unitOfMeasure;
@@ -61,13 +57,10 @@ namespace Irt.Core.IndicatorDefinitions
             string formula,
             string formulaDescription,
             string metadata,
-            string dpsir,
-            INameValidationChecker<IndicatorDefinition> nameValidationChecker)
+            string dpsir)
         {
-            Name indicatorName = Name.Of(name.Value);
-            CheckRule(new NameUniquenessChecker<IndicatorDefinition>(nameValidationChecker, indicatorName));
             return new IndicatorDefinition(
-                new IndicatorDefinitionId(ObjectId.GenerateNewId().ToString()),
+                new IndicatorDefinitionId(new Guid().ToString()),
                 name,
                 description,
                 reportingScope,

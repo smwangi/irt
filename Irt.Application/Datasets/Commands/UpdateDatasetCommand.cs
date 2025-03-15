@@ -3,14 +3,9 @@ using Irt.Application.Configuration.Commands;
 using Irt.Application.Configuration.Results;
 
 namespace Irt.Application.Datasets.Commands;
-public class UpdateDatasetCommand : CommandBase<UpdateResult<string>>
+public class UpdateDatasetCommand(DatasetDto datasetDto) : CommandBase<Result<DatasetDto,string>>
 {
-    public DatasetDto DatasetDto { get; }
-
-    public UpdateDatasetCommand(DatasetDto datasetDto)
-    {
-        DatasetDto = datasetDto ?? throw new ArgumentNullException(nameof(datasetDto));
-    }
+    public DatasetDto DatasetDto { get; } = datasetDto ?? throw new ArgumentNullException(nameof(datasetDto));
 }
 public class UpdateDatasetCommandValidator : AbstractValidator<UpdateDatasetCommand>
 {

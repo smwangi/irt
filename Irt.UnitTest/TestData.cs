@@ -3,17 +3,13 @@ using Irt.Core.IndicatorCategories;
 using Irt.Core.IndicatorDefinitions;
 using Irt.Core.IndicatorMainCategories;
 using Irt.Core.ReportingScopes;
-using Irt.Core.SharedKernel;
 using Irt.Core.UnitOfMeasurements;
 using Irt.Core.ValueObjects;
-using Moq;
 
 namespace Irt.UnitTest
 {
     public class TestData
-    {
-        private readonly INameValidationChecker<Dataset> nameValidationChecker = new Mock<INameValidationChecker<Dataset>>().Object;
-        private readonly INameValidationChecker<Datasource> datasourceNameValidation = new Mock<INameValidationChecker<Datasource>>().Object;
+    { 
         //private static readonly NameUniquenessChecker<Dataset> NameUniquenessChecker = new NameUniquenessChecker<Dataset>(new NameUniquenessChecker<Dataset>(name, Name.Of("Dataset1"), null);
         /*public static IEnumerable<object[]> GetDatasetData()
         {
@@ -44,8 +40,7 @@ namespace Irt.UnitTest
         {
             return ReportingScope.CreateReportingScope(
                 name: Name.Of(Guid.NewGuid().ToString()),
-                description: Guid.NewGuid().ToString(),
-                nameValidationChecker: GetMock<INameValidationChecker<ReportingScope>>()
+                description: Guid.NewGuid().ToString()
             );
         }
 
@@ -53,18 +48,15 @@ namespace Irt.UnitTest
         {
             return UnitOfMeasure.CreateUnitOfMeasure(
                 name: Name.Of(Guid.NewGuid().ToString()),
-                description: Guid.NewGuid().ToString(),
-                nameUniqueChecker: GetMock<INameValidationChecker<UnitOfMeasure>>()
+                description: Guid.NewGuid().ToString()
             );
         }
 
         public static IndicatorCategory CreateIndicatorCategory()
         {
             return IndicatorCategory.CreateIndicatorCategory(
-                name: Name.Of(Guid.NewGuid().ToString()),
                 description: Guid.NewGuid().ToString(),
-                indicatorMainCategory: CreateIndicatorMainCategory(),
-                nameValidationChecker: GetMock<INameValidationChecker<IndicatorCategory>>()
+                indicatorMainCategory: CreateIndicatorMainCategory()
             );
         }
 
@@ -72,8 +64,7 @@ namespace Irt.UnitTest
         {
             return IndicatorMainCategory.Create(
                 name: Name.Of(Guid.NewGuid().ToString()),
-                description: Guid.NewGuid().ToString(),
-                nameValidationChecker: GetMock<INameValidationChecker<IndicatorMainCategory>>()
+                description: Guid.NewGuid().ToString()
             );
         }
         public static IndicatorDefinition CreateIndicatorDefinition()
@@ -89,17 +80,15 @@ namespace Irt.UnitTest
                 string.Empty,
                 string.Empty,
                 string.Empty,
-                string.Empty,
-                nameValidationChecker: GetMock<INameValidationChecker<IndicatorDefinition>>());
+                string.Empty);
         }
         public static Datasource CreateDatasource()
         {
             return Datasource.CreateDatasource(
-                name: Guid.NewGuid().ToString(),
+                name: Name.Of(Guid.NewGuid().ToString()),
                 description: Guid.NewGuid().ToString(),
                 source: Guid.NewGuid().ToString(),
-                datasourceType: DatasourceType.File,
-                nameUniqueChecker: GetMock<INameValidationChecker<Datasource>>()
+                datasourceType: DatasourceType.File
             );
         }
 
@@ -110,30 +99,9 @@ namespace Irt.UnitTest
                 description: description ?? Guid.NewGuid().ToString(),
                 source: CreateDatasource(),
                 datasetType: DatasetType.Internal,
-                indicatorDefinition: CreateIndicatorDefinition(),
-                datasetUniqueChecker: GetNameValidationChecker<Dataset>()
+                indicatorDefinition: CreateIndicatorDefinition()
             );
         }
-        
-        private static readonly Dictionary<Type, object> _mocks = new()
-        {
-            { typeof(INameValidationChecker<Dataset>), new Mock<INameValidationChecker<Dataset>>().Object },
-            { typeof(INameValidationChecker<Datasource>), new Mock<INameValidationChecker<Datasource>>().Object },
-            { typeof(INameValidationChecker<ReportingScope>), new Mock<INameValidationChecker<ReportingScope>>().Object },
-            { typeof(INameValidationChecker<UnitOfMeasure>), new Mock<INameValidationChecker<UnitOfMeasure>>().Object },
-            { typeof(INameValidationChecker<IndicatorCategory>), new Mock<INameValidationChecker<IndicatorCategory>>().Object },
-            { typeof(INameValidationChecker<IndicatorMainCategory>), new Mock<INameValidationChecker<IndicatorMainCategory>>().Object },
-            { typeof(INameValidationChecker<IndicatorDefinition>), new Mock<INameValidationChecker<IndicatorDefinition>>().Object }
-        };
 
-        private static T GetMock<T>()
-        {
-            return (T)_mocks[typeof(T)];
-        }
-
-        private static INameValidationChecker<T> GetNameValidationChecker<T>()
-        {
-            return (INameValidationChecker<T>)_mocks[typeof(INameValidationChecker<T>)];
-        }
     }
 }

@@ -1,6 +1,7 @@
 namespace Irt.Core.SeedWork
 {
-    public abstract class Aggregate<TId> : Entity<TId>, IAggregate<TId> where TId : TypedIdValueBase
+    public abstract class Aggregate<TId>(TId id) : Entity<TId>(id), IAggregate<TId>
+        where TId : TypedIdValueBase<TId>
     {
         private readonly List<IDomainEvent> _domainEvents = [];
 

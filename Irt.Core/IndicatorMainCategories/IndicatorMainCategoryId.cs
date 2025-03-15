@@ -1,13 +1,11 @@
+
+
 using Irt.Core.SeedWork;
 
 namespace Irt.Core.IndicatorMainCategories
 {
-    public class IndicatorMainCategoryId : TypedIdValueBase
+    public class IndicatorMainCategoryId(string value) : TypedIdValueBase<IndicatorMainCategoryId>(value)
     {
-        public IndicatorMainCategoryId(string value) : base(value)
-        {
-        }
-
         public static implicit operator IndicatorMainCategoryId(string id)
             => new(id);
     }

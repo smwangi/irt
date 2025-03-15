@@ -5,12 +5,13 @@ using Irt.Application.Configuration.ApiResponse;
 using Irt.Application.Datasources;
 using Irt.Infrastructure;
 using IrtWeb.Middlewares;
-using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
+using MassTransit.DependencyInjection;
+using Irt.Application.Datasets;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 //builder.Services.AddControllers();
 
 builder.Services
@@ -33,6 +33,7 @@ IEdmModel GetEdmModel()
     var odataBuilder = new ODataConventionModelBuilder();
     odataBuilder.EnableLowerCamelCase();
     odataBuilder.EntitySet<DatasourceDto>("Datasources").EntityType.HasKey(x => x.Id);
+    odataBuilder.EntitySet<DatasetDto>("Datasets").EntityType.HasKey(x => x.Id);
     return odataBuilder.GetEdmModel();
 }
 
@@ -63,6 +64,12 @@ builder.Services.AddApiVersioning(opt =>
     opt.AssumeDefaultVersionWhenUnspecified = true;
 });
 
+builder.Services.AddHttpsRedirection(options =>
+{
+    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
+    options.HttpsPort = 5001;
+});
+
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithThreadId()
     .Enrich.WithMachineName()
@@ -87,7 +94,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
                 ms => ms.Value.Errors.Select(e => e.ErrorMessage).ToArray()
             );
 
-        var response = ApiResponse<object>.Error(new List<ApiError> { new ApiError("Validation error") { Code = "400" } });
+        var response = ApiResponse<object>.Error(new List<ApiError> { new ApiError($"Validation error{errors.Values}") { Code = "400" } });
 
         return new BadRequestObjectResult(response);
     };
@@ -101,7 +108,12 @@ builder.Host.UseSerilog((context, configuration)
 // health checks
 builder.Services.AddHealthChecks();
 
+builder.Services.AddScoped(typeof(IScopedBusContextProvider<>), typeof(ScopedBusContextProvider<>));
+
 var app = builder.Build();
+//var kafkaConsumerService = app.Services.GetRequiredService<IHostedService>();
+//await kafkaConsumerService.StartAsync(CancellationToken.None);
+//await Task.Delay(Timeout.Infinite);
 app.UseRouting();
 
 // Configure the HTTP request pipeline.
@@ -109,11 +121,19 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseDeveloperExceptionPage();
+}
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/error");
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 
 app.MapControllers();
+
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
 

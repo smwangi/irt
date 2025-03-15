@@ -13,7 +13,7 @@ namespace Irt.Core.IndicatorCategories
         private IndicatorCategory(
             IndicatorCategoryId id,
             string description,
-            IndicatorMainCategory indicatorMainCategory)
+            IndicatorMainCategory indicatorMainCategory) : base(id)
         {
             Id = id;
             Description = description;
@@ -21,12 +21,9 @@ namespace Irt.Core.IndicatorCategories
         }
 
         public static IndicatorCategory CreateIndicatorCategory(
-            Name name,
             string description,
-            IndicatorMainCategory indicatorMainCategory,
-            INameValidationChecker<IndicatorCategory> nameValidationChecker)
+            IndicatorMainCategory indicatorMainCategory)
         {
-            CheckRule(new NameUniquenessChecker<IndicatorCategory>(nameValidationChecker, name, null));
             return new IndicatorCategory(
                 new IndicatorCategoryId(description),
                 description,

@@ -2,8 +2,8 @@ using System.Runtime.CompilerServices;
 using Irt.Core.SeedWork;
 using Irt.Core.SharedKernel;
 
-namespace Irt.Core.ValueObjects
-{
+namespace Irt.Core.ValueObjects;
+
     public class Name : ValueObject
     {
         public string Value { get; }
@@ -11,6 +11,7 @@ namespace Irt.Core.ValueObjects
         private const int MaxLength = 100;
         private const int MinLength = 2;
 
+        private Name(){}
         private Name(string value)
         {
             Value = value;
@@ -18,17 +19,21 @@ namespace Irt.Core.ValueObjects
 
         public static Name Of(string value)
         {
-            if (string.IsNullOrEmpty(value))
+            if (string.IsNullOrWhiteSpace(value))
             {
-                throw new System.ArgumentException("Name cannot be empty", nameof(value));
+                throw new ArgumentException("Name cannot be empty", nameof(value));
             }
 
-            if (value.Length < MinLength || value.Length > MaxLength)
+            if (value.Length is < MinLength or > MaxLength)
             {
-                throw new System.ArgumentException($"The length of the name must be between {MinLength} and {MaxLength} characters.", nameof(value));
+                throw new ArgumentException($"The length of the name must be between {MinLength} and {MaxLength} characters.", nameof(value));
             }
 
             return new Name(value);
         }
+
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            yield return Value;
+        }
     }
-}

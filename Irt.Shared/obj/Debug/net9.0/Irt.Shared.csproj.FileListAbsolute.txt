@@ -10,6 +10,7 @@
 /Users/samwan/projects/irtool/Irt.Shared/obj/Debug/net9.0/Irt.Shared.AssemblyInfoInputs.cache
 /Users/samwan/projects/irtool/Irt.Shared/obj/Debug/net9.0/Irt.Shared.AssemblyInfo.cs
 /Users/samwan/projects/irtool/Irt.Shared/obj/Debug/net9.0/Irt.Shared.csproj.CoreCompileInputs.cache
+/Users/samwan/projects/irtool/Irt.Shared/obj/Debug/net9.0/Irt.Shared.sourcelink.json
 /Users/samwan/projects/irtool/Irt.Shared/obj/Debug/net9.0/Irt.Shared.csproj.Up2Date
 /Users/samwan/projects/irtool/Irt.Shared/obj/Debug/net9.0/Irt.Shared.dll
 /Users/samwan/projects/irtool/Irt.Shared/obj/Debug/net9.0/refint/Irt.Shared.dll

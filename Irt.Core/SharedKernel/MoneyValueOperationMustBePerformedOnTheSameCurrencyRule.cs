@@ -14,8 +14,9 @@ namespace Irt.Core.SharedKernel
             _valueRight = right;
         }
 
-        public string Message => "Money value operation must be performed on the same currency.";
+        public  Task<bool> IsBrokenAsync() =>  Task.FromResult(_valueLeft.Currency != _valueRight.Currency);
 
-        public Task<bool> IsBroken() => Task.FromResult(_valueLeft.Currency != _valueRight.Currency);
+        public string Message => "Money value operation must be performed on the same currency.";
+        public Task<string> ErrorMessage { get; }
     }
 }

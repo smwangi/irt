@@ -1,44 +1,70 @@
-/**
-This pattern explicitly wraps success and error responses in a Result object. 
-A method returns either a success or error result, and the caller must handle both cases.
-*/
-using Irt.Application.Configuration.ApiResponse;
 
 namespace Irt.Application.Configuration.Results
 {
-    public class Result<TSuccess, TError>
+    public class Result<TResponse, TError>
     {
-        public TSuccess? Success { get; }
+        public TResponse Response { get; }
         public bool IsSuccess { get; }
         public TError? Error { get; }
+        public Dictionary<string, object> Metadata { get; }
 
-        private Result(bool isSuccess, TSuccess? success = default, TError? failure = default)
+        // Private constructor to enforce usage of static factory methods
+        private Result(
+            TResponse response,
+            TError? error,
+            bool isSuccess, 
+            Dictionary<string, object>? metadata = null)
         {
             IsSuccess = isSuccess;
-            Success = success;
-            Error = failure;
-        }
-        /*private Result(TSuccess success)
-        {
-            Success = success;
-            IsSuccess = true;
+            Response = response;
+            Error = error ?? default;
+            Metadata = metadata ?? new Dictionary<string, object>();
         }
 
-        private Result(TError error)
+        public static Result<TResponse, TError> Success(TResponse response, Dictionary<string, object> metadata = null)
         {
-            Error = error;
-            IsSuccess = false;
-        }*/
-
-        public static Result<TSuccess, TError> Ok(TSuccess success) => new(true, success, default);
-
-        public static Result<TSuccess, TError> Fail(TError error) => new(false, default, error);
-
-        public ApiResponse<TSuccess> ToApiResponse()
-        {
-            return IsSuccess
-                ? ApiResponse<TSuccess>.Success(Success, "success")
-                : ApiResponse<TSuccess>.Fail(Error!.ToString());
+            return new Result<TResponse, TError>(response: response, default, true, metadata: metadata);
         }
+
+        public static Result<TResponse, TError> Success(TResponse response, string metadataKey, object metadataValue)
+        {
+            var metadata = new Dictionary<string, object> { { metadataKey, metadataValue } };
+            return new Result<TResponse, TError>(response: response, default, true, metadata: metadata);
+        }
+
+        public static Result<TResponse, TError> Success(TResponse response, bool wasUpdated)
+        {   
+            return Success(response, "WasUpdated", wasUpdated);
+        }
+        
+        public static Result<TResponse, TError?> Failure(TError? error, Dictionary<string, object> metadata = null)
+        {
+            return new Result<TResponse, TError?>(default, error, false, metadata);
+        }
+        
+        public static Result<TResponse, List<TError?>> Failure(List<TError?> errors, Dictionary<string, object> metadata = null)
+        {
+            return new Result<TResponse, List<TError?>>(default, errors, false, metadata);
+        }
+
+        // Helper method to check and retrieve metadata
+        public bool TryGetMetadata<T>(string key, out T value)
+        {
+            if (Metadata.TryGetValue(key, out var objValue) && objValue is T typedValue)
+            {
+                value = typedValue;
+                return true;
+            }
+
+            value = default;
+            return false;
+        }
+
+        public T GetMetadata<T>(string key, T defaultValue = default)
+        {
+            return TryGetMetadata<T>(key, out var value) ? value : defaultValue;
+        }
+
+        public bool WasUpdated => GetMetadata<bool>("WasUpdated", false);
     }
 }

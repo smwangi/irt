@@ -1,6 +1,4 @@
 
-using MediatR;
-
 namespace Irt.Infrastructure.Processing;
 
 public class DomainEventsDispatcher : IDomainEventsDispatcher

@@ -54,11 +54,13 @@ namespace Irt.Core.SeedWork
 
         protected static async void CheckRule(IBusinessRule rule)
         {
-            if (await rule.IsBroken())
+            if (await rule.IsBrokenAsync())
             {
                 throw new BusinessRuleValidationException(rule);
             }
         }
+        
+        protected abstract IEnumerable<object> GetEqualityComponents();
 
         private bool PropertiesAreEqual(object obj, PropertyInfo p)
         {

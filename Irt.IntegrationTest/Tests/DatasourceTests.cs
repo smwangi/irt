@@ -1,5 +1,4 @@
-
-
+// Purpose: Contains tests for the Datasource controller.
 using System.Text.Json;
 using Irt.IntegrationTest.Setup;
 
@@ -8,10 +7,7 @@ public class DatasourceTests : IClassFixture<CustomWebApplicationFactory<Program
 {
     private readonly CustomWebApplicationFactory<Program> _factory;
 
-    public DatasourceTests(CustomWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-    }
+    public DatasourceTests(CustomWebApplicationFactory<Program> factory) => _factory = factory;
 
     [Fact]
     public async Task Test1()
@@ -20,9 +16,9 @@ public class DatasourceTests : IClassFixture<CustomWebApplicationFactory<Program
         var response = await _factory.HttpClient.GetAsync(Constants.DatasourceRoute);
         response.EnsureSuccessStatusCode();
         var responseString = await response.Content.ReadAsStringAsync();
-        using JsonDocument document = JsonDocument.Parse(responseString);
-        JsonElement root = document.RootElement;
-        JsonElement value = root.GetProperty("value");
+        using var document = JsonDocument.Parse(responseString);
+        var root = document.RootElement;
+        var value = root.GetProperty("value");
         Assert.True(value.ValueKind == JsonValueKind.Array);
         Assert.Empty(value.EnumerateArray());
     }

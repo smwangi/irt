@@ -46,7 +46,7 @@
           }
         }
       },
-      "MediatR/12.3.0": {
+      "MediatR/12.4.1": {
         "dependencies": {
           "MediatR.Contracts": "2.0.1",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0"
@@ -54,7 +54,7 @@
         "runtime": {
           "lib/net6.0/MediatR.dll": {
             "assemblyVersion": "12.0.0.0",
-            "fileVersion": "12.3.0.0"
+            "fileVersion": "12.4.1.0"
           }
         }
       },
@@ -356,7 +356,7 @@
       },
       "Irt.Core/1.0.0": {
         "dependencies": {
-          "MediatR": "12.3.0",
+          "MediatR": "12.4.1",
           "MongoDB.Driver": "2.27.0",
           "MongoDB.EntityFrameworkCore": "8.0.3"
         },
@@ -396,12 +396,12 @@
       "path": "dnsclient/1.6.1",
       "hashPath": "dnsclient.1.6.1.nupkg.sha512"
     },
-    "MediatR/12.3.0": {
+    "MediatR/12.4.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-DuXRw/qux2n7pTRPond4WK9XImO+30TZrGPCeOmjYIXDWokpjZQDFRsdZMoP0WqWU7inC4m0D+Zbu5dSc4z6NQ==",
-      "path": "mediatr/12.3.0",
-      "hashPath": "mediatr.12.3.0.nupkg.sha512"
+      "sha512": "sha512-0tLxCgEC5+r1OCuumR3sWyiVa+BMv3AgiU4+pz8xqTc+2q1WbUEXFOr7Orm96oZ9r9FsldgUtWvB2o7b9jDOaw==",
+      "path": "mediatr/12.4.1",
+      "hashPath": "mediatr.12.4.1.nupkg.sha512"
     },
     "MediatR.Contracts/2.0.1": {
       "type": "package",

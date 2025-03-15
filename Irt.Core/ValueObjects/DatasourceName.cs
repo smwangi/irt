@@ -1,17 +1,14 @@
 
 using Irt.Core.SeedWork;
-using MongoDB.Bson.Serialization.Attributes;
 
 namespace Irt.Core.ValueObjects
 {
     public class DatasourceName: ValueObject
     {
-        [BsonElement("value")]
         public string Value { get; }
         private const int MaxLength = 100;
         private const int MinLength = 4;
 
-        [BsonConstructor]
         private DatasourceName(string value) => Value = value;
 
         public static DatasourceName Of(string value)
@@ -41,7 +38,7 @@ namespace Irt.Core.ValueObjects
             return Value;
         }
 
-        protected IEnumerable<object> GetEqualityComponents()
+        protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Value;
         }

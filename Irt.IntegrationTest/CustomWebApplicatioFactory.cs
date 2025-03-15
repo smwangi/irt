@@ -3,7 +3,6 @@ using Irt.Core.Datasets;
 using Irt.Core.Datasources;
 using Irt.Core.IndicatorDefinitions;
 using Irt.Infrastructure.Database;
-using Irt.Infrastructure.Datasets;
 using Irt.Infrastructure.Domain.Datasources;
 using Irt.Infrastructure.Domain.IndicatorDefinitions;
 using Irt.Infrastructure.Shared;
@@ -14,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Irt.IntegrationTest
 {
-    public class CustomWebApplicationFactory<Program> : WebApplicationFactory<Program> where Program : class
+    public abstract class CustomWebApplicationFactory<Program> : WebApplicationFactory<Program> where Program : class
     {
         public HttpClient HttpClient { get; private set; } = null!;
 
@@ -38,16 +37,7 @@ namespace Irt.IntegrationTest
             builder.ConfigureServices(services =>
             {
                 services.AddHttpClient();
-                services.AddSingleton<IrtDbContext>(x => new IrtDbContextMongo(new MongoDbSettings(dbConnection, db)));
-                services.AddScoped<IDatasourceRepository>(x => new DatasourceRepository(x.GetService<IrtDbContext>()!));
-                services.AddScoped<IDatasetRepository>(x => new DatasetRepository(x.GetService<IrtDbContext>()!));
-                services.AddScoped<IIndicatorDefinitionRepository>(x => new IndicatorDefinitionRepository(x.GetService<IrtDbContext>()!));
-                services.AddMediatR(cfg =>
-                {
-                    cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
-                    cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
-                    cfg.AddOpenBehavior(typeof(Application.Behaviors.ValidationBehavior<,>));
-                });
+                 
                 services.RegisterNameValidationAndRepository<Datasource>(CollectionNames.Datasources);
                 services.RegisterNameValidationAndRepository<Dataset>(CollectionNames.Datasets);
                 services.RegisterNameValidationAndRepository<IndicatorDefinition>(CollectionNames.IndicatorDefinitions);

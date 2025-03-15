@@ -3,6 +3,7 @@
 /Users/samwan/projects/irtool/Irt.Application/obj/Debug/net8.0/Irt.Application.AssemblyInfoInputs.cache
 /Users/samwan/projects/irtool/Irt.Application/obj/Debug/net8.0/Irt.Application.AssemblyInfo.cs
 /Users/samwan/projects/irtool/Irt.Application/obj/Debug/net8.0/Irt.Application.csproj.CoreCompileInputs.cache
+/Users/samwan/projects/irtool/Irt.Application/obj/Debug/net8.0/Irt.Application.sourcelink.json
 /Users/samwan/projects/irtool/Irt.Application/bin/Debug/net8.0/Irt.Application.deps.json
 /Users/samwan/projects/irtool/Irt.Application/bin/Debug/net8.0/Irt.Application.dll
 /Users/samwan/projects/irtool/Irt.Application/bin/Debug/net8.0/Irt.Application.pdb

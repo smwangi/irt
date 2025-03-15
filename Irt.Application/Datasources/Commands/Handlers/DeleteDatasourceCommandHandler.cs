@@ -10,7 +10,7 @@ namespace Irt.Application.Datasources.Commands
 
         public async Task<DeleteDatasourceResult> HandleAsync(DeleteDatasourceCommand request, CancellationToken cancellationToken)
         {
-            var datasource = await _datasourceRepository.GetByIdAsync(new DatasourceId(request.DatasourceId), cancellationToken);
+            var datasource = await _datasourceRepository.GetByIdAsync(DatasourceId.Create(request.DatasourceId), cancellationToken);
             if (datasource is null)
             {
                 return new DeleteDatasourceResult(false);

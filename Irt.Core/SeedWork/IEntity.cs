@@ -2,16 +2,26 @@ using Irt.Core.ValueObjects;
 
 namespace Irt.Core.SeedWork
 {
-    public interface IEntity<out TEntityId> : IEntity where TEntityId : TypedIdValueBase<TEntityId>
+    public interface IEntity<TEntityId> where TEntityId : TypedIdValueBase<TEntityId>
     {
-        public TEntityId Id { get; }
+        TEntityId Id { get; }
+        Name Name { get; }
     }
 
     public interface IEntity
     {
-        public DateTime? CreatedAt { get; }
-        public DateTime? LastModifiedAt { get; }
-        public CreatedBy CreatedBy { get;}
-        public LastModifiedBy LastModifiedBy { get; }
+        // <summary>
+        /// Sets the created by information directly (for event handlers and infrastructure)
+        /// </summary>
+        void SetCreatedByInfo(CreatedBy createdBy);
+        
+        /// <summary>
+        /// Sets the last modified information directly (for event handlers and infrastructure)
+        /// </summary>
+        void SetLastModifiedByInfo(LastModifiedBy lastModifiedBy);
+        bool IsApproved { get; }
+        bool IsDeleted { get; }
+        IReadOnlyCollection<IDomainEvent> DomainEvents { get; }
+        void ClearDomainEvents();
     }
 }

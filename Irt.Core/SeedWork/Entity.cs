@@ -17,21 +17,28 @@ namespace Irt.Core.SeedWork;
 
         public TId Id { get; protected init; }
         public Name Name { get; protected set; }
-        public DateTime? CreatedAt { get; private set; } = DateTime.UtcNow;
-        public DateTime? LastModifiedAt { get; private set; }
         public CreatedBy CreatedBy { get; private set; }
         public LastModifiedBy LastModifiedBy { get; private set; }
 
         public bool IsApproved { get; private set; } = false;
         public bool IsDeleted { get; private set; } = false;
 
-        private Entity()
+        protected Entity()
         {
             
         }
         protected Entity(TId id)
         {
             Id = id;
+            // Register Creation with Default user
+            RegisterCreation("system", "system", "system", "127.0.0.1");
+        }
+        
+        // Overload that allows specifying creation details
+        protected Entity(TId id, string userId, string userName, string application, string ipAddress)
+        {
+            Id = id;
+            RegisterCreation(userId, userName, application, ipAddress);
         }
 
         protected void AddDomainEvent(IDomainEvent domainEvent)
@@ -42,48 +49,59 @@ namespace Irt.Core.SeedWork;
         /// <summary>
         /// Clear domain events
         /// </summary>
-        public static async Task CheckRuleAsync(IBusinessRule rule)
-        {
-            if (await rule.IsBrokenAsync())
-                throw new BusinessRuleValidationException(rule);
-        }
-
-        public static void CheckRule(IBusinessRule rule)
-        {
-            if (rule.IsBrokenAsync().Result)
-                throw new BusinessRuleValidationException(rule);
-        }
-
-        public bool IsTransient()
-        {
-            return false;// this.Id == default;
-        }
-
         public void ClearDomainEvents()
         {
-            throw new NotImplementedException();
+            _domainEvents.Clear();
         }
 
-        public void SetCreated()
+        /// <summary>
+        /// Sets the created by information directly (for event handlers and infrastructure)
+        /// This should not be called from domain logic, only from event handlers
+        /// </summary>
+        public void SetCreatedByInfo(CreatedBy createdBy)
         {
-            CreatedAt = DateTime.UtcNow;
-            CreatedBy = new CreatedBy("system");
-            SetModified();
+            CreatedBy = createdBy;
         }
 
-        internal void SetModified()
+        /// <summary>
+        /// Sets the last modified information directly (for event handlers and infrastructure)
+        /// This should not be called from domain logic, only from event handlers
+        /// </summary>
+        public void SetLastModifiedByInfo(LastModifiedBy lastModifiedBy)
         {
-            LastModifiedAt = DateTime.UtcNow;
-            LastModifiedBy = new LastModifiedBy("system");
+            LastModifiedBy = lastModifiedBy;
+        }
+        /// <summary>
+        /// Registers that this entity has been created with the specified user information.
+        /// Raises an EntityCreatedEvent that will be handled to set audit information.
+        /// </summary>
+        protected void RegisterCreation(string userId, string userName, string application, string ipAddress)
+        {
+            var entityType = this.GetType().Name;
+            AddDomainEvent(new EntityCreatedEvent(
+                Id.Value, 
+                entityType, 
+                userId, 
+                userName, 
+                application,
+                ipAddress
+            ));
+        }
+
+        /// <summary>
+        /// Registers that this entity has been modified with the specified user information.
+        /// Raises an EntityModifiedEvent that will be handled to update audit information.
+        /// </summary>
+        protected void RegisterModification(string userId, string userName, string application)
+        {
+            var entityType = this.GetType().Name;
+            AddDomainEvent(new EntityModifiedEvent(
+                Id.Value, 
+                entityType, 
+                userId, 
+                userName, 
+                application
+            ));
         }
     
-    }
-
-    public class Entity2
-    {
-        public Entity2(Name name)
-        {
-            //Name = name;
-        }
-        
     }

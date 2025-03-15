@@ -4,7 +4,7 @@ namespace Irt.Application.Datasources
 {
     public record DatasourceDto
     (
-        string Id,
+        string? Id,
         [Required]
         string Name,
         string Description,

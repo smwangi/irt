@@ -37,7 +37,7 @@ namespace IrtWeb.Datasources
         {
             var createDatasourceCommand = new CreateDatasourceCommand(datasourceDto);
          
-            var resp = _commandDispatcher.DispatchAsync<CreateDatasourceCommand, Result<DatasourceDto, string>>(
+            var resp = await _commandDispatcher.DispatchAsync<CreateDatasourceCommand, Result<DatasourceDto, string>>(
                 createDatasourceCommand, cancellationToken: CancellationToken.None);
             return Ok(resp);
         }

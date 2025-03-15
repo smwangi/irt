@@ -30,13 +30,6 @@ namespace Irt.Infrastructure.Migrations
                     b.Property<string>("Bindings")
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("CronExpression")
                         .HasColumnType("text");
 
@@ -51,13 +44,6 @@ namespace Irt.Infrastructure.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("LastModifiedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("LastModifiedBy")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -82,13 +68,6 @@ namespace Irt.Infrastructure.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<int>("DatasourceType")
                         .HasColumnType("integer");
 
@@ -101,13 +80,6 @@ namespace Irt.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime?>("LastModifiedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("LastModifiedBy")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -118,6 +90,114 @@ namespace Irt.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("datasources", "irt");
+                });
+
+            modelBuilder.Entity("Irt.Core.Datasets.Dataset", b =>
+                {
+                    b.OwnsOne("Irt.Core.ValueObjects.CreatedBy", "CreatedBy", b1 =>
+                        {
+                            b1.Property<string>("DatasetId")
+                                .HasColumnType("text");
+
+                            b1.HasKey("DatasetId");
+
+                            b1.ToTable("datasets", "irt");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DatasetId");
+                        });
+
+                    b.OwnsOne("Irt.Core.ValueObjects.LastModifiedBy", "LastModifiedBy", b1 =>
+                        {
+                            b1.Property<string>("DatasetId")
+                                .HasColumnType("text");
+
+                            b1.HasKey("DatasetId");
+
+                            b1.ToTable("datasets", "irt");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DatasetId");
+                        });
+
+                    b.Navigation("CreatedBy")
+                        .IsRequired();
+
+                    b.Navigation("LastModifiedBy")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Irt.Core.Datasources.Datasource", b =>
+                {
+                    b.OwnsOne("Irt.Core.ValueObjects.CreatedBy", "CreatedBy", b1 =>
+                        {
+                            b1.Property<string>("DatasourceId")
+                                .HasColumnType("text");
+
+                            b1.Property<DateTime>("CreatedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("created_at");
+
+                            b1.Property<string>("IpAddress")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("created_by_ip");
+
+                            b1.Property<string>("UserId")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("created_by_id");
+
+                            b1.Property<string>("UserName")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("created_by_name");
+
+                            b1.HasKey("DatasourceId");
+
+                            b1.ToTable("datasources", "irt");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DatasourceId");
+                        });
+
+                    b.OwnsOne("Irt.Core.ValueObjects.LastModifiedBy", "LastModifiedBy", b1 =>
+                        {
+                            b1.Property<string>("DatasourceId")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("IpAddress")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("last_modified_by_ip");
+
+                            b1.Property<DateTime>("ModifiedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("last_modified_at");
+
+                            b1.Property<string>("UserId")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("last_modified_by_id");
+
+                            b1.Property<string>("UserName")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("last_modified_by_name");
+
+                            b1.HasKey("DatasourceId");
+
+                            b1.ToTable("datasources", "irt");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DatasourceId");
+                        });
+
+                    b.Navigation("CreatedBy")
+                        .IsRequired();
+
+                    b.Navigation("LastModifiedBy")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

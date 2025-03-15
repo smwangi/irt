@@ -1,19 +1,16 @@
 using Couchbase;
+using Irt.Application.Configuration.DomainEvents;
 using Irt.Application.Dispatchers;
 using Irt.Application.Helpers;
-using Irt.Infrastructure.Database;
 using Microsoft.Extensions.DependencyInjection;
-using Irt.Infrastructure.Processing;
 using Microsoft.Extensions.Configuration;
-using Irt.Core.Datasources;
-using Irt.Infrastructure.Domain.Datasources;
-using Irt.Core.Datasets;
-using Irt.Core.IndicatorDefinitions;
+using Irt.Core.SeedWork;
 using Irt.Core.SharedKernel;
 using Irt.Infrastructure.Database.Postgres;
 using Irt.Infrastructure.Domain.Datasets;
-using Irt.Infrastructure.Domain.IndicatorDefinitions;
 using Microsoft.EntityFrameworkCore;
+using DomainEvents_DomainEventsDispatcher = Irt.Application.Configuration.DomainEvents.DomainEventsDispatcher;
+
 
 namespace Irt.Infrastructure;
 
@@ -26,7 +23,6 @@ public static class DependencyInjection
         var cluster = Cluster.ConnectAsync("couchbase://localhost", "samwan", "P@55w.rd");
         
         services.AddSingleton<ICluster>(cluster.Result);
-        services.AddScoped<IDomainEventsDispatcher, DomainEventsDispatcher>();
         
         services.AddDispatchers();
         services.AddRepositories();
@@ -57,6 +53,11 @@ public static class DependencyInjection
         services.AddScoped(typeof(CouchbaseRepository<>));
         services.AddScoped(typeof(PostgresRepository<>));
         services.AddScoped(typeof(DatasetService));
+
+        services.AddScoped(typeof(IEntityRepository), typeof(EntityRepository));
+        services.AddScoped<IDomainEventInterface.IDomainEventDispatcher, DomainEvents_DomainEventsDispatcher>();
+        services.AddScoped<IDomainEventInterface.IDomainEventHandler<EntityCreatedEvent>, EntityCreatedEventHandler>();
+        services.AddScoped<IDomainEventInterface.IDomainEventHandler<EntityModifiedEvent>, EntityModifiedEventHandler>();
         
         return services;
     }

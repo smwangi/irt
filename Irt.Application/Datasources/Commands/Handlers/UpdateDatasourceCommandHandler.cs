@@ -17,13 +17,13 @@ namespace Irt.Application.Datasources.Commands.Handlers
         public async Task<Result<DatasourceDto, string>> HandleAsync(UpdateDatasourceCommand request, CancellationToken cancellationToken)
         {
             var datasource = await datasourceRepository.CreateFactory<Datasource>().FindByIdAsync(
-                new DatasourceId(request.DatasourceRequest.Id)) ?? throw new NotFoundException(request.DatasourceRequest.Id);
+                DatasourceId.Create(request.DatasourceRequest.Id)) ?? throw new NotFoundException(request.DatasourceRequest.Id);
 
             // update datasource with new values
             datasource.UpdateDatasource(
                 Name.Of(request.DatasourceRequest.Name),
                 request.DatasourceRequest.Description,
-                new DatasourceId(request.Id));
+                DatasourceId.Create(request.DatasourceRequest.Id));
 
             await datasourceRepository.CreateFactory<Datasource>().UpdateAsync(datasource, cancellationToken);
             return Result<DatasourceDto, string>.Success(mapper.Map<DatasourceDto>(datasource));

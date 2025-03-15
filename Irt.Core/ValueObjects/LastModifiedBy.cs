@@ -4,23 +4,65 @@ namespace Irt.Core.ValueObjects
 {
     public class LastModifiedBy : ValueObject
     {
-        public string Value { get; }
+        public string UserId { get; }
+        public string UserName { get; }
+        public string Application { get; }
+        public DateTime ModifiedAt { get; }
+        public string IpAddress { get; }
 
-        private LastModifiedBy()
+        private LastModifiedBy(string userId, string userName, string application, DateTime modifiedAt, string ipAddress)
         {
+            ValidateNotNullOrWhitespace(userId, nameof(userId));
+            ValidateNotNullOrWhitespace(userName, nameof(userName));
+            ValidateNotNullOrWhitespace(application, nameof(application));
+
+            UserId = userId;
+            UserName = userName;
+            Application = application;
+            ModifiedAt = modifiedAt;
+            IpAddress = ipAddress;
         }
-        public LastModifiedBy(string value)
+
+        // Required by some ORMs for deserialization
+        private LastModifiedBy() { }
+
+        public static LastModifiedBy Create(string userId, string userName, string application, 
+            DateTime? modifiedAt = null, string ipAddress = null)
         {
-            Value = value;
+            return new LastModifiedBy(
+                userId, 
+                userName, 
+                application, 
+                modifiedAt ?? DateTime.UtcNow,
+                ipAddress ?? "127.0.0.1"
+            );
         }
 
-        public static implicit operator string(LastModifiedBy lastModifiedBy) => lastModifiedBy is not null ? lastModifiedBy.Value : string.Empty;
-
-        public static implicit operator LastModifiedBy(string value) => new LastModifiedBy(value);
+        // Simplified constructor for cases with minimal information
+        public static LastModifiedBy Create(string userId, string userName, string application, string ipAddress)
+        {
+            return Create(userId, userName, application, DateTime.UtcNow, ipAddress);
+        }
 
         protected override IEnumerable<object> GetEqualityComponents()
         {
-            yield return Value;
+            yield return UserId;
+            yield return UserName;
+            yield return Application;
+            yield return ModifiedAt;
+            yield return IpAddress ?? string.Empty;
+        }
+
+        public override string ToString() =>
+            $"{UserName} ({UserId}) via {Application} at {ModifiedAt:O}" +
+            (string.IsNullOrWhiteSpace(IpAddress) ? string.Empty : $" from {IpAddress}");
+
+        private static void ValidateNotNullOrWhitespace(string value, string paramName)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", paramName);
+            }
         }
     }
 }

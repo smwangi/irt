@@ -2,9 +2,11 @@ using FluentValidation;
 using Irt.Application.Behaviors;
 using Irt.Application.Configuration.Behaviors;
 using Irt.Application.Configuration.Commands;
+using Irt.Application.Configuration.ContextAccessor;
 using Irt.Application.Configuration.Emails;
 using Irt.Application.Configuration.Queries;
 using Irt.Application.Configuration.Results;
+using Irt.Application.Configuration.Validation;
 using Irt.Application.Datasets;
 using Irt.Application.Datasets.Commands;
 using Irt.Application.Datasets.Commands.Handlers;
@@ -13,6 +15,7 @@ using Irt.Application.Datasources;
 using Irt.Application.Datasources.Commands;
 using Irt.Application.Datasources.Commands.Handlers;
 using Irt.Application.Datasources.Queries;
+using Irt.Application.Datasources.Validators;
 using Irt.Application.Mappers;
 using Irt.Core.Datasources;
 using MassTransit;
@@ -44,6 +47,7 @@ public static class DependencyInjection
             x =>
             new CreateDatasourceCommandHandler(
                 x.GetService<IDatasourceRepository>()!));*/
+        services.AddDtoValidators();
 
         services.AddTransient<IValidator<UpdateDatasetCommand>, UpdateDatasetCommandValidator>();
         services.AddTransient<IValidator<CreateDatasetCommand>, CreateDatasetCommandValidator>();
@@ -129,6 +133,8 @@ public static class DependencyInjection
         //var busControl = services.BuildServiceProvider().GetRequiredService<IBusControl>();
         //busControl.StartAsync().GetAwaiter().GetResult();
         services.AddAutoMapper(typeof(DatasetMappingProfile));
+        services.AddHttpContextAccessor();
+        services.AddScoped<IOperationContextAccessor, OperationContextAccessor>();
         return services;
     }
 }

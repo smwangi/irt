@@ -1,6 +1,7 @@
 using Irt.Core.SeedWork;
 using Irt.Core.SharedKernel;
 using Irt.Infrastructure.Database.Postgres;
+using Irt.SharedKernel.Repositories;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Irt.Infrastructure.Shared;

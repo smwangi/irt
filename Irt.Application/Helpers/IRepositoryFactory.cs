@@ -1,4 +1,5 @@
 using Irt.Core.SharedKernel;
+using Irt.SharedKernel.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -19,7 +20,6 @@ public class RepositoryFactory(IServiceProvider serviceProvider, IOptions<Databa
         var databaseType = _databaseSettings.DefaultDatabaseType;
         return databaseType switch
         {
-            "Couchbase" => _serviceProvider.GetRequiredService<CouchbaseRepository<T>>(),
             "Postgres" => _serviceProvider.GetRequiredService<IGenericRepository<T>>(),
             //"MySql" => _serviceProvider.GetRequiredService<MySqlRepository<T>>(),
             _ => throw new ArgumentException("Invalid database type")

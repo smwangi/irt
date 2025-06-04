@@ -169,3 +169,7 @@
 /Users/samwan/projects/irtool/Irt.UnitTest/obj/Debug/net9.0/Irt.UnitTest.pdb
 /Users/samwan/projects/irtool/Irt.UnitTest/obj/Debug/net9.0/Irt.UnitTest.genruntimeconfig.cache
 /Users/samwan/projects/irtool/Irt.UnitTest/obj/Debug/net9.0/ref/Irt.UnitTest.dll
+/Users/samwan/projects/irtool/Irt.UnitTest/bin/Debug/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
+/Users/samwan/projects/irtool/Irt.UnitTest/bin/Debug/net9.0/Microsoft.Extensions.Logging.Abstractions.dll
+/Users/samwan/projects/irtool/Irt.UnitTest/bin/Debug/net9.0/Irt.SharedKernel.dll
+/Users/samwan/projects/irtool/Irt.UnitTest/bin/Debug/net9.0/Irt.SharedKernel.pdb

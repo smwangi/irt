@@ -3,7 +3,7 @@
 using System.Linq.Expressions;
 using Irt.SharedKernel.Results;
 
-namespace Irt.Core.SharedKernel
+namespace Irt.SharedKernel.Repositories
 {
     public interface IRepository<T> where T : class
     {
@@ -15,7 +15,7 @@ namespace Irt.Core.SharedKernel
         Task<bool> DeleteAsync(T entity, CancellationToken cancellationToken);
         
         Task<Result<bool>> ExistsAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken);
-        Task<Result<T>> FindByIdAsync(string id);
+        Task<Result<T>> FindByIdAsync<TKey>(TKey id);
         Task<Result<T>> FilterByIdAsync(string id);
     }
 

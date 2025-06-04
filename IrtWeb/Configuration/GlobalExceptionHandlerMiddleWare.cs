@@ -1,12 +1,9 @@
 using System.Net;
 using System.Text.Json;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
-namespace Irt.SharedKernel.ErrorHandling.MiddleWare;
+namespace IrtWeb.Configuration;
 
 public class GlobalExceptionHandlerMiddleWare(
     RequestDelegate next,

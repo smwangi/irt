@@ -1,26 +1,17 @@
 using Irt.Application.Helpers;
+using Irt.Core.SharedKernel;
+using Irt.SharedKernel.Providers;
+using Irt.SharedKernel.Repositories;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Irt.Infrastructure.Shared;
 
 // Service Locator
-public class RepositoryProvider
+public class RepositoryProvider(IServiceProvider serviceProvider) : IRepositoryProvider
 {
-    private readonly IRepositoryFactory _repositoryFactory;
-    private readonly Dictionary<Type, object> _repositories = new Dictionary<Type, object>();
 
-    public RepositoryProvider(IRepositoryFactory repositoryFactory)
+    public IRepository<T> GetRepository<T>() where T : class
     {
-        _repositoryFactory = repositoryFactory;
-    }
-
-    public T GetRepository<T>() where T : class
-    {
-        var type = typeof(T);
-        if (!_repositories.ContainsKey(type))
-        {
-            _repositories[type] = _repositoryFactory.CreateFactory<T>();
-        }
-
-        return (T)_repositories[type];
+        return serviceProvider.GetRequiredService<IRepository<T>>();
     }
 }

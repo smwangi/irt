@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace Irt.Shared.Exceptions;
+namespace Irt.SharedKernel.ErrorHandling.Exceptions;
 
 /// <summary>
 /// Base class for all application thrown errors

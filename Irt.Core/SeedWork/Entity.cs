@@ -15,7 +15,7 @@ namespace Irt.Core.SeedWork;
         /// </summary>
         public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
-        public TId Id { get; protected init; }
+        public TId Id { get; protected set; }
         public Name Name { get; protected set; }
         public CreatedBy CreatedBy { get; private set; }
         public LastModifiedBy LastModifiedBy { get; private set; }
@@ -30,6 +30,14 @@ namespace Irt.Core.SeedWork;
         protected Entity(TId id)
         {
             Id = id;
+            // Register Creation with Default user
+            RegisterCreation("system", "system", "system", "127.0.0.1");
+        }
+        
+        protected Entity(TId id, Name name)
+        {
+            Id = id;
+            Name = name;
             // Register Creation with Default user
             RegisterCreation("system", "system", "system", "127.0.0.1");
         }

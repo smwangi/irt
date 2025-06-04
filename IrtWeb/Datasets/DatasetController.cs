@@ -2,9 +2,8 @@ using Asp.Versioning;
 using Irt.Application.Datasets;
 using Irt.Application.Datasets.Commands;
 using Irt.Application.Datasets.Queries;
-using Irt.Application.Configuration.Results;
 using Irt.Application.Dispatchers;
-using IrtWeb.Configuration;
+using Irt.SharedKernel.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
@@ -28,21 +27,21 @@ namespace IrtWeb.Datasets
         [EnableQuery]
         public async Task<IActionResult> GetDatasets()
         {
-            var datasets = await _queryDispatcher.DispatchAsync<GetDatasetsQuery, Result<List<DatasetDto>, string>>(new GetDatasetsQuery(), CancellationToken.None);
+            var datasets = await _queryDispatcher.DispatchAsync<GetDatasetsQuery, Result<List<DatasetDto>>>(new GetDatasetsQuery(), CancellationToken.None);
             return Ok(datasets);
         }
 
         [HttpPost(ApiPrefix)]
         public async Task<IActionResult> CreateDataset([FromBody] DatasetDto request)
         {
-            var resp = await _commandDispatcher.DispatchAsync<CreateDatasetCommand, Result<DatasetDto, string>>(new CreateDatasetCommand(request), CancellationToken.None);
+            var resp = await _commandDispatcher.DispatchAsync<CreateDatasetCommand, Result<DatasetDto>>(new CreateDatasetCommand(request), CancellationToken.None);
             return Ok(resp);
         }
 
         [HttpGet(ApiPrefix+ "/{id}")]
         public async Task<IActionResult> GetDataset([FromRoute]string id)
         {
-            var dataset = await _queryDispatcher.DispatchAsync<GetDatasetsByIdQuery, Result<DatasetDto, string>>(new GetDatasetsByIdQuery(id), CancellationToken.None);
+            var dataset = await _queryDispatcher.DispatchAsync<GetDatasetsByIdQuery, Result<DatasetDto>>(new GetDatasetsByIdQuery(id), CancellationToken.None);
             
             return Ok(dataset);
         }
@@ -53,22 +52,18 @@ namespace IrtWeb.Datasets
             if (id != request.Id)
             {
                 logger.LogWarning("ID mismatch: Route ID = {RouteId}, Request ID = {RequestId}", id, request.Id);
-                return BadRequest(Result<object, string>.Failure("Id Missmatch"));
+                return BadRequest("ID mismatch: Route ID does not match Request ID");
             }
 
             logger.LogInformation("Updating dataset with ID {DatasetId}", id);
-            Result<DatasetDto, string?> resp = await _commandDispatcher.DispatchAsync<UpdateDatasetCommand, Result<DatasetDto, string>>(new UpdateDatasetCommand(request), CancellationToken.None);
+            var resp = await _commandDispatcher.DispatchAsync<UpdateDatasetCommand, Result<DatasetDto>>(new UpdateDatasetCommand(request), CancellationToken.None);
             if (!resp.IsSuccess)
             {
                 logger.LogWarning("Update not successful!");
-                return resp.Error switch
-                {
-                    "Dataset not found" => NotFound(Result<string, object>.Failure(resp.Error)),
-                    _ => BadRequest(ApiResult<DatasetDto>.Failure(resp.Error ?? "Unknown error"))
-                };
+                return BadRequest(resp);
             }
             logger.LogInformation("Update Successful!");
-            return Ok(resp.ToApiResult());
+            return Ok(resp);
             
         }
 
@@ -79,7 +74,7 @@ namespace IrtWeb.Datasets
             {
                 return BadRequest("Id in the request body does not match the id in the route");
             }
-            var resp = await _commandDispatcher.DispatchAsync<UpdateDatasetCommand, Result<DatasetDto, string>>(new UpdateDatasetCommand(request), CancellationToken.None);
+            var resp = await _commandDispatcher.DispatchAsync<UpdateDatasetCommand, Result<DatasetDto>>(new UpdateDatasetCommand(request), CancellationToken.None);
             return Ok(resp);
         }
     }

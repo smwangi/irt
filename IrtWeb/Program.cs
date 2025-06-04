@@ -1,17 +1,16 @@
 
 using Asp.Versioning;
 using Irt.Application;
-using Irt.Application.Configuration.ApiResponse;
 using Irt.Application.Datasources;
 using Irt.Infrastructure;
-using IrtWeb.Middlewares;
 using Microsoft.AspNetCore.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
-using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using MassTransit.DependencyInjection;
 using Irt.Application.Datasets;
+using Irt.SharedKernel.ErrorHandling.MiddleWare;
+using IrtWeb.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +18,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-//builder.Services.AddControllers();
 
 builder.Services
         .AddApplication()
@@ -32,7 +30,7 @@ IEdmModel GetEdmModel()
 {
     var odataBuilder = new ODataConventionModelBuilder();
     odataBuilder.EnableLowerCamelCase();
-    odataBuilder.EntitySet<DatasourceDto>("Datasources").EntityType.HasKey(x => x.Id);
+    odataBuilder.EntitySet<DatasourceDto>("Datasource").EntityType.HasKey(x => x.Id);
     odataBuilder.EntitySet<DatasetDto>("Datasets").EntityType.HasKey(x => x.Id);
     return odataBuilder.GetEdmModel();
 }
@@ -79,26 +77,6 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
-//builder.Host.UseSerilog();
-
-builder.Services.Configure<ApiBehaviorOptions>(options =>
-{
-    options.InvalidModelStateResponseFactory = context =>
-    {
-        /*var errors = context.ModelState.Values.SelectMany(x => x.Errors.Select(e => e.ErrorMessage));
-        return new BadRequestObjectResult(new { Errors = errors });*/
-        var errors = context.ModelState
-            .Where(ms => ms.Value.Errors.Count > 0)
-            .ToDictionary(
-                ms => ms.Key,
-                ms => ms.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-            );
-
-        var response = ApiResponse<object>.Error(new List<ApiError> { new ApiError($"Validation error{errors.Values}") { Code = "400" } });
-
-        return new BadRequestObjectResult(response);
-    };
-});
 
 builder.Host.UseSerilog((context, configuration)
 => configuration.ReadFrom.Configuration(context.Configuration)
@@ -131,11 +109,10 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<GlobalExceptionHandlerMiddleWare>();
+app.UseMiddleware<ResultErrorHandlingMiddleWare>();
 
 app.MapControllers();
-
-app.UseMiddleware<ErrorHandlingMiddleware>();
-
 
 app.UseSerilogRequestLogging(); // Logging incoming http requests
 

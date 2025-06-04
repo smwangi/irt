@@ -1,6 +1,7 @@
 using Irt.Core.IndicatorCategories;
 using Irt.Core.ReportingScopes;
 using Irt.Core.SeedWork;
+using Irt.Core.SharedKernel;
 using Irt.Core.UnitOfMeasurements;
 using Irt.Core.ValueObjects;
 namespace Irt.Core.IndicatorDefinitions
@@ -8,7 +9,6 @@ namespace Irt.Core.IndicatorDefinitions
     public class IndicatorDefinition : Entity<IndicatorDefinitionId>
     {
         public string Description { get; private set; }
-        public Name IndicatorDefinitionName { get; private set; }
         public ReportingScope ReportingScope { get; private set; }
         public UnitOfMeasure UnitOfMeasure { get; private set; }
         public IndicatorCategory IndicatorCategory { get; private set; }
@@ -18,6 +18,10 @@ namespace Irt.Core.IndicatorDefinitions
         public string? FormulaDescription { get; private set; }
         public string? Metadata { get; private set; }
         public string? DPSIR { get; private set; }
+
+        private IndicatorDefinition()
+        {
+        }
 
         private IndicatorDefinition(
             IndicatorDefinitionId id,
@@ -31,9 +35,10 @@ namespace Irt.Core.IndicatorDefinitions
             string formula,
             string formulaDescription,
             string metadata,
-            string dpsir) : base(id)
+            string dpsir)
         {
             Id = id;
+            Name = name;
             Description = description;
             ReportingScope = reportingScope;
             UnitOfMeasure = unitOfMeasure;
@@ -60,8 +65,8 @@ namespace Irt.Core.IndicatorDefinitions
             string dpsir)
         {
             return new IndicatorDefinition(
-                new IndicatorDefinitionId(new Guid().ToString()),
-                name,
+                IndicatorDefinitionId.Create(UniqueIdGenerator.NextId()),
+                name, 
                 description,
                 reportingScope,
                 unitOfMeasure,

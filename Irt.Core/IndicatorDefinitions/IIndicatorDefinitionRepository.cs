@@ -1,4 +1,5 @@
 using Irt.Core.SharedKernel;
+using Irt.SharedKernel.Repositories;
 
 namespace Irt.Core.IndicatorDefinitions
 {

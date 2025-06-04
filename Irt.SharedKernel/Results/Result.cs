@@ -6,114 +6,88 @@ public readonly struct Result<T>
 {
     public bool IsSuccess { get; }
     public bool IsFailure => !IsSuccess;
+
     public T? Value { get; }
     public Error? Error { get; }
-    
     public Dictionary<string, object> Metadata { get; }
-    
-    private Result(T? value)
+
+    // Success constructor
+    private Result(T value, Dictionary<string, object>? metadata = null)
     {
         IsSuccess = true;
         Value = value;
         Error = null;
-    }
-    
-    private Result(T? value, Dictionary<string, object>? metadata = null)
-    {
-        IsSuccess = true;
-        Value = value;
-        Error = null;
-        Metadata = metadata ?? new ();
+        Metadata = metadata ?? new();
     }
 
-    private Result(Error error)
-    {
-        IsSuccess = false;
-        Value = default;
-        Error = error;
-    }
-    
+    // Failure constructor
     private Result(Error error, Dictionary<string, object>? metadata = null)
     {
         IsSuccess = false;
         Value = default;
         Error = error;
-        Metadata = metadata ?? new ();
+        Metadata = metadata ?? new();
     }
-    
-    public static Result<T> Ok (T value) => new(value);
 
-    public static Result<T> Ok(T value, Dictionary<string, object>? metadata = null)
-        => new(value: value, metadata);
+    // Factory methods
+    public static Result<T> Success(T value, Dictionary<string, object>? metadata = null)
+        => new(value, metadata);
 
-    public static Result<T> Fail(Error error) => new(error);
-    public static Result<T> Fail(Error error, Dictionary<string, object>? metadata = null)
-        => new(error: error, metadata);
-    
-    // Monadic Combinators
-    public Result<TOut> Map<TOut>(Func<T, TOut> map)
-    {
-        return IsSuccess
-            ? Result<TOut>.Ok(map(Value!))
-            : Result<TOut>.Fail(Error!);
-    }
+    public static Result<T> Failure(Error error, Dictionary<string, object>? metadata = null)
+        => new(error, metadata);
+
+    // Combinators
+    public Result<U> Map<U>(Func<T, U> map)
+        => IsSuccess
+            ? Result<U>.Success(map(Value!), Metadata)
+            : Result<U>.Failure(Error!, Metadata);
 
     public Result<U> Bind<U>(Func<T, Result<U>> bind)
-    {
-        return IsSuccess
+        => IsSuccess
             ? bind(Value!)
-            : Result<U>.Fail(Error!);
-    }
-    
-    public async Task<Result<U>> BindAsyn<U>(Func<T, Task<Result<U>>> bind)
-    {
-        return IsSuccess
+            : Result<U>.Failure(Error!, Metadata);
+
+    public async Task<Result<U>> BindAsync<U>(Func<T, Task<Result<U>>> bind)
+        => IsSuccess
             ? await bind(Value!)
-            : Result<U>.Fail(Error!, Metadata);
-    }
+            : Result<U>.Failure(Error!, Metadata);
 
     public Result<T> Tap(Action<T> action)
     {
         if (IsSuccess)
-        {
             action(Value!);
-        }
 
         return this;
     }
-    
-    public T Unwrap() 
-        => IsSuccess ? Value! : throw new InvalidOperationException("Result is a failure");
-    
+
+    public T Unwrap()
+        => IsSuccess ? Value! : throw new InvalidOperationException("Result is a failure.");
+
     public TMeta? GetMetadata<TMeta>(string key, TMeta? defaultValue = default)
     {
-        if (Metadata.TryGetValue(key, out var value))
-        {
-            return (TMeta?)value;
-        }
+        if (Metadata.TryGetValue(key, out var value) && value is TMeta casted)
+            return casted;
 
         return defaultValue;
     }
-    
+
     public Result<T> WithMetadata(string key, object value)
     {
         var newMetadata = new Dictionary<string, object>(Metadata) { [key] = value };
-        return IsSuccess ? Result<T>.Ok(Value!, newMetadata) : Result<T>.Fail(Error!, newMetadata);
+        return IsSuccess
+            ? Success(Value!, newMetadata)
+            : Failure(Error!, newMetadata);
     }
-}
 
-// Void Scenarios
-public sealed class Result
-{ 
-    public bool IsSuccess { get; }
-    public Error? Error { get; }
-    private Result(bool isSuccess, Error? error)
+    public bool TryGetMetadata<TMeta>(string key, out TMeta? value)
     {
-        IsSuccess = isSuccess;
-        Error = error;
-    }
+        if (Metadata.TryGetValue(key, out var raw) && raw is TMeta casted)
+        {
+            value = casted;
+            return true;
+        }
 
-    public static Result Ok()
-        => new(true, error: null);
-    public static Result Fail(Error error) => new(false, error);
+        value = default;
+        return false;
+    }
 }

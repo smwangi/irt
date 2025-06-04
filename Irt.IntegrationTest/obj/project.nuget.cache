@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "JxeHwEocuDg=",
+  "dgSpecHash": "vWDLqlSBOy4=",
   "success": true,
   "projectFilePath": "/Users/samwan/projects/irtool/Irt.IntegrationTest/Irt.IntegrationTest.csproj",
   "expectedPackageFiles": [
@@ -15,7 +15,7 @@
     "/Users/samwan/.nuget/packages/couchbase.extensions.dependencyinjection/3.6.5/couchbase.extensions.dependencyinjection.3.6.5.nupkg.sha512",
     "/Users/samwan/.nuget/packages/couchbasenetclient/3.6.5/couchbasenetclient.3.6.5.nupkg.sha512",
     "/Users/samwan/.nuget/packages/coverlet.collector/6.0.0/coverlet.collector.6.0.0.nupkg.sha512",
-    "/Users/samwan/.nuget/packages/dapper/2.1.35/dapper.2.1.35.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/dapper/2.1.66/dapper.2.1.66.nupkg.sha512",
     "/Users/samwan/.nuget/packages/dnsclient/1.8.0/dnsclient.1.8.0.nupkg.sha512",
     "/Users/samwan/.nuget/packages/fluentvalidation/11.9.2/fluentvalidation.11.9.2.nupkg.sha512",
     "/Users/samwan/.nuget/packages/fluentvalidation.aspnetcore/11.3.0/fluentvalidation.aspnetcore.11.3.0.nupkg.sha512",

@@ -1,21 +1,73 @@
+using System.Data;
+using System.Linq.Expressions;
 using Irt.Core.SeedWork;
 using Irt.Core.SharedKernel;
-using Irt.Core.ValueObjects;
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace Irt.Infrastructure.Database.Postgres;
 
-public class UniquenessChecker(ApplicationDbContext applicationDbContext) :  IUniquenessChecker
-{
-    public async Task<bool> IsNameUniqueAsync<TEntity>(Name name, CancellationToken cancellationToken) where TEntity : class, IEntity
+    public class GenericNameUniquenessChecker<TEntity, TId>(
+        ApplicationDbContext applicationDbContext) :  INameUniquenessChecker<TEntity, TId>
+    where TEntity : class, IEntity where TId : TypedIdValueBase<TId>
     {
-        return !await applicationDbContext.Set<TEntity>()
-            .AnyAsync(e => e..Name.Value == name.Value, cancellationToken);
-    }
+        public async Task<bool> IsNameUniqueAsync(string nameValue, CancellationToken cancellationToken = default)
+        {
+            // Get the table name
+            var tableName = (applicationDbContext.Model.FindEntityType(typeof(TEntity)) ?? throw new InvalidOperationException()).GetTableName();
 
-    public Task<bool> IsNameUniqueAsync<TEntity, TId>(Name name, TId excludeId, CancellationToken cancellationToken) where TEntity : class, IEntity where TId : TypedIdValueBase<TId>
+            // Construct the SQL query
+            var sql = $"SELECT COUNT(*) FROM {tableName} WHERE LOWER(\"Name\") = LOWER(@nameValue)";
+
+            // Open the connection
+            var connection = applicationDbContext.Database.GetDbConnection();
+            await connection.OpenAsync(cancellationToken);
+
+            try 
+            {
+                // Execute the query using Dapper
+                var count = await connection.ExecuteScalarAsync<int>(
+                    sql, 
+                    new { nameValue }, 
+                    commandType: CommandType.Text
+                );
+
+                // Return true if count is 0 (unique), false otherwise
+                return count == 0;
+            }
+            finally 
+            {
+                await connection.CloseAsync();
+            }
+        }
+
+    public async Task<bool> IsNameUniqueAsync(string nameValue, TId excludeId, CancellationToken cancellationToken = default)
     {
-        return applicationDbContext.Set<TEntity>()
-            .AnyAsync(e => e.Name.Value == name.Value && e.I != excludeId, cancellationToken);
+        // Get the table name
+        var tableName = (applicationDbContext.Model.FindEntityType(typeof(TEntity)) ?? throw new InvalidOperationException()).GetTableName();
+
+        // Construct the SQL query
+        var sql = $"SELECT COUNT(*) FROM {tableName} WHERE LOWER(\"Name\") = LOWER(@nameValue) AND \"Id\" <> @currentId";
+
+        // Open the connection
+        var connection = applicationDbContext.Database.GetDbConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        try 
+        {
+            // Execute the query using Dapper
+            var count = await connection.ExecuteScalarAsync<int>(
+                sql, 
+                new { nameValue, excludeId }, 
+                commandType: CommandType.Text
+            );
+
+            // Return true if count is 0 (unique), false otherwise
+            return count == 0;
+        }
+        finally 
+        {
+            await connection.CloseAsync();
+        }
     }
 }

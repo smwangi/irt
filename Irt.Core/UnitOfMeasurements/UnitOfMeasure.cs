@@ -7,14 +7,18 @@ namespace Irt.Core.UnitOfMeasurements
     {
         public string Description { get; private set; }
 
+        private UnitOfMeasure()
+        {
+        }
+
         private UnitOfMeasure(
             Name name,
             string description,
-            UnitOfMeasureId id) : base(id)
+            UnitOfMeasureId id)
         {
+            Id = id;
             Name = name;
             Description = description;
-            Id = id;
         }
 
         public static UnitOfMeasure CreateUnitOfMeasure(
@@ -24,14 +28,14 @@ namespace Irt.Core.UnitOfMeasurements
             return new UnitOfMeasure(
                 name, 
                 description,
-                new UnitOfMeasureId(UniqueIdGenerator.NextId()));
+                UnitOfMeasureId.Create(UniqueIdGenerator.NextId()));
         }
 
         public void UpdateUnitOfMeasure(
             string name,
             string description)
         {
-            Name = Name.Of(name);
+            Name.Of(name);
             Description = description;
         }
 

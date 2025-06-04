@@ -1,6 +1,7 @@
 // Code Created: 2020-07-19 1:00 PM
 
 using Irt.Core.SharedKernel;
+using Irt.SharedKernel.Results;
 
 namespace Irt.Application.Configuration.Commands
 {

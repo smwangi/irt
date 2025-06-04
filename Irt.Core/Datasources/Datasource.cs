@@ -24,11 +24,11 @@ namespace Irt.Core.Datasources
             Name name,
             string description,
             string? source,
-            DatasourceType datasourceType) : base(id)
+            DatasourceType datasourceType)
         {
-            Description = description;
             Id = id;
             Name = name;
+            Description = description;
             Source = source;
             DatasourceType = datasourceType;
             //this.AddDomainEvent(new Events.DatasourceCreatedEvent(id));
@@ -42,22 +42,25 @@ namespace Irt.Core.Datasources
         {
             return new Datasource(
                 DatasourceId.Create(UniqueIdGenerator.NextId()),
-                name,
+                name: name,
                 description,
                 source,
                 datasourceType
             );
         }
 
-        public void UpdateDatasource(
+        public Datasource WithUpdatedDatasource(
             Name name,
-            string description,
-            DatasourceId datasourceId)
+            string description)
         {
-            Name = name;
-            Description = description;
-
             AddDomainEvent(new Events.DatasourceUpdatedEvent(this));
+            return new Datasource(
+                    id: Id,
+                    name: name,
+                    description: description,
+                    source: Source,
+                    datasourceType: DatasourceType
+                );
         }
     }
 }

@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="CouchbaseNetClient" Version="3.6.5" />
+    <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="MassTransit.Kafka" Version="8.3.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
@@ -32,6 +33,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Domain\IndicatorDefinitions\" />
+    <Folder Include="ErrorHandling\Exceptions\" />
+    <Folder Include="ErrorHandling\MiddleWare\" />
     <Folder Include="Services\" />
   </ItemGroup>
 </Project>

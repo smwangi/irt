@@ -1,3 +1,5 @@
+using Irt.SharedKernel.ErrorHandling.Exceptions;
+
 namespace Irt.Application.Helpers;
 
 using Irt.Application.Exceptions;

@@ -7,11 +7,13 @@ namespace Irt.Core.IndicatorMainCategories
     public class IndicatorMainCategory : Entity<IndicatorMainCategoryId>
     {
         public string Description { get; private set; }
+        
+        private IndicatorMainCategory() { }
 
         private IndicatorMainCategory(
             IndicatorMainCategoryId id,
             Name indicatorMainCategoryName,
-            string description) : base(id)
+            string description)
         {
             Id = id;
             Name = indicatorMainCategoryName;
@@ -23,8 +25,7 @@ namespace Irt.Core.IndicatorMainCategories
             string description)
         {
             return new IndicatorMainCategory(
-                new IndicatorMainCategoryId(
-                    UniqueIdGenerator.NextId()),
+                IndicatorMainCategoryId.Create(UniqueIdGenerator.NextId()),
                 name,
                 description);
         }

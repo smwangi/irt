@@ -18,7 +18,10 @@ namespace Irt.Core.Datasources
         public static DatasourceId Create(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
+            {
                 throw new ArgumentException("DatasourceId cannot be empty", nameof(value));
+            }
+            
             return new DatasourceId(value);
         }
 

@@ -9,7 +9,6 @@ namespace Irt.Core.Datasets
     public sealed class Dataset : Entity<DatasetId>
     {
         public string? Description { get; private set; }
-        public Name Name { get; protected set; }
         //public Datasource Datasource { get; private set; }
         public DatasetType DatasetType { get; private set; }
         //public IndicatorDefinition IndicatorDefinition { get; private set; }
@@ -20,7 +19,7 @@ namespace Irt.Core.Datasets
         public string? RelatedIndicatorsIds { get; private set; } = string.Empty;
         
         // For migration
-        private Dataset() : base(new DatasetId(""))
+        private Dataset() : base(null)
         {
             
         }
@@ -30,9 +29,11 @@ namespace Irt.Core.Datasets
             string description,
             Datasource source,
             DatasetType datasetType,
-            IndicatorDefinition indicatorDefinition) : base(id: id)
+            IndicatorDefinition indicatorDefinition)
         {
             Description = description;
+            Name = name;
+            Id = id;
             //this.Datasource = source;
             this.DatasetType = datasetType;
             //this.IndicatorDefinition = indicatorDefinition;
@@ -55,19 +56,21 @@ namespace Irt.Core.Datasets
                 indicatorDefinition);
         }
 
-        public void UpdateDataset(
-            string name,
+        public Dataset WithUpdatedDataset(
+            Name name,
             string description,
-            DatasetId datasetId,
             Datasource datasource,
             IndicatorDefinition indicatorDefinition,
             DatasetType datasetType)
         {
-            Name = Name.Of(name);
-            Description = description;
-            //Datasource = datasource;
-            //IndicatorDefinition = indicatorDefinition;
-            DatasetType = datasetType;
+            return new Dataset(
+                id: Id,
+                name: name,
+                description: description,
+                source: datasource,
+                datasetType: datasetType,
+                indicatorDefinition: indicatorDefinition
+            );
         }
 
     }

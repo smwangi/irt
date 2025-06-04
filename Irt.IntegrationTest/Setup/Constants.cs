@@ -8,7 +8,7 @@ namespace Irt.IntegrationTest.Setup
         // Route Constants
         public const string DatasourceRoute = $"{BaseUrlApi}/datasources";
 
-        public const string DatasourceCollectionName = "Datasources";
+        public const string DatasourceCollectionName = "Datasource";
         public const string DatasetCollectionName = "Datasets";
         public const string NameCollectionName = "Names";
     }

@@ -7,12 +7,15 @@ namespace Irt.Core.ReportingScopes
     public class ReportingScope : Entity<ReportingScopeId>
     {
         public string Description { get; private set; }
-        public Name ReportingScopeName { get; private set; }
 
-        private ReportingScope(ReportingScopeId id, Name name, string description) : base(id)
+        private ReportingScope()
+        {
+        }
+
+        private ReportingScope(ReportingScopeId id, Name name, string description)
         {
             Id = id;
-            ReportingScopeName = name;
+            Name = name;
             Description = description;
         }
 
@@ -21,7 +24,7 @@ namespace Irt.Core.ReportingScopes
             string description)
         {
             return new ReportingScope(
-                new ReportingScopeId(UniqueIdGenerator.NextId()),
+                ReportingScopeId.Create(UniqueIdGenerator.NextId()),
                 name,
                 description);
         }

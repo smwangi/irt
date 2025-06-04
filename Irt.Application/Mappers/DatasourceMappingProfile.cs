@@ -1,7 +1,7 @@
 using AutoMapper;
 using Irt.Application.Datasources;
-using Irt.Core.Datasources;
 using Irt.Core.ValueObjects;
+using CoreDatasource = Irt.Core.Datasources.Datasource;
 
 namespace Irt.Application.Mappers;
 
@@ -10,7 +10,7 @@ public class DatasourceMappingProfile : Profile
     public DatasourceMappingProfile()
     {
         CreateMap<Name, string>().ConvertUsing(name => name.Value);
-        CreateMap<Datasource, DatasourceDto>()
+        CreateMap<CoreDatasource, DatasourceDto>()
             .ForMember(dest =>
                 dest.Description, opt =>
                 opt.MapFrom(src =>

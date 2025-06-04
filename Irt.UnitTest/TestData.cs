@@ -55,6 +55,7 @@ namespace Irt.UnitTest
         public static IndicatorCategory CreateIndicatorCategory()
         {
             return IndicatorCategory.CreateIndicatorCategory(
+                name: Name.Of(Guid.NewGuid().ToString()), 
                 description: Guid.NewGuid().ToString(),
                 indicatorMainCategory: CreateIndicatorMainCategory()
             );

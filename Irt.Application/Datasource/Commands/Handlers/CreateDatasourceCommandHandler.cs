@@ -1,6 +1,8 @@
 using AutoMapper;
 using FluentValidation;
 using Irt.Application.Configuration.Commands;
+using Irt.Application.Datasources;
+using Irt.Application.Datasources.Commands;
 using Irt.Application.Helpers;
 using Irt.Core.Datasources;
 using Irt.Core.SharedKernel;
@@ -9,13 +11,13 @@ using Irt.SharedKernel.ErrorHandling.Exceptions;
 using Irt.SharedKernel.Results;
 using ValidationException = Irt.SharedKernel.ErrorHandling.Exceptions.ValidationException;
 
-namespace Irt.Application.Datasources.Commands.Handlers
+namespace Irt.Application.Datasource.Commands.Handlers
 {
-    internal abstract class CreateDatasourceCommandHandler(
+    internal class CreateDatasourceCommandHandler(
         IRepositoryFactory datasourceRepository,
         IMapper mapper,
         IValidator<DatasourceDto> validator,
-        INameUniquenessChecker<Datasource, DatasourceId> uniquenessChecker) : ICommandHandler<CreateDatasourceCommand, Result<DatasourceDto>>
+        INameUniquenessChecker<Core.Datasources.Datasource, DatasourceId> uniquenessChecker) : ICommandHandler<CreateDatasourceCommand, Result<DatasourceDto>>
     {
         public async Task<Result<DatasourceDto>> HandleAsync(
             CreateDatasourceCommand command,
@@ -48,14 +50,14 @@ namespace Irt.Application.Datasources.Commands.Handlers
                         new BadRequestException("Datasource name must be unique.")));
             }
             
-            var datasource = Datasource.CreateDatasource(
+            var datasource = Core.Datasources.Datasource.CreateDatasource(
                 Name.Of(command.DatasourceCreateRequest.Name), 
                 command.DatasourceCreateRequest.Description, 
                 command.DatasourceCreateRequest.Source,
                 datasourceType);
 
             var savedDatasource = await datasourceRepository
-                .CreateFactory<Datasource>()
+                .CreateFactory<Core.Datasources.Datasource>()
                 .AddAsync(datasource, cancellationToken);
             return Result<DatasourceDto>.Success(mapper.Map<DatasourceDto>(savedDatasource));
         }

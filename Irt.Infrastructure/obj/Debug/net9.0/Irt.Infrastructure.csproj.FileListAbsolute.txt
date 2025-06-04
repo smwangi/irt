@@ -18,3 +18,5 @@
 /Users/samwan/projects/irtool/Irt.Infrastructure/obj/Debug/net9.0/ref/Irt.Infrastructure.dll
 /Users/samwan/projects/irtool/Irt.Infrastructure/bin/Debug/net9.0/Irt.Infrastructure.runtimeconfig.json
 /Users/samwan/projects/irtool/Irt.Infrastructure/obj/Debug/net9.0/Irt.Infrastructure.genruntimeconfig.cache
+/Users/samwan/projects/irtool/Irt.Infrastructure/bin/Debug/net9.0/Irt.SharedKernel.dll
+/Users/samwan/projects/irtool/Irt.Infrastructure/bin/Debug/net9.0/Irt.SharedKernel.pdb

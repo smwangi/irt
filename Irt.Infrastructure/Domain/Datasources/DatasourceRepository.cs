@@ -9,7 +9,7 @@ namespace Irt.Infrastructure.Domain.Datasources
             //_datasources.DeleteMany(FilterDefinition<Datasource>.Empty);
             
             //await _datasources.InsertOneAsync(datasource, cancellationToken: CancellationToken.None);
-            //await context.Datasources.AddAsync(datasource);
+            //await context.Datasource.AddAsync(datasource);
 
             return null;
         }
@@ -21,7 +21,7 @@ namespace Irt.Infrastructure.Domain.Datasources
                 .Find(filter)
                 .AnyAsync();
             return resp;
-             /*return await context.Datasources.AnyAsync(d => d.Name == name);*/
+             /*return await context.Datasource.AnyAsync(d => d.Name == name);*/
        /* }*/
 
         public  Task<Datasource?> GetByIdAsync(DatasourceId datasourceId, CancellationToken cancellationToken)
@@ -34,7 +34,7 @@ namespace Irt.Infrastructure.Domain.Datasources
             //_datasources.DeleteMany(FilterDefinition<Datasource>.Empty);
             return null;
 
-            /*return await context.Datasources
+            /*return await context.Datasource
                 .Where(p => p.Name.Value != null)
                 .ToListAsync();*/
         }
@@ -42,7 +42,7 @@ namespace Irt.Infrastructure.Domain.Datasources
         public  Task<bool> DeleteAsync(Datasource datasource, CancellationToken cancellationToken)
         {
             return null;
-            /*var response =  context.Datasources.Remove(datasource);
+            /*var response =  context.Datasource.Remove(datasource);
             await _unitOfWork.CommitAsync();
             return response.State == EntityState.Deleted;*/
         }
@@ -50,7 +50,7 @@ namespace Irt.Infrastructure.Domain.Datasources
         public  Task<bool> UpdateAsync(Datasource datasource, CancellationToken cancellationToken)
         {
             return null;
-            /*var response = context.Datasources.Update(datasource);
+            /*var response = context.Datasource.Update(datasource);
             await _unitOfWork.CommitAsync();
             return response.State == EntityState.Modified;*/
         }

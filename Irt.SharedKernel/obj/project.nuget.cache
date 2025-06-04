@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "l2A6yejjeTM=",
+  "success": true,
+  "projectFilePath": "/Users/samwan/projects/irtool/Irt.SharedKernel/Irt.SharedKernel.csproj",
+  "expectedPackageFiles": [
+    "/Users/samwan/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/9.0.2/microsoft.extensions.dependencyinjection.abstractions.9.0.2.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/microsoft.extensions.logging.abstractions/9.0.2/microsoft.extensions.logging.abstractions.9.0.2.nupkg.sha512"
+  ],
+  "logs": []
+}

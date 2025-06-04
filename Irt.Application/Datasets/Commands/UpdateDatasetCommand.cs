@@ -1,9 +1,9 @@
 using FluentValidation;
 using Irt.Application.Configuration.Commands;
-using Irt.Application.Configuration.Results;
+using Irt.SharedKernel.Results;
 
 namespace Irt.Application.Datasets.Commands;
-public class UpdateDatasetCommand(DatasetDto datasetDto) : CommandBase<Result<DatasetDto,string>>
+public class UpdateDatasetCommand(DatasetDto datasetDto) : CommandBase<Result<DatasetDto>>
 {
     public DatasetDto DatasetDto { get; } = datasetDto ?? throw new ArgumentNullException(nameof(datasetDto));
 }

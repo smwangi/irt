@@ -1,7 +1,7 @@
 using System.Net;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
 
-namespace Irt.Core.Common;
+namespace Irt.SharedKernel.ErrorHandling.Exceptions;
 
 public class Error
 {

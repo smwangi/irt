@@ -189,15 +189,15 @@
           "build/netstandard1.0/coverlet.collector.targets": {}
         }
       },
-      "Dapper/2.1.35": {
+      "Dapper/2.1.66": {
         "type": "package",
         "compile": {
-          "lib/net7.0/Dapper.dll": {
+          "lib/net8.0/Dapper.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net7.0/Dapper.dll": {
+          "lib/net8.0/Dapper.dll": {
             "related": ".xml"
           }
         }
@@ -4960,6 +4960,9 @@
       "Irt.Core/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v9.0",
+        "dependencies": {
+          "Irt.SharedKernel": "1.0.0"
+        },
         "compile": {
           "bin/placeholder/Irt.Core.dll": {}
         },
@@ -4972,6 +4975,7 @@
         "framework": ".NETCoreApp,Version=v9.0",
         "dependencies": {
           "CouchbaseNetClient": "3.6.5",
+          "Dapper": "2.1.66",
           "Irt.Application": "1.0.0",
           "Irt.Core": "1.0.0",
           "MassTransit.Kafka": "8.3.4",
@@ -4990,6 +4994,19 @@
         },
         "runtime": {
           "bin/placeholder/Irt.Infrastructure.dll": {}
+        }
+      },
+      "Irt.SharedKernel/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v9.0",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.2"
+        },
+        "compile": {
+          "bin/placeholder/Irt.SharedKernel.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Irt.SharedKernel.dll": {}
         }
       },
       "IrtWeb/1.0.0": {
@@ -5248,22 +5265,20 @@
         "coverlet.collector.nuspec"
       ]
     },
-    "Dapper/2.1.35": {
-      "sha512": "YKRwjVfrG7GYOovlGyQoMvr1/IJdn+7QzNXJxyMh0YfFF5yvDmTYaJOVYWsckreNjGsGSEtrMTpnzxTUq/tZQw==",
+    "Dapper/2.1.66": {
+      "sha512": "/q77jUgDOS+bzkmk3Vy9SiWMaetTw+NOoPAV0xPBsGVAyljd5S6P+4RUW7R3ZUGGr9lDRyPKgAMj2UAOwvqZYw==",
       "type": "package",
-      "path": "dapper/2.1.35",
+      "path": "dapper/2.1.66",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Dapper.png",
-        "dapper.2.1.35.nupkg.sha512",
+        "dapper.2.1.66.nupkg.sha512",
         "dapper.nuspec",
         "lib/net461/Dapper.dll",
         "lib/net461/Dapper.xml",
-        "lib/net5.0/Dapper.dll",
-        "lib/net5.0/Dapper.xml",
-        "lib/net7.0/Dapper.dll",
-        "lib/net7.0/Dapper.xml",
+        "lib/net8.0/Dapper.dll",
+        "lib/net8.0/Dapper.xml",
         "lib/netstandard2.0/Dapper.dll",
         "lib/netstandard2.0/Dapper.xml",
         "readme.md"
@@ -13290,6 +13305,11 @@
       "type": "project",
       "path": "../Irt.Infrastructure/Irt.Infrastructure.csproj",
       "msbuildProject": "../Irt.Infrastructure/Irt.Infrastructure.csproj"
+    },
+    "Irt.SharedKernel/1.0.0": {
+      "type": "project",
+      "path": "../Irt.SharedKernel/Irt.SharedKernel.csproj",
+      "msbuildProject": "../Irt.SharedKernel/Irt.SharedKernel.csproj"
     },
     "IrtWeb/1.0.0": {
       "type": "project",

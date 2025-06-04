@@ -2,6 +2,7 @@ using Irt.Application.Exceptions;
 using Irt.Application.Helpers;
 using Irt.Core.SeedWork;
 using Irt.Core.ValueObjects;
+using Irt.SharedKernel.ErrorHandling.Exceptions;
 
 namespace Irt.Application.Configuration.DomainEvents;
 

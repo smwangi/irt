@@ -63,7 +63,7 @@ namespace Irt.Infrastructure.Migrations
                     b.ToTable("datasets", "irt");
                 });
 
-            modelBuilder.Entity("Irt.Core.Datasources.Datasource", b =>
+            modelBuilder.Entity("Irt.Core.Datasource.Datasource", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
@@ -127,7 +127,7 @@ namespace Irt.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Irt.Core.Datasources.Datasource", b =>
+            modelBuilder.Entity("Irt.Core.Datasource.Datasource", b =>
                 {
                     b.OwnsOne("Irt.Core.ValueObjects.CreatedBy", "CreatedBy", b1 =>
                         {

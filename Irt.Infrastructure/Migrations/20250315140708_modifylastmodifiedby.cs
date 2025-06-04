@@ -5,7 +5,7 @@
 namespace Irt.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class modifylastmodifiedby : Migration
+    public partial class  modifylastmodifiedby : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

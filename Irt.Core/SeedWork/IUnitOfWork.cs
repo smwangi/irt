@@ -1,5 +1,6 @@
 using System;
 using Irt.Core.SharedKernel;
+using Irt.SharedKernel.Repositories;
 
 namespace Irt.Core.SeedWork
 {

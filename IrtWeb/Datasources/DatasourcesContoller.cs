@@ -1,8 +1,9 @@
 using Asp.Versioning;
-using Irt.Application.Configuration.Results;
 using Irt.Application.Datasources;
 using Irt.Application.Datasources.Commands;
+using Irt.Application.Datasources.Queries;
 using Irt.Application.Dispatchers;
+using Irt.SharedKernel.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
@@ -10,7 +11,7 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 namespace IrtWeb.Datasources
 {
     [ApiController]
-    [ControllerName("Datasources")]
+    [ControllerName("Datasource")]
     [Route("api/v{version:apiVersion}")]
     [ApiVersion("1.0")]
     public class DatasourcesController(
@@ -28,7 +29,9 @@ namespace IrtWeb.Datasources
         [EnableQuery]
         public async Task<IActionResult> GetDatasources()
         {
-            var datasources = await _queryDispatcher.DispatchAsync<GetDatasourcesQuery, Result<List<DatasourceDto>, string>>(new GetDatasourcesQuery(), CancellationToken.None);
+            var datasources = await _queryDispatcher
+                .DispatchAsync<GetDatasourceQuery, Result<List<DatasourceDto>>>(
+                    new GetDatasourceQuery(), CancellationToken.None);
             return Ok(datasources);
         }
         
@@ -37,15 +40,23 @@ namespace IrtWeb.Datasources
         {
             var createDatasourceCommand = new CreateDatasourceCommand(datasourceDto);
          
-            var resp = await _commandDispatcher.DispatchAsync<CreateDatasourceCommand, Result<DatasourceDto, string>>(
-                createDatasourceCommand, cancellationToken: CancellationToken.None);
+            var resp = await _commandDispatcher
+                .DispatchAsync<CreateDatasourceCommand, Result<DatasourceDto>>(
+                    createDatasourceCommand, cancellationToken: CancellationToken.None);
+            
+            if (!resp.IsSuccess)
+            {
+                return BadRequest(resp);
+            }
             return Ok(resp);
         }
 
         [HttpGet(ApiPrefix + "/{{id}}")]
         public async Task<IActionResult> GetDatasource([FromRoute]string id)
         {
-            var datasource = await _queryDispatcher.DispatchAsync<GetDatasourcesByIdQuery, DatasourceDto>(new GetDatasourcesByIdQuery(id), CancellationToken.None);
+            var datasource = await _queryDispatcher
+                .DispatchAsync<GetDatasourceByIdQuery, Result<DatasourceDto>>(
+                    new GetDatasourceByIdQuery(id), CancellationToken.None);
             return Ok(datasource);
         }
 
@@ -58,7 +69,7 @@ namespace IrtWeb.Datasources
             }
             
             var command = new UpdateDatasourceCommand(request);
-            var resp = await _commandDispatcher.DispatchAsync<UpdateDatasourceCommand, Result<DatasourceDto, string>>(command, cancellationToken: CancellationToken.None);
+            var resp = await _commandDispatcher.DispatchAsync<UpdateDatasourceCommand, Result<DatasourceDto>>(command, cancellationToken: CancellationToken.None);
             return Ok(resp);
         }
 
@@ -69,14 +80,18 @@ namespace IrtWeb.Datasources
             {
                 throw new ArgumentException("Id mismatch");
             }
-            var resp = await _commandDispatcher.DispatchAsync<UpdateDatasourceCommand, Result<DatasourceDto, string>>(new UpdateDatasourceCommand(request), CancellationToken.None);
+            var resp = await _commandDispatcher
+                .DispatchAsync<UpdateDatasourceCommand, Result<DatasourceDto>>(
+                    new UpdateDatasourceCommand(request), CancellationToken.None);
             return Ok(resp);
         }
 
         [HttpDelete(ApiPrefix+ "/{{id}}")]
         public async Task<IActionResult> DeleteDatasource([FromRoute]string id)
         {
-            var resp = await _commandDispatcher.DispatchAsync<DeleteDatasourceCommand, DeleteDatasourceResult>(new DeleteDatasourceCommand(id), CancellationToken.None);
+            var resp = await _commandDispatcher
+                .DispatchAsync<DeleteDatasourceCommand, DeleteDatasourceResult>(
+                    new DeleteDatasourceCommand(id), CancellationToken.None);
             return Ok(resp);
         }
     }

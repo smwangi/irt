@@ -1,6 +1,7 @@
-using Irt.Core.SharedKernel;
 
-namespace Irt.Infrastructure.Shared;
+using Irt.SharedKernel.Repositories;
+
+namespace Irt.SharedKernel.Providers;
 
 public interface IRepositoryProvider
 {

@@ -1,15 +1,16 @@
-using Irt.Application.Configuration.Results;
+
+using Irt.SharedKernel.Results;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Irt.Application.Configuration.Commands;
 
 public static class CommandHandlerDiRegistrationExtensions
 {
-    public static IServiceCollection AddCommandHandler<TCommand, TResponse, TError, THandler>(this IServiceCollection services)
-        where THandler : class, ICommandHandler<TCommand, Result<TResponse, TError>>
-        where TCommand : CommandBase<Result<TResponse, TError>>
+    public static IServiceCollection AddCommandHandler<TCommand, TResponse, THandler>(this IServiceCollection services)
+        where THandler : class, ICommandHandler<TCommand, Result<TResponse>>
+        where TCommand : class, ICommand<Result<TResponse>>
     {
-        services.AddScoped<ICommandHandler<TCommand, Result<TResponse, TError>>, THandler>();
+        services.AddScoped<ICommandHandler<TCommand, Result<TResponse>>, THandler>();
         return services;
     }
     

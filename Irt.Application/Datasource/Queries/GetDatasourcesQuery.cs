@@ -1,7 +1,8 @@
 using Irt.Application.Configuration.Queries;
+using Irt.Application.Datasources;
 using Irt.SharedKernel.Results;
 
-namespace Irt.Application.Datasources.Queries
+namespace Irt.Application.Datasource.Queries
 {
     public class GetDatasourceQuery : IQuery<Result<List<DatasourceDto>>>
     {

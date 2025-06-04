@@ -11,4 +11,10 @@ public class CommandDispatcher(IServiceProvider serviceProvider) : ICommandDispa
         var handler = _serviceProvider.GetRequiredService<ICommandHandler<TCommand, TResult>>();
         return await handler.HandleAsync(command, cancellationToken);
     }
+
+    public Task<TResult> DispatchCommandAsync<TCommand, TResult>(TCommand command, CancellationToken cancellationToken) where TCommand : ICommand<TResult>
+    {
+        var handler = _serviceProvider.GetRequiredService<ICommandHandler<TCommand, TResult>>();
+        return handler.HandleAsync(command, cancellationToken);
+    }
 }

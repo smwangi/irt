@@ -1,7 +1,6 @@
 
 using AutoMapper;
 using Irt.Application.Configuration.Commands;
-using Irt.Application.Helpers;
 using Irt.Core.Datasets;
 using Irt.Core.Datasources;
 using Irt.Core.IndicatorDefinitions;

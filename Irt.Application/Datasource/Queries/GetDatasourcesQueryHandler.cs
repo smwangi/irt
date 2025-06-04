@@ -2,7 +2,6 @@ using System.ComponentModel;
 using AutoMapper;
 using Irt.Application.Configuration.Queries;
 using Irt.Application.Datasources;
-using Irt.Application.Datasources.Queries;
 using Irt.Application.Helpers;
 using Irt.SharedKernel.Results;
 

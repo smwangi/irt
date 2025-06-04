@@ -28,4 +28,9 @@
     <ProjectReference Include="..\Irt.Core\Irt.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="IndicatorDefinitions\EventHandlers\" />
+    <Folder Include="IndicatorDefinitions\Validators\" />
+  </ItemGroup>
+
 </Project>

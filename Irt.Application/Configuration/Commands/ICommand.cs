@@ -1,9 +1,8 @@
 
 namespace Irt.Application.Configuration.Commands
 {
-    public interface ICommand<TResult>
+    public interface ICommand<out TResult>
     {
-        string Id { get; }
     }
     
     // For commands without result

@@ -1,7 +1,8 @@
 using Asp.Versioning;
+using Irt.Application.Datasource.Commands;
+using Irt.Application.Datasource.Queries;
 using Irt.Application.Datasources;
 using Irt.Application.Datasources.Commands;
-using Irt.Application.Datasources.Queries;
 using Irt.Application.Dispatchers;
 using Irt.SharedKernel.Results;
 using Microsoft.AspNetCore.Mvc;
@@ -51,7 +52,7 @@ namespace IrtWeb.Datasources
             return Ok(resp);
         }
 
-        [HttpGet(ApiPrefix + "/{{id}}")]
+        [HttpGet(ApiPrefix + "/{id}")]
         public async Task<IActionResult> GetDatasource([FromRoute]string id)
         {
             var datasource = await _queryDispatcher
@@ -60,7 +61,7 @@ namespace IrtWeb.Datasources
             return Ok(datasource);
         }
 
-        [HttpPut(ApiPrefix+ "/{{id}}")]
+        [HttpPut(ApiPrefix+ "/{id}")]
         public async Task<IActionResult> UpdateDatasource([FromRoute]string id, [FromBody] DatasourceDto request)
         {
             if (request.Id != id)
@@ -73,7 +74,7 @@ namespace IrtWeb.Datasources
             return Ok(resp);
         }
 
-        [HttpPatch(ApiPrefix+ "/{{id}}")]
+        [HttpPatch(ApiPrefix+ "/{id}")]
         public async Task<IActionResult> PatchDatasource([FromRoute]string id, [FromBody] DatasourceDto request)
         {
             if (request.Id != id)
@@ -86,7 +87,7 @@ namespace IrtWeb.Datasources
             return Ok(resp);
         }
 
-        [HttpDelete(ApiPrefix+ "/{{id}}")]
+        [HttpDelete(ApiPrefix+ "/{id}")]
         public async Task<IActionResult> DeleteDatasource([FromRoute]string id)
         {
             var resp = await _commandDispatcher

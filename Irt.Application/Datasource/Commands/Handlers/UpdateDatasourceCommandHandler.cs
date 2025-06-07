@@ -22,7 +22,7 @@ namespace Irt.Application.Datasource.Commands.Handlers
             return await datasourceRepository
                 .CreateFactory<Core.Datasources.Datasource>()
                 .FindByIdAsync(request.Id)
-                .EnsureAsync(d => d != null, Error.NotFound($"Datasource with id {request.Id} not found."))
+                .EnsureAsync(d => d != null, IrtError.NotFound($"Datasource with id {request.Id} not found."))
                 .BindAsync(async datasource =>
                 {
                     if (request.DatasourceRequest.Id != null)

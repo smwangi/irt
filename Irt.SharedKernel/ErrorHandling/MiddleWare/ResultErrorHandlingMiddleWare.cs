@@ -46,7 +46,7 @@ public class ResultErrorHandlingMiddleWare(
         catch (Exception e)
         {
             logger.LogError(e, "Unhandled Exception");
-            var error = Error.Unexpected("An unexpected error occurred.");
+            var error = IrtError.Unexpected("An unexpected error occurred.");
             var problem = error.ToProblemDetailsResult();
             context.Response.StatusCode = problem.StatusCode ?? 500;
             var json = JsonSerializer.Serialize(problem.Value, new JsonSerializerOptions

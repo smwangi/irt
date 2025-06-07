@@ -52,7 +52,7 @@ public class Error
         return new Error(code, message, HttpStatusCode.Forbidden, details);
     }
     public static Error InternalServerError(
-        string message = "Internal Server Error", 
+        string message = "Internal Server IrtError", 
         string code = "InternalServerError", 
         Dictionary<string, object>? details = null)
     {

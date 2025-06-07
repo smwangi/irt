@@ -53,17 +53,28 @@ public class ApplicationDbContext : DbContext
             .HasConversion(
                 name => name.Value,
                 value => Name.Of(value));
+        modelBuilder.Entity<Datasource>().OwnsOne(e => e.CreatedBy, cb =>
+        {
+            cb.Property(p => p.UserId).HasColumnName("created_by_id");
+            cb.Property(p => p.UserName).HasColumnName("created_by_name");
+            cb.Property(p => p.Application).HasColumnName("created_by_app");
+            cb.Property(p => p.IpAddress).HasColumnName("created_by_ip");
+            cb.Property(p => p.Timestamp).HasColumnName("created_at");
+        });
+
+        modelBuilder.Entity<Datasource>().OwnsOne(e => e.LastModifiedBy, lb =>
+        {
+            lb.Property(p => p.UserId).HasColumnName("last_modified_by_id");
+            lb.Property(p => p.UserName).HasColumnName("last_modified_by_name");
+            lb.Property(p => p.Application).HasColumnName("last_modified_by_app");
+            lb.Property(p => p.IpAddress).HasColumnName("last_modified_by_ip");
+            lb.Property(p => p.Timestamp).HasColumnName("last_modified_at");
+        });
         
         modelBuilder.Entity<Dataset>()
             .ToTable("datasets", schema: "irt");
         modelBuilder.Entity<Dataset>()
             .HasKey(k => k.Id);
-        /*modelBuilder.Entity<Dataset>()
-            .OwnsOne(n => n.Name, n =>
-            {
-                n.WithOwner();
-                n.Property(v => v.Value).HasColumnName("dataset_name");
-            });*/
         modelBuilder.Entity<Dataset>().OwnsOne(e => e.CreatedBy);
         modelBuilder.Entity<Dataset>().OwnsOne(e => e.LastModifiedBy);
         modelBuilder.Entity<Dataset>()
@@ -76,6 +87,23 @@ public class ApplicationDbContext : DbContext
             .HasConversion(
                 name => name.Value,
                 value => Name.Of(value));
+        modelBuilder.Entity<Dataset>().OwnsOne(e => e.CreatedBy, cb =>
+        {
+            cb.Property(p => p.UserId).HasColumnName("created_by_id");
+            cb.Property(p => p.UserName).HasColumnName("created_by_name");
+            cb.Property(p => p.Application).HasColumnName("created_by_app");
+            cb.Property(p => p.IpAddress).HasColumnName("created_by_ip");
+            cb.Property(p => p.Timestamp).HasColumnName("created_at");
+        });
+
+        modelBuilder.Entity<Dataset>().OwnsOne(e => e.LastModifiedBy, lb =>
+        {
+            lb.Property(p => p.UserId).HasColumnName("last_modified_by_id");
+            lb.Property(p => p.UserName).HasColumnName("last_modified_by_name");
+            lb.Property(p => p.Application).HasColumnName("last_modified_by_app");
+            lb.Property(p => p.IpAddress).HasColumnName("last_modified_by_ip");
+            lb.Property(p => p.Timestamp).HasColumnName("last_modified_at");
+        });
            
            modelBuilder.Entity<IndicatorMainCategory>()
                .ToTable("indicator_main_categories", schema: "irt");
@@ -91,25 +119,23 @@ public class ApplicationDbContext : DbContext
                .HasConversion(
                    n => n.Value,
                    value => Name.Of(value));
-           modelBuilder.Entity<IndicatorMainCategory>()
-               .OwnsOne(e => e.CreatedBy, cb =>
-               {
-                   cb.WithOwner();
-                   cb.Property(p => p.UserId).HasColumnName("created_by_id");
-                   cb.Property(p => p.UserName).HasColumnName("created_by_name");
-                   cb.Property(p => p.CreatedAt).HasColumnName("created_at");
-                   cb.Property(p => p.IpAddress).HasColumnName("created_by_ip");
-               });
-           modelBuilder.Entity<IndicatorMainCategory>()
-               .OwnsOne(e => e.LastModifiedBy, lb =>
-               {
-                   
-                   lb.WithOwner();
-                   lb.Property(p => p.UserId).HasColumnName("last_modified_by_id");
-                   lb.Property(p => p.UserName).HasColumnName("last_modified_by_name");
-                   lb.Property(p => p.ModifiedAt).HasColumnName("last_modified_at");
-                   lb.Property(p => p.IpAddress).HasColumnName("last_modified_by_ip");
-               });
+           modelBuilder.Entity<IndicatorMainCategory>().OwnsOne(e => e.CreatedBy, cb =>
+           {
+               cb.Property(p => p.UserId).HasColumnName("created_by_id");
+               cb.Property(p => p.UserName).HasColumnName("created_by_name");
+               cb.Property(p => p.Application).HasColumnName("created_by_app");
+               cb.Property(p => p.IpAddress).HasColumnName("created_by_ip");
+               cb.Property(p => p.Timestamp).HasColumnName("created_at");
+           });
+
+           modelBuilder.Entity<IndicatorMainCategory>().OwnsOne(e => e.LastModifiedBy, lb =>
+           {
+               lb.Property(p => p.UserId).HasColumnName("last_modified_by_id");
+               lb.Property(p => p.UserName).HasColumnName("last_modified_by_name");
+               lb.Property(p => p.Application).HasColumnName("last_modified_by_app");
+               lb.Property(p => p.IpAddress).HasColumnName("last_modified_by_ip");
+               lb.Property(p => p.Timestamp).HasColumnName("last_modified_at");
+           });
            
            modelBuilder.Entity<IndicatorCategory>()
                .ToTable("indicator_categories", schema: "irt");
@@ -125,25 +151,23 @@ public class ApplicationDbContext : DbContext
                 .HasConversion(
                     n => n.Value,
                     value => Name.Of(value));
-           modelBuilder.Entity<IndicatorCategory>()
-               .OwnsOne(e => e.CreatedBy, cb =>
-               {
-                   cb.WithOwner();
-                   cb.Property(p => p.UserId).HasColumnName("created_by_id");
-                   cb.Property(p => p.UserName).HasColumnName("created_by_name");
-                   cb.Property(p => p.CreatedAt).HasColumnName("created_at");
-                   cb.Property(p => p.IpAddress).HasColumnName("created_by_ip");
-               });
-           modelBuilder.Entity<IndicatorCategory>()
-               .OwnsOne(e => e.LastModifiedBy, lb =>
-               {
-                   
-                   lb.WithOwner();
-                   lb.Property(p => p.UserId).HasColumnName("last_modified_by_id");
-                   lb.Property(p => p.UserName).HasColumnName("last_modified_by_name");
-                   lb.Property(p => p.ModifiedAt).HasColumnName("last_modified_at");
-                   lb.Property(p => p.IpAddress).HasColumnName("last_modified_by_ip");
-               });
+            modelBuilder.Entity<IndicatorCategory>().OwnsOne(e => e.CreatedBy, cb =>
+            {
+                cb.Property(p => p.UserId).HasColumnName("created_by_id");
+                cb.Property(p => p.UserName).HasColumnName("created_by_name");
+                cb.Property(p => p.Application).HasColumnName("created_by_app");
+                cb.Property(p => p.IpAddress).HasColumnName("created_by_ip");
+                cb.Property(p => p.Timestamp).HasColumnName("created_at");
+            });
+
+            modelBuilder.Entity<IndicatorCategory>().OwnsOne(e => e.LastModifiedBy, lb =>
+            {
+                lb.Property(p => p.UserId).HasColumnName("last_modified_by_id");
+                lb.Property(p => p.UserName).HasColumnName("last_modified_by_name");
+                lb.Property(p => p.Application).HasColumnName("last_modified_by_app");
+                lb.Property(p => p.IpAddress).HasColumnName("last_modified_by_ip");
+                lb.Property(p => p.Timestamp).HasColumnName("last_modified_at");
+            });
            
            modelBuilder.Entity<IndicatorDefinition>()
                .ToTable("indicator_definitions", schema: "irt");
@@ -164,6 +188,23 @@ public class ApplicationDbContext : DbContext
                .HasConversion(
                    n => n.Value,
                    value => Name.Of(value));
+           modelBuilder.Entity<IndicatorDefinition>().OwnsOne(e => e.CreatedBy, cb =>
+           {
+               cb.Property(p => p.UserId).HasColumnName("created_by_id");
+               cb.Property(p => p.UserName).HasColumnName("created_by_name");
+               cb.Property(p => p.Application).HasColumnName("created_by_app");
+               cb.Property(p => p.IpAddress).HasColumnName("created_by_ip");
+               cb.Property(p => p.Timestamp).HasColumnName("created_at");
+           });
+
+           modelBuilder.Entity<IndicatorDefinition>().OwnsOne(e => e.LastModifiedBy, lb =>
+           {
+               lb.Property(p => p.UserId).HasColumnName("last_modified_by_id");
+               lb.Property(p => p.UserName).HasColumnName("last_modified_by_name");
+               lb.Property(p => p.Application).HasColumnName("last_modified_by_app");
+               lb.Property(p => p.IpAddress).HasColumnName("last_modified_by_ip");
+               lb.Property(p => p.Timestamp).HasColumnName("last_modified_at");
+           });
            
            modelBuilder.Entity<ReportingScope>()
                .ToTable("reporting_scopes", schema: "irt");
@@ -179,25 +220,23 @@ public class ApplicationDbContext : DbContext
                .HasConversion(
                    n => n.Value,
                    value => Name.Of(value));
-           modelBuilder.Entity<ReportingScope>()
-               .OwnsOne(e => e.CreatedBy, cb =>
-               {
-                   cb.WithOwner();
-                   cb.Property(p => p.UserId).HasColumnName("created_by_id");
-                   cb.Property(p => p.UserName).HasColumnName("created_by_name");
-                   cb.Property(p => p.CreatedAt).HasColumnName("created_at");
-                   cb.Property(p => p.IpAddress).HasColumnName("created_by_ip");
-               });
-           modelBuilder.Entity<ReportingScope>()
-               .OwnsOne(e => e.LastModifiedBy, lb =>
-               {
-                   
-                   lb.WithOwner();
-                   lb.Property(p => p.UserId).HasColumnName("last_modified_by_id");
-                   lb.Property(p => p.UserName).HasColumnName("last_modified_by_name");
-                   lb.Property(p => p.ModifiedAt).HasColumnName("last_modified_at");
-                   lb.Property(p => p.IpAddress).HasColumnName("last_modified_by_ip");
-               });
+           modelBuilder.Entity<ReportingScope>().OwnsOne(e => e.CreatedBy, cb =>
+           {
+               cb.Property(p => p.UserId).HasColumnName("created_by_id");
+               cb.Property(p => p.UserName).HasColumnName("created_by_name");
+               cb.Property(p => p.Application).HasColumnName("created_by_app");
+               cb.Property(p => p.IpAddress).HasColumnName("created_by_ip");
+               cb.Property(p => p.Timestamp).HasColumnName("created_at");
+           });
+
+           modelBuilder.Entity<ReportingScope>().OwnsOne(e => e.LastModifiedBy, lb =>
+           {
+               lb.Property(p => p.UserId).HasColumnName("last_modified_by_id");
+               lb.Property(p => p.UserName).HasColumnName("last_modified_by_name");
+               lb.Property(p => p.Application).HasColumnName("last_modified_by_app");
+               lb.Property(p => p.IpAddress).HasColumnName("last_modified_by_ip");
+               lb.Property(p => p.Timestamp).HasColumnName("last_modified_at");
+           });
            
            modelBuilder.Entity<UnitOfMeasure>()
                .ToTable("unit_of_measures", schema: "irt");
@@ -213,11 +252,23 @@ public class ApplicationDbContext : DbContext
                .HasConversion(
                    n => n.Value,
                    value => Name.Of(value));
-           modelBuilder.Entity<UnitOfMeasure>()
-               .OwnsOne(e => e.CreatedBy);
-           modelBuilder.Entity<UnitOfMeasure>()
-               .OwnsOne(e => e.LastModifiedBy);
-         
+           modelBuilder.Entity<UnitOfMeasure>().OwnsOne(e => e.CreatedBy, cb =>
+           {
+               cb.Property(p => p.UserId).HasColumnName("created_by_id");
+               cb.Property(p => p.UserName).HasColumnName("created_by_name");
+               cb.Property(p => p.Application).HasColumnName("created_by_app");
+               cb.Property(p => p.IpAddress).HasColumnName("created_by_ip");
+               cb.Property(p => p.Timestamp).HasColumnName("created_at");
+           });
+
+           modelBuilder.Entity<UnitOfMeasure>().OwnsOne(e => e.LastModifiedBy, lb =>
+           {
+               lb.Property(p => p.UserId).HasColumnName("last_modified_by_id");
+               lb.Property(p => p.UserName).HasColumnName("last_modified_by_name");
+               lb.Property(p => p.Application).HasColumnName("last_modified_by_app");
+               lb.Property(p => p.IpAddress).HasColumnName("last_modified_by_ip");
+               lb.Property(p => p.Timestamp).HasColumnName("last_modified_at");
+           });
 
     }
     

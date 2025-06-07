@@ -8,7 +8,7 @@ public readonly struct Result<T>
     public bool IsFailure => !IsSuccess;
 
     public T? Value { get; }
-    public Error? Error { get; }
+    public IrtError? IrtError { get; }
     public Dictionary<string, object> Metadata { get; }
 
     // Success constructor
@@ -16,16 +16,16 @@ public readonly struct Result<T>
     {
         IsSuccess = true;
         Value = value;
-        Error = null;
+        IrtError = null;
         Metadata = metadata ?? new();
     }
 
     // Failure constructor
-    private Result(Error error, Dictionary<string, object>? metadata = null)
+    private Result(IrtError irtError, Dictionary<string, object>? metadata = null)
     {
         IsSuccess = false;
         Value = default;
-        Error = error;
+        IrtError = irtError;
         Metadata = metadata ?? new();
     }
 
@@ -33,24 +33,24 @@ public readonly struct Result<T>
     public static Result<T> Success(T value, Dictionary<string, object>? metadata = null)
         => new(value, metadata);
 
-    public static Result<T> Failure(Error error, Dictionary<string, object>? metadata = null)
-        => new(error, metadata);
+    public static Result<T> Failure(IrtError irtError, Dictionary<string, object>? metadata = null)
+        => new(irtError, metadata);
 
     // Combinators
     public Result<U> Map<U>(Func<T, U> map)
         => IsSuccess
             ? Result<U>.Success(map(Value!), Metadata)
-            : Result<U>.Failure(Error!, Metadata);
+            : Result<U>.Failure(IrtError!, Metadata);
 
     public Result<U> Bind<U>(Func<T, Result<U>> bind)
         => IsSuccess
             ? bind(Value!)
-            : Result<U>.Failure(Error!, Metadata);
+            : Result<U>.Failure(IrtError!, Metadata);
 
     public async Task<Result<U>> BindAsync<U>(Func<T, Task<Result<U>>> bind)
         => IsSuccess
             ? await bind(Value!)
-            : Result<U>.Failure(Error!, Metadata);
+            : Result<U>.Failure(IrtError!, Metadata);
 
     public Result<T> Tap(Action<T> action)
     {
@@ -76,7 +76,7 @@ public readonly struct Result<T>
         var newMetadata = new Dictionary<string, object>(Metadata) { [key] = value };
         return IsSuccess
             ? Success(Value!, newMetadata)
-            : Failure(Error!, newMetadata);
+            : Failure(IrtError!, newMetadata);
     }
 
     public bool TryGetMetadata<TMeta>(string key, out TMeta? value)

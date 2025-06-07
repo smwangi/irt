@@ -7,7 +7,7 @@ namespace Irt.Core.ValueObjects
         public string UserId { get; }
         public string UserName { get; }
         public string Application { get; }
-        public DateTime ModifiedAt { get; }
+        public DateTime Timestamp { get; }
         public string IpAddress { get; }
 
         private LastModifiedBy(string userId, string userName, string application, DateTime modifiedAt, string ipAddress)
@@ -19,7 +19,7 @@ namespace Irt.Core.ValueObjects
             UserId = userId;
             UserName = userName;
             Application = application;
-            ModifiedAt = modifiedAt;
+            Timestamp = modifiedAt;
             IpAddress = ipAddress;
         }
 
@@ -49,12 +49,12 @@ namespace Irt.Core.ValueObjects
             yield return UserId;
             yield return UserName;
             yield return Application;
-            yield return ModifiedAt;
+            yield return Timestamp;
             yield return IpAddress ?? string.Empty;
         }
 
         public override string ToString() =>
-            $"{UserName} ({UserId}) via {Application} at {ModifiedAt:O}" +
+            $"{UserName} ({UserId}) via {Application} at {Timestamp:O}" +
             (string.IsNullOrWhiteSpace(IpAddress) ? string.Empty : $" from {IpAddress}");
 
         private static void ValidateNotNullOrWhitespace(string value, string paramName)

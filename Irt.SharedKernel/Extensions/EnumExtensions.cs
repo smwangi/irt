@@ -9,6 +9,6 @@ public static class EnumExtensions
     {
         return Enum.TryParse<TEnum>(input, ignoreCase: true, out var value)
             ? Result<TEnum>.Success(value)
-            : Result<TEnum>.Failure(Error.Validation($"Invalid {nameForError ?? typeof(TEnum).Name} value: '{input}'"));
+            : Result<TEnum>.Failure(IrtError.Validation($"Invalid {nameForError ?? typeof(TEnum).Name} value: '{input}'"));
     }
 }

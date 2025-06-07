@@ -2,8 +2,6 @@ using AutoMapper;
 using Irt.Application.Configuration.Queries;
 using Irt.Core.Datasets;
 using Irt.Application.Helpers;
-using Irt.Core.SharedKernel;
-using Irt.SharedKernel.ErrorHandling.Exceptions;
 using Irt.SharedKernel.Providers;
 using Irt.SharedKernel.Results;
 
@@ -37,9 +35,8 @@ internal class GetDatasetsByTypeQueryHandler(
 {
     public async Task<Result<List<DatasetDto>>> HandleAsync(GetDatasetsByTypeQuery request, CancellationToken cancellationToken)
     {
-        var whereClause = $"type = '{request.Type}'";
         return await repositoryProvider.GetRepository<Dataset>()
-            .FilterByWhereClauseAsync(whereClause, cancellationToken)
+            .FilterAsync(x => x.DatasetType.ToString() == request.Type, cancellationToken)
             .MapAsync(mapper.Map<List<DatasetDto>>);
     }
 }
@@ -53,9 +50,8 @@ internal class GetDatasetsByDatasourceIdQueryHandler(
         GetDatasetsByDatasourceIdQuery request,
         CancellationToken cancellationToken)
     {
-        var whereClause = $"dasourceId = '{request.DatasourceId}'";
         return await repositoryProvider.GetRepository<Dataset>()
-            .FilterByWhereClauseAsync(whereClause, cancellationToken)
+            .FilterAsync(x => x.Datasource.Id == request.DatasourceId, cancellationToken)
             .MapAsync(mapper.Map<List<DatasetDto>>);
     }
 }
@@ -69,9 +65,10 @@ internal class GetDatasetsByDatasourceIdAndTypeQueryHandler(
         GetDatasetsByDatasourceIdAndTypeQuery request, 
         CancellationToken cancellationToken)
     {
-        var whereClause = $"datasourceId = '{request.DatasourceId}' AND type = '{request.Type}'";
         return await repositoryProvider.GetRepository<Dataset>().
-            FilterByWhereClauseAsync(whereClause, cancellationToken)
+            FilterAsync(
+                x => x.Datasource.Id == request.DatasourceId 
+                     && x.DatasetType.ToString() == request.Type, cancellationToken)
             .MapAsync(mapper.Map<List<DatasetDto>>);
     }
 }

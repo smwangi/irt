@@ -12,10 +12,12 @@ public record CreateIndicatorDefinitionCommand : ICommand<Result<IndicatorDefini
     public string? CreatedBy { get; private set; }
     public string? UserName { get; private set; }
     public string? Application { get; private set; }
-    public void SetMetadata(string userId, string userName, string application)
+    public string? IpAddress { get; private set; }
+    public void SetMetadata(string userId, string userName, string application, string ipAddress)
     {
         CreatedBy = userId;
         UserName = userName;
         Application = application;
+        IpAddress = ipAddress;
     }
 }

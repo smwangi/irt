@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using Irt.Core.SharedKernel;
 using Irt.Infrastructure.Shared;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
 using Irt.SharedKernel.Repositories;
@@ -8,7 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Irt.Infrastructure.Database.Postgres;
 
-public class GenericRepository<T>(ApplicationDbContext applicationDbContext) : IGenericRepository<T> where T : class
+public class GenericRepository<T>(
+    ApplicationDbContext applicationDbContext) 
+    : IGenericRepository<T> where T : class
 {
     private readonly ApplicationDbContext _context = applicationDbContext ?? throw new ArgumentNullException(nameof(applicationDbContext));
     
@@ -18,21 +19,10 @@ public class GenericRepository<T>(ApplicationDbContext applicationDbContext) : I
             .Set<T>()
             .ToListAsync()
             .ToResult(
-                Error.NotFound($"{typeof(T).Name}  Not Found."),
+                IrtError.NotFound($"{typeof(T).Name}  Not Found."),
                 includeCountMetadata: true);
     }
-
-    public async Task<Result<List<T>>> FilterByWhereClauseAsync(string whereClause, CancellationToken cancellationToken)
-    {
-        return await _context
-            .Set<T>()
-            .FromSqlRaw(whereClause)
-            .ToListAsync()
-            .ToResult(
-                Error.NotFound($"{typeof(T).Name}  Not Found."),
-                includeCountMetadata: true);
-    }
-
+    
     public async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
     {
         await _context
@@ -74,26 +64,15 @@ public class GenericRepository<T>(ApplicationDbContext applicationDbContext) : I
         return Result<bool>.Success(exists);
     }
     
-    public async Task<List<T>> FindByFilterAsync(string whereClause)
+    public async Task<Result<List<T>>> FilterAsync(
+        Expression<Func<T, bool>> predicate, 
+        CancellationToken cancellationToken)
     {
         return await _context
             .Set<T>()
-            .FromSqlRaw(whereClause)
-            .ToListAsync();
-    }
-    
-    public async Task<Result<T>> FilterByIdAsync(string id)
-    {
-        return await _context
-            .Set<T>()
-            .FromSqlInterpolated($"SELECT * FROM irt.datasources WHERE \"Id\" = {id}")
-            .FirstOrDefaultAsync()
-            .ToResult(Error.NotFound($"{typeof(T).Name}  Not Found."));
-    }
-    
-    public async Task<List<T>> FindByN1qlAsync(string n1qlQuery)
-    {
-        return await _context.Set<T>().FromSqlRaw(n1qlQuery).ToListAsync();
+            .Where(predicate)
+            .ToListAsync(cancellationToken)
+            .ToResult(IrtError.NotFound("No items found matching the filter."), includeCountMetadata: true);
     }
     public async Task<PaginationResult<T>> GetPaginatedAsync(int page, int pageSize)
     {
@@ -115,40 +94,5 @@ public class GenericRepository<T>(ApplicationDbContext applicationDbContext) : I
         return  _context
             .Set<T>()
             .FindByIdAsync(id: id);
-    }
-
-    public async Task<List<T>> QueryAsync(string n1QlQuery, object parameters = null)
-    {
-        var result = await _context
-            .Set<T>()
-            .FromSqlRaw(n1QlQuery, parameters)
-            .ToListAsync();
-        return result;
-    }
-    public async Task<List<T>> QueryAsync(string n1qlQuery)
-    {
-        return await _context
-            .Set<T>()
-            .FromSqlRaw(n1qlQuery)
-            .ToListAsync();
-    }
-    public async Task<List<T>> QueryAsync(
-        string n1qlQuery,
-        object parameters,
-        CancellationToken cancellationToken)
-    {
-        return await _context
-            .Set<T>()
-            .FromSqlRaw(n1qlQuery, parameters)
-            .ToListAsync(cancellationToken);
-    }
-    public async Task<List<T>> QueryAsync(
-        string n1qlQuery,
-        CancellationToken cancellationToken)
-    {
-        return await _context
-            .Set<T>()
-            .FromSqlRaw(n1qlQuery)
-            .ToListAsync(cancellationToken);
     }
 }

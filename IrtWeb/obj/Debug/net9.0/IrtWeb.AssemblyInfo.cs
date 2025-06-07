@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("IrtWeb")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+279fe1e83abc6634aabdc9f729d2b76c669df1d6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fc460606eb15c6f9bf1f9b2ff688b29bb51e7758")]
 [assembly: System.Reflection.AssemblyProductAttribute("IrtWeb")]
 [assembly: System.Reflection.AssemblyTitleAttribute("IrtWeb")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -83,8 +83,18 @@ namespace Irt.Core.SeedWork;
         /// Registers that this entity has been created with the specified user information.
         /// Raises an EntityCreatedEvent that will be handled to set audit information.
         /// </summary>
-        protected void RegisterCreation(string userId, string userName, string application, string ipAddress)
+        public void RegisterCreation(
+            string userId,
+            string userName,
+            string application,
+            string ipAddress)
         {
+            CreatedBy = CreatedBy.Create(
+                userId, 
+                userName, 
+                application, 
+                ipAddress
+            );
             var entityType = this.GetType().Name;
             AddDomainEvent(new EntityCreatedEvent(
                 Id.Value, 
@@ -100,8 +110,18 @@ namespace Irt.Core.SeedWork;
         /// Registers that this entity has been modified with the specified user information.
         /// Raises an EntityModifiedEvent that will be handled to update audit information.
         /// </summary>
-        protected void RegisterModification(string userId, string userName, string application)
+        public void RegisterModification(
+            string userId,
+            string userName,
+            string application,
+            string ipAddress)
         {
+            LastModifiedBy = LastModifiedBy.Create(
+                userId, 
+                userName, 
+                application, 
+                ipAddress
+            );
             var entityType = this.GetType().Name;
             AddDomainEvent(new EntityModifiedEvent(
                 Id.Value, 

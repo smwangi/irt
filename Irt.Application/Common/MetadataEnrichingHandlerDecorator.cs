@@ -15,7 +15,8 @@ public class MetadataEnrichingHandlerDecorator<TCommand, TResult>(
             requireMetadata.SetMetadata(
                 userDetails.UserId,
                 userDetails.UserName,
-                userDetails.Application);
+                userDetails.Application,
+                userDetails.IpAddress);
         }
 
         return await innerHandler.HandleAsync(request, cancellationToken);

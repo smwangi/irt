@@ -32,21 +32,21 @@ namespace Irt.Application.Datasource.Commands.Handlers
                         g => g.Key,
                         g => g.Select(e => e.ErrorMessage).ToArray());
                 return Result<DatasourceDto>
-                    .Failure(Error.FromException(
+                    .Failure(IrtError.FromException(
                         new ValidationException(dict)));
             }
             
             if (!Enum.TryParse(command.DatasourceCreateRequest.DatasourceType, out DatasourceType datasourceType))
             {
                 return Result<DatasourceDto>
-                    .Failure(Error.FromException(
+                    .Failure(IrtError.FromException(
                         new BadRequestException("Invalid datasource type.")));
             }
             
             if (!await uniquenessChecker.IsNameUniqueAsync(command.DatasourceCreateRequest.Name, cancellationToken))
             {
                 return Result<DatasourceDto>.Failure(
-                    Error.FromException(
+                    IrtError.FromException(
                         new BadRequestException("Datasource name must be unique.")));
             }
             

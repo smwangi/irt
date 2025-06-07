@@ -3,7 +3,7 @@ using Irt.SharedKernel.Results;
 
 namespace Irt.Application.ReportingScopes.Queries.Handlers;
 
-public class GetReportingScopeQuery : IQuery<Result<ReportingScopeDto>>
+public class GetReportingScopeQuery : IQuery<Result<List<ReportingScopeDto>>>
 {
 }
 public class GetReportingScopeByIdQuery(string id) : IQuery<Result<ReportingScopeDto>>

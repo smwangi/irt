@@ -5,16 +5,16 @@ namespace Irt.SharedKernel.Extensions;
 
 public static class ToProblemDetailsResultFactory
 {
-    public static ObjectResult ToProblemDetailsResult(this Error error)
+    public static ObjectResult ToProblemDetailsResult(this IrtError irtError)
     {
         var problem = new ProblemDetails
         {
-            Title = error.Code,
-            Detail = error.Message,
-            Status = (int)error.StatusCode
+            Title = irtError.Code,
+            Detail = irtError.Message,
+            Status = (int)irtError.StatusCode
         };
         
-        foreach (var kv in error.Details)
+        foreach (var kv in irtError.Details)
         {
             problem.Extensions[kv.Key] = kv.Value;
         }

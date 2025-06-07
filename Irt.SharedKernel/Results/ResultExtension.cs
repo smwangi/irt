@@ -1,4 +1,5 @@
 
+using Irt.SharedKernel.Common;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
 
 namespace Irt.SharedKernel.Results;
@@ -12,7 +13,7 @@ public static class ResultExtension
     {
         return result.IsSuccess
             ? bind(result.Value!)
-            : Result<TOut>.Failure(result.Error!);
+            : Result<TOut>.Failure(result.IrtError!);
     } 
     
     // BindAsync (async chaining)
@@ -22,7 +23,7 @@ public static class ResultExtension
     {
         return result.IsSuccess
             ? await bind(result.Value!)
-            : Result<TOut>.Failure(result.Error!);
+            : Result<TOut>.Failure(result.IrtError!);
     }
     
     public static async Task<Result<TOut>> BindAsync<T, TOut>(
@@ -32,7 +33,22 @@ public static class ResultExtension
         var result = await task;
         return result.IsSuccess
             ? await bind(result.Value!)
-            : Result<TOut>.Failure(result.Error!);
+            : Result<TOut>.Failure(result.IrtError!);
+    }
+
+    public static async Task<Result<Unit>>EnsureNotExistsAsync(
+        this Task<Result<bool>> task,
+        string errorMessage)
+    {
+        var result = await task;
+        if (result.IsFailure)
+        {
+            return Result<Unit>.Failure(result.IrtError!);
+        }
+        
+        return result.Value
+            ? Result<Unit>.Failure(IrtError.Unexpected(errorMessage))
+            : Result<Unit>.Success(default!);
     }
     
     // Map (Monadic mapping transform value, keep same metadata)
@@ -42,7 +58,7 @@ public static class ResultExtension
     {
         return result.IsSuccess
             ? Result<TOut>.Success(map(result.Value!), result.Metadata)
-            : Result<TOut>.Failure(result.Error!, result.Metadata);
+            : Result<TOut>.Failure(result.IrtError!, result.Metadata);
     }
     
     // Map Async (async mapping transform value, keep same metadata)
@@ -52,7 +68,7 @@ public static class ResultExtension
     {
         return result.IsSuccess
             ? Result<TOut>.Success(await map(result.Value!), result.Metadata)
-            : Result<TOut>.Failure(result.Error!, result.Metadata);
+            : Result<TOut>.Failure(result.IrtError!, result.Metadata);
     }
     
     public static async Task<Result<TOut>> MapAsync<T, TOut>(
@@ -62,29 +78,29 @@ public static class ResultExtension
         var result = await resultTask;
         return result.IsSuccess
             ? Result<TOut>.Success(map(result.Value!), result.Metadata)
-            : Result<TOut>.Failure(result.Error!, result.Metadata);
+            : Result<TOut>.Failure(result.IrtError!, result.Metadata);
     }
     
     // Match 
     public static TResult Match<T, TResult>(
         this Result<T> result,
         Func<T, TResult> onSuccess,
-        Func<Error, TResult> onFailure)
+        Func<IrtError, TResult> onFailure)
     {
         return result.IsSuccess
             ? onSuccess(result.Value!)
-            : onFailure(result.Error!);
+            : onFailure(result.IrtError!);
     }
     
     // MatchAsync
     public static async Task<TResult> MatchAsync<T, TResult>(
         this Result<T> result,
         Func<T, Task<TResult>> onSuccess,
-        Func<Error, Task<TResult>> onFailure)
+        Func<IrtError, Task<TResult>> onFailure)
     {
         return result.IsSuccess
             ? await onSuccess(result.Value!)
-            : await onFailure(result.Error!);
+            : await onFailure(result.IrtError!);
     }
     
     // Tap (Side effect on success)
@@ -117,7 +133,7 @@ public static class ResultExtension
     public static Result<T> Ensure<T>(
         this Result<T> result,
         Func<T, bool> predicate,
-        Error errorIfFalse)
+        IrtError irtErrorIfFalse)
     {
         if (result.IsFailure)
         {
@@ -126,19 +142,19 @@ public static class ResultExtension
 
         return predicate(result.Value!)
             ? result
-            : Result<T>.Failure(errorIfFalse, result.Metadata);
+            : Result<T>.Failure(irtErrorIfFalse, result.Metadata);
     }
     
     public static async Task<Result<T>> EnsureAsync<T>(
         this Task<Result<T>> task,
         Func<T, bool> predicate,
-        Error error)
+        IrtError irtError)
     {
         var result = await task;
         return 
             result.IsFailure 
                 ? result 
-                : predicate(result.Value!) ? result : Result<T>.Failure(error);
+                : predicate(result.Value!) ? result : Result<T>.Failure(irtError);
     }
     
     // WithMetadata (add metadata to the result)
@@ -159,7 +175,7 @@ public static class ResultExtension
         {
             if (result.IsFailure)
             {
-                return Result<IReadOnlyList<T>>.Failure(result.Error!, result.Metadata);
+                return Result<IReadOnlyList<T>>.Failure(result.IrtError!, result.Metadata);
             }
 
             if (result.Value != null) list.Add(result.Value);
@@ -170,35 +186,35 @@ public static class ResultExtension
     
     public static async Task<Result<T>> ToResult<T>(
         this Task<T?> task,
-        Error notFoundError)
+        IrtError notFoundIrtError)
         where T : class
     {
         var result = await task;
         return result is null 
-            ? Result<T>.Failure(notFoundError) 
+            ? Result<T>.Failure(notFoundIrtError) 
             : Result<T>.Success(result);
     }
     
     public static async Task<Result<T>> ToResult<T>(
         this ValueTask<T> task,
-        Error notFoundError) where T : class?
+        IrtError notFoundIrtError) where T : class?
     {
         var result = await task;
         return result is null
-            ? Result<T>.Failure(notFoundError)
+            ? Result<T>.Failure(notFoundIrtError)
             : Result<T>.Success(result);
     }
 
     public static async Task<Result<List<T>>> ToResult<T>(
         this Task<List<T>> task,
-        Error notFoundError,
+        IrtError notFoundIrtError,
         bool treatEmptyListAsSuccess = true,
         bool includeCountMetadata = false)
     {
         var result = await task;
         if (result is null)
         {
-            return Result<List<T>>.Failure(notFoundError);
+            return Result<List<T>>.Failure(notFoundIrtError);
         }
 
         var metadata = includeCountMetadata
@@ -210,7 +226,7 @@ public static class ResultExtension
 
     public static async Task<Result<List<T>>> ToResult<T>(
         this Task<List<T>> task,
-        Error notFoundError,
+        IrtError notFoundIrtError,
         bool includeCountMetadata = false)
     {
         var result = await task;

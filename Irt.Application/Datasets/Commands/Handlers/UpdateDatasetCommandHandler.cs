@@ -3,7 +3,6 @@ using Irt.Application.Configuration.Commands;
 using Irt.Core.Datasets;
 using Irt.Core.IndicatorDefinitions;
 using Irt.Core.ValueObjects;
-using Irt.SharedKernel.ErrorHandling.Exceptions;
 using Irt.SharedKernel.Extensions;
 using Irt.SharedKernel.Providers;
 using Irt.SharedKernel.Results;
@@ -27,24 +26,21 @@ public class UpdateDatasetCommandHandler(
 
         return await datasetRepository
             .FindByIdAsync(request.DatasetDto.Id)
-            .EnsureAsync(d => d is not null, Error.NotFound("Dataset not found"))
             .BindAsync(async dataset =>
             {
                 var datasource = await datasourceRepository
-                    .FindByIdAsync(request.DatasetDto.DatasourceId)
-                    .EnsureAsync(d => d is not null, Error.NotFound("Datasource not found"));
+                    .FindByIdAsync(request.DatasetDto.DatasourceId);
 
 
                 var indicatorDefinition = await indicatorDefinitionRepository
-                    .FindByIdAsync(request.DatasetDto.IndicatorDefinitionId)
-                    .EnsureAsync(id => id is not null, Error.NotFound("IndicatorDefinition not found"));
+                    .FindByIdAsync(request.DatasetDto.IndicatorDefinitionId);
 
                 var datasetType =
                     EnumExtensions
                         .TryParseEnum<Core.Datasets.DatasetType>(request.DatasetDto.DatasetType.ToString());
                 if (datasetType.IsFailure)
                 {
-                    return Result<DatasetDto>.Failure(datasetType.Error!);
+                    return Result<DatasetDto>.Failure(datasetType.IrtError!);
                 }
 
                 dataset.WithUpdatedDataset(

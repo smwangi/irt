@@ -36,5 +36,6 @@
     <Folder Include="Domain\IndicatorDefinitions\" />
     <Folder Include="ErrorHandling\Exceptions\" />
     <Folder Include="ErrorHandling\MiddleWare\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 </Project>

@@ -23,7 +23,7 @@ namespace Irt.UnitTest
                     new IndicatorDefinitionId(ObjectId.GenerateNewId().ToString()),
                     Name.Of("IndicatorDefinition1"),
                     "Description1",
-                    new ReportingScope("ReportingScope1"),
+                    new ReportingScopes("ReportingScope1"),
                     new UnitOfMeasure("UnitOfMeasure1"),
                     new IndicatorCategory("IndicatorCategory1"),
                     1,

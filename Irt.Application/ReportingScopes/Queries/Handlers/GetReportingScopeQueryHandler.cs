@@ -8,14 +8,14 @@ namespace Irt.Application.ReportingScopes.Queries.Handlers;
 
 public class GetReportingScopeQueryHandler(
     IRepositoryProvider repositoryProvider,
-    IMapper mapper) : IQueryHandler<GetReportingScopeQuery, Result<ReportingScopeDto>>
+    IMapper mapper) : IQueryHandler<GetReportingScopeQuery, Result<List<ReportingScopeDto>>>
 {
-    public async Task<Result<ReportingScopeDto>> HandleAsync(GetReportingScopeQuery query, CancellationToken cancellationToken)
+    public async Task<Result<List<ReportingScopeDto>>> HandleAsync(GetReportingScopeQuery query, CancellationToken cancellationToken)
     {
         var reportingScopeRepository = repositoryProvider.GetRepository<ReportingScope>();
         return await reportingScopeRepository
             .GetAllAsync()
-            .MapAsync(mapper.Map<ReportingScopeDto>);
+            .MapAsync(mapper.Map<List<ReportingScopeDto>>);
     }
 }
 

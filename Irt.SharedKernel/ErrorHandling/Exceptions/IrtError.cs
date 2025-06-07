@@ -3,14 +3,14 @@ using Irt.SharedKernel.ErrorHandling.Exceptions;
 
 namespace Irt.SharedKernel.ErrorHandling.Exceptions;
 
-public class Error
+public class IrtError
 {
     public string Code { get; }
     public string Message { get; }
     public HttpStatusCode StatusCode { get; }
     public IDictionary<string, object> Details { get; }
     
-    protected Error(
+    protected IrtError(
         string code, 
         string message, 
         HttpStatusCode statusCode, 
@@ -23,30 +23,30 @@ public class Error
         Details = details ?? new Dictionary<string, object>();
     }
     
-    public static Error FromException(AppException appException)
+    public static IrtError FromException(AppException appException)
         => new(
             appException.ErrorCode,
             appException.Message,
             appException.StatusCode,
             appException.Details);
     
-    public static Error Unexpected(
+    public static IrtError Unexpected(
         string message = "An unexpected error occurred.",
         string errorCode = "INTERNAL_ERROR",
         IDictionary<string, object>? details = null,
         Exception? innerException = null)
     {
-        return new Error(
+        return new IrtError(
             errorCode,
             message,
             HttpStatusCode.InternalServerError,
             details);
     }
     
-    public static Error Validation(string msg) 
+    public static IrtError Validation(string msg) 
         => new("VALIDATION_ERROR", msg, HttpStatusCode.BadRequest);
-    public static Error NotFound(string msg) 
+    public static IrtError NotFound(string msg) 
         => new("NOT_FOUND", msg, HttpStatusCode.NotFound);
-    public static Error Unexpected(string msg) 
+    public static IrtError Unexpected(string msg) 
         => new("UNEXPECTED_ERROR", msg, HttpStatusCode.InternalServerError);
 }

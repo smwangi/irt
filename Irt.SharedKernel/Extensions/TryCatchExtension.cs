@@ -7,7 +7,7 @@ public static class TryCatchExtension
 {
     public static Result<T> Try<T>(
         Func<T> action,
-        Func<Exception, Error>? errorHandler = null)
+        Func<Exception, IrtError>? errorHandler = null)
     {
         try
         {
@@ -15,14 +15,14 @@ public static class TryCatchExtension
         }
         catch (Exception e)
         {
-            var error = errorHandler?.Invoke(e) ?? Error.Unexpected(e.Message);
+            var error = errorHandler?.Invoke(e) ?? IrtError.Unexpected(e.Message);
             return Result<T>.Failure(error);
         }
     }
 
     public static async Task<Result<T>> TryAsync<T>(
         Func<Task<T>> action,
-        Func<Exception, Error>? errorHandler = null)
+        Func<Exception, IrtError>? errorHandler = null)
     {
         try
         {
@@ -31,7 +31,7 @@ public static class TryCatchExtension
         }
         catch (Exception e)
         {
-            var error = errorHandler?.Invoke(e) ?? Error.Unexpected(e.Message);
+            var error = errorHandler?.Invoke(e) ?? IrtError.Unexpected(e.Message);
             return Result<T>.Failure(error);
         }
     }

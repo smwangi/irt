@@ -26,10 +26,8 @@ namespace Irt.Application.Datasets.Commands.Handlers
             
             return await datasourceRepository
                 .FindByIdAsync(DatasourceId.Create(command.Request.DatasourceId))
-                .EnsureAsync(d => d is not null && !d.IsDeleted, Error.NotFound("Datasource not found"))
                 .BindAsync(datasource => indicatorDefinitionRepository
                     .FindByIdAsync(IndicatorDefinitionId.Create(command.Request.IndicatorDefinitionId)))
-                .EnsureAsync(id => id is not null && !id.IsDeleted, Error.NotFound("IndicatorDefinition not found"))
                 .BindAsync(async indDefn =>
                 {
                     var dataset = Dataset.CreateDataset(

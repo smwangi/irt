@@ -1,39 +1,38 @@
-using System.ComponentModel;
-using AutoMapper;
+using Irt.Application.Common;
 using Irt.Application.Configuration.Queries;
-using Irt.Application.Datasources;
-using Irt.Application.Helpers;
+using Irt.SharedKernel.Extensions;
+using Irt.SharedKernel.Repositories;
 using Irt.SharedKernel.Results;
+using CoreDatasource = Irt.Core.Datasources.Datasource;
 
 namespace Irt.Application.Datasource.Queries
 {
     internal class GetDatasourceQueryHandler(
-        IRepositoryFactory datasourceRepository,
-        IMapper mapper) : IQueryHandler<GetDatasourceQuery, Result<List<DatasourceDto>>>
+        IReadOnlyRepository<Core.Datasources.Datasource> datasourceRepository,
+        IProjection<CoreDatasource, DatasourceDto> projection)
+        : IODataQueryHandler<GetDatasourceQuery, Result<IQueryable<DatasourceDto>>>
     {
-        public async Task<Result<List<DatasourceDto>>> HandleAsync(
-            GetDatasourceQuery request, 
+        public Task<Result<IQueryable<DatasourceDto>>> HandleAsync(GetDatasourceQuery request,
             CancellationToken cancellationToken)
         {
-            return await datasourceRepository
-                .CreateFactory<Core.Datasources.Datasource>()
-                .GetAllAsync()
-                .MapAsync(mapper.Map<List<DatasourceDto>>);
+            return Task.FromResult(
+                datasourceRepository
+                    .QuerySafely(projection.Expression)
+                    .Bind(q => q.ApplyODataSafely(request.Options)));
         }
     }
 
     internal class GetDatasourceByIdQueryHandler(
-        IRepositoryFactory datasourceRepository,
-        IMapper mapper) : IQueryHandler<GetDatasourceByIdQuery, Result<DatasourceDto>>
+        IReadOnlyRepository<Core.Datasources.Datasource> datasourceRepository,
+        IProjection<CoreDatasource, DatasourceDto> projection)
+        : IQueryHandler<GetDatasourceByIdQuery, Result<IQueryable<DatasourceDto>>>
     {
-        public async Task<Result<DatasourceDto>> HandleAsync(
-            GetDatasourceByIdQuery request, 
+        public Task<Result<IQueryable<DatasourceDto>>> HandleAsync(GetDatasourceByIdQuery request,
             CancellationToken cancellationToken)
         {
-            return await datasourceRepository
-                .CreateFactory<Core.Datasources.Datasource>()
-                .FindByIdAsync(request.Id)
-                .MapAsync(mapper.Map<DatasourceDto>);
+            var projectedQuery = datasourceRepository
+                .QueryById(request.Id, projection.Expression);
+            return Task.FromResult(Result<IQueryable<DatasourceDto>>.Success(projectedQuery));
         }
     }
 }

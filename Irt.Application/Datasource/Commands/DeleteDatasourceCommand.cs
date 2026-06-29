@@ -1,16 +1,16 @@
 using System.Windows.Input;
 using FluentValidation;
 using Irt.Application.Configuration.Commands;
+using Irt.SharedKernel.Common;
+using Irt.SharedKernel.Results;
 
-namespace Irt.Application.Datasources.Commands
+namespace Irt.Application.Datasource.Commands
 {
     public class DeleteDatasourceCommand(string datasourceId)
-                : CommandBase<DeleteDatasourceResult>
+                : ICommand<Result<Unit>>
     {
         public string DatasourceId { get; } = datasourceId;
     }
-
-    public record DeleteDatasourceResult(bool IsSuccess);
 
     public class DeleteDatasourceCommandValidator : AbstractValidator<DeleteDatasourceCommand>
     {

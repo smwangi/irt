@@ -7,4 +7,12 @@ namespace Irt.Application.Configuration.Queries
         Task<TResult> HandleAsync(TQuery query, CancellationToken cancellationToken);
     }
 
+    public interface IQueryableQueryHandler<in TQuery, TResult>
+        where TQuery : IQuery<TResult>
+    {
+        Task<TResult> HandleAsync(TQuery query, CancellationToken cancellationToken);
+    }
+    
+    public interface IODataQueryHandler<in TQuery, TResult> : IQueryHandler<TQuery, TResult>
+        where TQuery : IODataQuery<TResult> {}
 }

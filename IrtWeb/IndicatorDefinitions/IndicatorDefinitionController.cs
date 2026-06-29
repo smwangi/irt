@@ -10,7 +10,7 @@ namespace IrtWeb.IndicatorDefinitions;
 
 [ApiController]
 [ControllerName("IndicatorDefinition")]
-[Route("api/v{version:apiVersion}")]
+[Route("irt/api/v{version:apiVersion}")]
 [ApiVersion("1.0")]
 public class IndicatorDefinitionController(
     ICommandDispatcher commandDispatcher,
@@ -22,7 +22,7 @@ public class IndicatorDefinitionController(
     public async Task<IActionResult> GetAll()
     {
         var indicatorDefinitions = await queryDispatcher
-            .DispatchAsync<GetIndicatorDefinitionQuery, Result<List<IndicatorDefinitionDto>>>(
+            .DispatchAsync<GetIndicatorDefinitionQuery, Irt.SharedKernel.Results.Result<List<IndicatorDefinitionDto>>>(
                 new GetIndicatorDefinitionQuery(), CancellationToken.None);
 
         return Ok(indicatorDefinitions);
@@ -32,7 +32,7 @@ public class IndicatorDefinitionController(
     public async Task<IActionResult> GetById([FromRoute] string id)
     {
         var indicatorDefinition = await queryDispatcher
-            .DispatchAsync<GetIndicatorDefinitionByIdQuery, Result<IndicatorDefinitionDto>>(
+            .DispatchAsync<GetIndicatorDefinitionByIdQuery, Irt.SharedKernel.Results.Result<IndicatorDefinitionDto>>(
                 new GetIndicatorDefinitionByIdQuery(id), CancellationToken.None);
 
         return Ok(indicatorDefinition);
@@ -42,7 +42,7 @@ public class IndicatorDefinitionController(
     public async Task<IActionResult> Create([FromBody] CreateIndicatorDefinitionCommand command)
     {
         var resp = await commandDispatcher
-            .DispatchCommandAsync<CreateIndicatorDefinitionCommand, Result<IndicatorDefinitionDto>>(
+            .DispatchCommandAsync<CreateIndicatorDefinitionCommand, Irt.SharedKernel.Results.Result<IndicatorDefinitionDto>>(
                 command, CancellationToken.None);
         
         if (!resp.IsSuccess)

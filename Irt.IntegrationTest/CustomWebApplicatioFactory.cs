@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Irt.IntegrationTest
 {
-    public abstract class CustomWebApplicationFactory<Program> : WebApplicationFactory<Program> where Program : class
+    public class CustomWebApplicationFactory<Program> : WebApplicationFactory<Program> where Program : class
     {
         public HttpClient HttpClient { get; private set; } = null!;
 

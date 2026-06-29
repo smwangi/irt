@@ -49,18 +49,15 @@ namespace Irt.Core.Datasources
             );
         }
 
-        public Datasource WithUpdatedDatasource(
+        public Datasource UpdateDatasource(
             Name name,
             string description)
         {
+            Name = name;
+            Description = description;
+
             AddDomainEvent(new Events.DatasourceUpdatedEvent(this));
-            return new Datasource(
-                    id: Id,
-                    name: name,
-                    description: description,
-                    source: Source,
-                    datasourceType: DatasourceType
-                );
+            return this;
         }
     }
 }

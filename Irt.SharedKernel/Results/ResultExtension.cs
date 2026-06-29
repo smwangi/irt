@@ -1,240 +1,200 @@
 
 using Irt.SharedKernel.Common;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Irt.SharedKernel.Results;
 
 public static class ResultExtension
 {
-    // Bind (Monadic chaining)
-    public static Result<TOut> Bind<T, TOut>(
-        this Result<T> result,
-        Func<T, Result<TOut>> bind)
+    // Convert Result<T> to IActionResult
+    public static IActionResult ToActionResult<T>(this Result<T> result)
     {
-        return result.IsSuccess
-            ? bind(result.Value!)
-            : Result<TOut>.Failure(result.IrtError!);
-    } 
-    
-    // BindAsync (async chaining)
-    public static async Task<Result<TOut>> BindAsync<T, TOut>(
-        this Result<T> result,
-        Func<T, Task<Result<TOut>>> bind)
-    {
-        return result.IsSuccess
-            ? await bind(result.Value!)
-            : Result<TOut>.Failure(result.IrtError!);
-    }
-    
-    public static async Task<Result<TOut>> BindAsync<T, TOut>(
-        this Task<Result<T>> task,
-        Func<T, Task<Result<TOut>>> bind)
-    {
-        var result = await task;
-        return result.IsSuccess
-            ? await bind(result.Value!)
-            : Result<TOut>.Failure(result.IrtError!);
-    }
-
-    public static async Task<Result<Unit>>EnsureNotExistsAsync(
-        this Task<Result<bool>> task,
-        string errorMessage)
-    {
-        var result = await task;
-        if (result.IsFailure)
+        if (result.IsSuccess)
         {
-            return Result<Unit>.Failure(result.IrtError!);
+            return new OkObjectResult(result.Value);
         }
         
-        return result.Value
-            ? Result<Unit>.Failure(IrtError.Unexpected(errorMessage))
-            : Result<Unit>.Success(default!);
+        // Map IrtError to appropriate HTTP status codes
+        return result.IrtError switch
+        {
+            { Type: "NotFound" } error => new NotFoundObjectResult(new { 
+                error = error.Message, 
+                code = error.Code,
+                details = error.Details 
+            }),
+            { Type: "Validation" } error => new BadRequestObjectResult(new { 
+                error = error.Message, 
+                code = error.Code,
+                details = error.Details 
+            }),
+            { Type: "BadRequest" } error => new BadRequestObjectResult(new { 
+                error = error.Message, 
+                code = error.Code,
+                details = error.Details 
+            }),
+            { Type: "Unauthorized" } error => new UnauthorizedObjectResult(new { 
+                error = error.Message, 
+                code = error.Code,
+                details = error.Details 
+            }),
+            { Type: "Forbidden" } error => new ObjectResult(new { 
+                error = error.Message, 
+                code = error.Code,
+                details = error.Details 
+            }) { StatusCode = 403 },
+            { Type: "Conflict" } error => new ConflictObjectResult(new { 
+                error = error.Message, 
+                code = error.Code,
+                details = error.Details 
+            }),
+            { Type: "Internal" } error => new ObjectResult(new { 
+                error = error.Message, 
+                code = error.Code,
+                details = error.Details 
+            }) { StatusCode = 500 },
+            { } error => new BadRequestObjectResult(new { 
+                error = error.Message, 
+                code = error.Code,
+                details = error.Details 
+            })
+        };
     }
     
-    // Map (Monadic mapping transform value, keep same metadata)
-    public static Result<TOut> Map<T, TOut>(
-        this Result<T> result,
-        Func<T, TOut> map)
-    {
-        return result.IsSuccess
-            ? Result<TOut>.Success(map(result.Value!), result.Metadata)
-            : Result<TOut>.Failure(result.IrtError!, result.Metadata);
-    }
-    
-    // Map Async (async mapping transform value, keep same metadata)
-    public static async Task<Result<TOut>> MapAsync<T, TOut>(
-        this Result<T> result,
-        Func<T, Task<TOut>> map)
-    {
-        return result.IsSuccess
-            ? Result<TOut>.Success(await map(result.Value!), result.Metadata)
-            : Result<TOut>.Failure(result.IrtError!, result.Metadata);
-    }
-    
-    public static async Task<Result<TOut>> MapAsync<T, TOut>(
-        this Task<Result<T>> resultTask,
-        Func<T, TOut> map)
-    {
-        var result = await resultTask;
-        return result.IsSuccess
-            ? Result<TOut>.Success(map(result.Value!), result.Metadata)
-            : Result<TOut>.Failure(result.IrtError!, result.Metadata);
-    }
-    
-    // Match 
-    public static TResult Match<T, TResult>(
-        this Result<T> result,
-        Func<T, TResult> onSuccess,
-        Func<IrtError, TResult> onFailure)
-    {
-        return result.IsSuccess
-            ? onSuccess(result.Value!)
-            : onFailure(result.IrtError!);
-    }
-    
-    // MatchAsync
-    public static async Task<TResult> MatchAsync<T, TResult>(
-        this Result<T> result,
-        Func<T, Task<TResult>> onSuccess,
-        Func<IrtError, Task<TResult>> onFailure)
-    {
-        return result.IsSuccess
-            ? await onSuccess(result.Value!)
-            : await onFailure(result.IrtError!);
-    }
-    
-    // Tap (Side effect on success)
-    public static Result<T> Tap<T>(
-        this Result<T> result,
-        Action<T> action)
+    // Convert non-generic Result to IActionResult
+    public static IActionResult ToActionResult(this Result result)
     {
         if (result.IsSuccess)
         {
-            action(result.Value!);
+            return new OkResult();
         }
-
-        return result;
+        
+        return result.IrtError switch
+        {
+            { Type: "NotFound" } error => new NotFoundObjectResult(new { 
+                error = error.Message, 
+                code = error.Code,
+                details = error.Details 
+            }),
+            { Type: "Validation" } error => new BadRequestObjectResult(new { 
+                error = error.Message, 
+                code = error.Code,
+                details = error.Details 
+            }),
+            { Type: "BadRequest" } error => new BadRequestObjectResult(new { 
+                error = error.Message, 
+                code = error.Code,
+                details = error.Details 
+            }),
+            { Type: "Unauthorized" } error => new UnauthorizedObjectResult(new { 
+                error = error.Message, 
+                code = error.Code,
+                details = error.Details 
+            }),
+            { Type: "Forbidden" } error => new ObjectResult(new { 
+                error = error.Message, 
+                code = error.Code,
+                details = error.Details 
+            }) { StatusCode = 403 },
+            { Type: "Conflict" } error => new ConflictObjectResult(new { 
+                error = error.Message, 
+                code = error.Code,
+                details = error.Details 
+            }),
+            { Type: "Internal" } error => new ObjectResult(new { 
+                error = error.Message, 
+                code = error.Code,
+                details = error.Details 
+            }) { StatusCode = 500 },
+            { } error => new BadRequestObjectResult(new { 
+                error = error.Message, 
+                code = error.Code,
+                details = error.Details 
+            })
+        };
     }
     
-    // TapAsync (async side effect on success)
-    public static async Task<Result<T>> TapAsync<T>(
-        this Result<T> result,
-        Func<T, Task> action)
+    // For OData specifically - returns the value directly or throws
+    public static T ToODataResult<T>(this Result<T> result)
     {
         if (result.IsSuccess)
-        {
-            await action(result.Value!);
-        }
-
-        return result;
-    }
-    
-    // Ensure validation within the chain
-    public static Result<T> Ensure<T>(
-        this Result<T> result,
-        Func<T, bool> predicate,
-        IrtError irtErrorIfFalse)
-    {
-        if (result.IsFailure)
-        {
-            return result;
-        }
-
-        return predicate(result.Value!)
-            ? result
-            : Result<T>.Failure(irtErrorIfFalse, result.Metadata);
-    }
-    
-    public static async Task<Result<T>> EnsureAsync<T>(
-        this Task<Result<T>> task,
-        Func<T, bool> predicate,
-        IrtError irtError)
-    {
-        var result = await task;
-        return 
-            result.IsFailure 
-                ? result 
-                : predicate(result.Value!) ? result : Result<T>.Failure(irtError);
-    }
-    
-    // WithMetadata (add metadata to the result)
-    public static Result<T> WithMetadata<T>(
-        this Result<T> result,
-        Dictionary<string, object> metadata)
-    {
-        return result.IsFailure 
-            ? result 
-            : Result<T>.Success(result.Value!, metadata);
+            return result.Value;
+            
+        throw new InvalidOperationException($"OData query failed: {result.IrtError?.Message}");
     }
     
     // Combine multiple results
-    public static Result<IReadOnlyList<T>> Combine<T>(params Result<T>[] results)
+    public static Result Combine(params Result[] results)
     {
-        var list = new List<T>();
-        foreach (var result in results)
-        {
-            if (result.IsFailure)
-            {
-                return Result<IReadOnlyList<T>>.Failure(result.IrtError!, result.Metadata);
-            }
-
-            if (result.Value != null) list.Add(result.Value);
-        }
-
-        return Result<IReadOnlyList<T>>.Success(list);
+        var failures = results.Where(r => r.IsFailure).ToArray();
+        
+        if (failures.Length == 0)
+            return Result.Success();
+        
+        // Combine all error messages
+        var combinedMessage = string.Join("; ", failures.Select(f => f.IrtError!.Message));
+        var combinedError = IrtError.BadRequest($"Multiple errors occurred: {combinedMessage}");
+        
+        return Result.Failure(combinedError);
     }
     
-    public static async Task<Result<T>> ToResult<T>(
-        this Task<T?> task,
-        IrtError notFoundIrtError)
-        where T : class
+    public static Result<T[]> Combine<T>(params Result<T>[] results)
     {
-        var result = await task;
-        return result is null 
-            ? Result<T>.Failure(notFoundIrtError) 
-            : Result<T>.Success(result);
+        var failures = results.Where(r => r.IsFailure).ToArray();
+        
+        if (failures.Length == 0)
+            return Result<T[]>.Success(results.Select(r => r.Value!).ToArray());
+        
+        // Combine all error messages
+        var combinedMessage = string.Join("; ", failures.Select(f => f.IrtError!.Message));
+        var combinedError = IrtError.BadRequest($"Multiple errors occurred: {combinedMessage}");
+        
+        return Result<T[]>.Failure(combinedError);
     }
     
-    public static async Task<Result<T>> ToResult<T>(
-        this ValueTask<T> task,
-        IrtError notFoundIrtError) where T : class?
+    // Execute action on success
+    public static Result<T> OnSuccess<T>(this Result<T> result, Action<T> action)
     {
-        var result = await task;
-        return result is null
-            ? Result<T>.Failure(notFoundIrtError)
-            : Result<T>.Success(result);
-    }
-
-    public static async Task<Result<List<T>>> ToResult<T>(
-        this Task<List<T>> task,
-        IrtError notFoundIrtError,
-        bool treatEmptyListAsSuccess = true,
-        bool includeCountMetadata = false)
-    {
-        var result = await task;
-        if (result is null)
-        {
-            return Result<List<T>>.Failure(notFoundIrtError);
-        }
-
-        var metadata = includeCountMetadata
-            ? new Dictionary<string, object> { ["TotalCount"] = result.Count }
-            : null;
+        if (result.IsSuccess)
+            action(result.Value!);
         
-        return Result<List<T>>.Success(result, metadata);
+        return result;
     }
-
-    public static async Task<Result<List<T>>> ToResult<T>(
-        this Task<List<T>> task,
-        IrtError notFoundIrtError,
-        bool includeCountMetadata = false)
+    
+    // Execute action on failure
+    public static Result<T> OnFailure<T>(this Result<T> result, Action<IrtError> action)
     {
-        var result = await task;
-
-        var metadata = includeCountMetadata
-            ? new Dictionary<string, object> { ["TotalCount"] = result.Count }
-            : null;
+        if (result.IsFailure)
+            action(result.IrtError!);
         
-        return Result<List<T>>.Success(result, metadata);
+        return result;
+    }
+    
+    // Convert to nullable
+    public static T? ToNullable<T>(this Result<T> result) where T : struct
+    {
+        return result.IsSuccess ? result.Value : null;
+    }
+    
+    // Ensure (add validation)
+    public static Result<T> Ensure<T>(this Result<T> result, Func<T, bool> predicate, IrtError error)
+    {
+        if (result.IsFailure)
+            return result;
+        
+        return predicate(result.Value!) 
+            ? result 
+            : Result<T>.Failure(error);
+    }
+    
+    // Async ensure
+    public static async Task<Result<T>> EnsureAsync<T>(this Result<T> result, Func<T, Task<bool>> predicate, IrtError error)
+    {
+        if (result.IsFailure)
+            return result;
+        
+        return await predicate(result.Value!) 
+            ? result 
+            : Result<T>.Failure(error);
     }
 }

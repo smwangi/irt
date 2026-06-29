@@ -3,7 +3,7 @@ using Irt.Application.Configuration.Commands;
 
 namespace Irt.Application.Datasets.Commands
 {
-    public class DeleteDatasetCommand(string datasetId) : CommandBase<DeleteDatasetResult>
+    public class DeleteDatasetCommand(string datasetId) : ICommand<DeleteDatasetResult>
     {
         public string DatasetId { get; } = datasetId;
     }

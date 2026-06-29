@@ -1,21 +1,38 @@
 using FluentValidation;
+using Irt.Application.Common;
 using Irt.Application.Configuration.Commands;
+using Irt.Application.Datasources;
 using Irt.SharedKernel.Results;
 
-namespace Irt.Application.Datasources.Commands
+namespace Irt.Application.Datasource.Commands
 {
-    public class UpdateDatasourceCommand(DatasourceDto datasourceRequest) : CommandBase<Result<DatasourceDto>>
+    public record UpdateDatasourceCommand(
+        string Id,
+        string Name,
+        string Description,
+        string Source,
+        string DatasourceType) : ICommand<Result<DatasourceDto>>, IRequireMetadata
     {
-        public DatasourceDto DatasourceRequest { get; } = datasourceRequest;
+        public string? UserId { get; private set; }
+        public string? UserName { get; private set; }
+        public string? Application { get; private set; }
+        public string? IpAddress { get; private set; }
+        public void SetMetadata(string userId, string userName, string application, string ipAddress)
+        {
+            UserId = userId;
+            UserName = userName;
+            Application = application;
+            IpAddress = ipAddress;
+        }
     }
 
     public class UpdateDatasourceCommandValidator : AbstractValidator<UpdateDatasourceCommand>
     {
         public UpdateDatasourceCommandValidator()
         {
-            RuleFor(x => x.DatasourceRequest.Id).NotEmpty().WithMessage("Id is required");
-            RuleFor(x => x.DatasourceRequest.Name).NotEmpty().WithMessage("Name is required");
-            RuleFor(x => x.DatasourceRequest.Description).NotEmpty().WithMessage("Description is required");
+            RuleFor(x => x.Id).NotEmpty().WithMessage("Id is required");
+            RuleFor(x => x.Name).NotEmpty().WithMessage("Name is required");
+            RuleFor(x => x.Description).NotEmpty().WithMessage("Description is required");
         }
     }
 }

@@ -1,74 +1,88 @@
-using AutoMapper;
+using System.Linq.Expressions;
+using Irt.Application.Common;
 using Irt.Application.Configuration.Queries;
 using Irt.Core.Datasets;
-using Irt.Application.Helpers;
-using Irt.SharedKernel.Providers;
+using Irt.SharedKernel.Extensions;
+using Irt.SharedKernel.Repositories;
 using Irt.SharedKernel.Results;
 
 namespace Irt.Application.Datasets.Queries;
 
-internal class GetAllDatasetsQueryHandler(IRepositoryFactory repository, IMapper mapper) : IQueryHandler<GetDatasetsQuery ,Result<List<DatasetDto>>>
+internal class GetAllDatasetsQueryHandler(
+    IReadOnlyRepository<Dataset> repository,
+    IProjection<Dataset, DatasetDto> projection)
+    : IODataQueryHandler<GetDatasetsQuery, Result<IQueryable<DatasetDto>>>
 {
-    public async Task<Result<List<DatasetDto>>> HandleAsync(GetDatasetsQuery request, CancellationToken cancellationToken)
+    public Task<Result<IQueryable<DatasetDto>>> HandleAsync(GetDatasetsQuery request,
+        CancellationToken cancellationToken)
     {
-        return await repository.CreateFactory<Dataset>()
-            .GetAllAsync()
-            .MapAsync(mapper.Map<List<DatasetDto>>);
+        return Task.FromResult(
+            repository
+                .QuerySafely(projection.Expression)
+                .Bind(q => q.ApplyODataSafely(request.Options)));
+
     }
 }
 
-internal class GetDatasetsByIdQueryHandler(IRepositoryFactory repository, IMapper mapper) : IQueryHandler<GetDatasetsByIdQuery, Result<DatasetDto>>
+internal class GetDatasetsByIdQueryHandler(
+    IReadOnlyRepository<Dataset> repository, 
+    IProjection<Dataset, DatasetDto> projection)
+    : IQueryHandler<GetDatasetsByIdQuery, Result<IQueryable<DatasetDto>>>
 {
 
-    public async Task<Result<DatasetDto>> HandleAsync(GetDatasetsByIdQuery request, CancellationToken cancellationToken)
+    public Task<Result<IQueryable<DatasetDto>>> HandleAsync(GetDatasetsByIdQuery request,
+        CancellationToken cancellationToken)
     {
-        return await repository.CreateFactory<Dataset>()
-            .FindByIdAsync(request.Id)
-            .MapAsync(mapper.Map<DatasetDto>);
+        var result = repository.QueryById(request.Id, projection.Expression);
+        return Task.FromResult(Result<IQueryable<DatasetDto>>.Success(result));
+            
     }
 }
 
 internal class GetDatasetsByTypeQueryHandler(
-    IRepositoryProvider repositoryProvider,
-    IMapper mapper) 
-    : IQueryHandler<GetDatasetsByTypeQuery, Result<List<DatasetDto>>>
+    IReadOnlyRepository<Dataset> repository,
+    IProjection<Dataset, DatasetDto> projection) 
+    : IODataQueryHandler<GetDatasetsByTypeQuery, Result<IQueryable<DatasetDto>>>
 {
-    public async Task<Result<List<DatasetDto>>> HandleAsync(GetDatasetsByTypeQuery request, CancellationToken cancellationToken)
+    public Task<Result<IQueryable<DatasetDto>>> HandleAsync(GetDatasetsByTypeQuery request,
+        CancellationToken cancellationToken)
     {
-        return await repositoryProvider.GetRepository<Dataset>()
-            .FilterAsync(x => x.DatasetType.ToString() == request.Type, cancellationToken)
-            .MapAsync(mapper.Map<List<DatasetDto>>);
+        Expression<Func<Dataset, bool>> predicate = r => r.DatasetType.ToString() == request.Type;
+        var result = repository
+            .QuerySafely(predicate, projection.Expression)
+            .Bind(q => q.ApplyODataSafely(request.Options));
+        
+        return Task.FromResult(result);
     }
 }
 
 internal class GetDatasetsByDatasourceIdQueryHandler(
-    IRepositoryProvider repositoryProvider,
-    IMapper mapper) 
-    : IQueryHandler<GetDatasetsByDatasourceIdQuery, Result<List<DatasetDto>>>
+    IReadOnlyRepository<Dataset> repository,
+    IProjection<Dataset, DatasetDto> projection) 
+    : IODataQueryHandler<GetDatasetsByDatasourceIdQuery, Result<IQueryable<DatasetDto>>>
 {
-    public async Task<Result<List<DatasetDto>>> HandleAsync(
-        GetDatasetsByDatasourceIdQuery request,
+    public Task<Result<IQueryable<DatasetDto>>> HandleAsync(GetDatasetsByDatasourceIdQuery request,
         CancellationToken cancellationToken)
     {
-        return await repositoryProvider.GetRepository<Dataset>()
-            .FilterAsync(x => x.Datasource.Id == request.DatasourceId, cancellationToken)
-            .MapAsync(mapper.Map<List<DatasetDto>>);
+        Expression<Func<Dataset, bool>> filter = d => d.Datasource.Id == request.DatasourceId;
+        return Task.FromResult(
+            repository.QuerySafely(filter, projection.Expression)
+                .Bind(q => q.ApplyODataSafely(request.Options)));
     }
 }
 
 internal class GetDatasetsByDatasourceIdAndTypeQueryHandler(
-    IRepositoryProvider repositoryProvider,
-    IMapper mapper) 
-    : IQueryHandler<GetDatasetsByDatasourceIdAndTypeQuery, Result<List<DatasetDto>>>
+    IReadOnlyRepository<Dataset> repository,
+    IProjection<Dataset, DatasetDto> projection) 
+    : IQueryHandler<GetDatasetsByDatasourceIdAndTypeQuery, Result<IQueryable<DatasetDto>>>
 {
-    public async Task<Result<List<DatasetDto>>> HandleAsync(
-        GetDatasetsByDatasourceIdAndTypeQuery request, 
+    public Task<Result<IQueryable<DatasetDto>>> HandleAsync(GetDatasetsByDatasourceIdAndTypeQuery request,
         CancellationToken cancellationToken)
     {
-        return await repositoryProvider.GetRepository<Dataset>().
-            FilterAsync(
-                x => x.Datasource.Id == request.DatasourceId 
-                     && x.DatasetType.ToString() == request.Type, cancellationToken)
-            .MapAsync(mapper.Map<List<DatasetDto>>);
+        Expression<Func<Dataset, bool>> filter = (d => d.Datasource.Id == request.DatasourceId && d.DatasetType.ToString() == request.Type);
+        return Task.FromResult(
+            repository
+                .QuerySafely(filter, projection.Expression)
+                .Bind(q => q.ApplyODataSafely(request.Options)));
     }
 }

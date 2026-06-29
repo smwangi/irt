@@ -1,8 +1,6 @@
 using AutoMapper;
 using FluentValidation;
 using Irt.Application.Configuration.Commands;
-using Irt.Application.Datasources;
-using Irt.Application.Datasources.Commands;
 using Irt.Application.Helpers;
 using Irt.Core.Datasources;
 using Irt.Core.SharedKernel;

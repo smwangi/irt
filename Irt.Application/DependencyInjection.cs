@@ -7,19 +7,16 @@ using Irt.Application.Configuration.Queries;
 using Irt.Application.Configuration.Validation;
 using Irt.Application.Datasets;
 using Irt.Application.Datasets.Commands;
-using Irt.Application.Datasets.Commands.Handlers;
 using Irt.Application.Datasets.Queries;
-using Irt.Application.Datasource.Commands;
-using Irt.Application.Datasource.Commands.Handlers;
+using Irt.Application.Datasource;
 using Irt.Application.Datasource.Queries;
-using Irt.Application.Datasources;
-using Irt.Application.Datasources.Commands;
 using Irt.Application.Mappers;
 using Irt.Application.ReportingScopes;
-using Irt.Application.ReportingScopes.Commands;
-using Irt.Application.ReportingScopes.Commands.Handlers;
+using Irt.Application.ReportingScopes.Queries;
 using Irt.Application.ReportingScopes.Queries.Handlers;
+using Irt.Core.Datasets;
 using Irt.Core.ReportingScopes;
+using Irt.SharedKernel.Repositories;
 using Irt.SharedKernel.Results;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,28 +41,34 @@ public static class DependencyInjection
         services.AddTransient<IValidator<UpdateDatasetCommand>, UpdateDatasetCommandValidator>();
         services.AddTransient<IValidator<CreateDatasetCommand>, CreateDatasetCommandValidator>();
         
-        services.AddScoped<IQueryHandler<GetDatasetsQuery, Result<List<DatasetDto>>>, GetAllDatasetsQueryHandler>();
-        services
-            .AddScoped<IQueryHandler<GetDatasourceQuery, Result<List<DatasourceDto>>>,
-                GetDatasourceQueryHandler>();
-        services
-            .AddScoped<IQueryHandler<GetReportingScopeQuery, Result<List<ReportingScopeDto>>>,
-                GetReportingScopeQueryHandler>();
-        services
-            .AddScoped<IQueryHandler<GetDatasetsByIdQuery, Result<DatasetDto>>,
-                GetDatasetsByIdQueryHandler>();
+        services.AddScoped<IODataQueryHandler<GetDatasetsQuery, Result<IQueryable<DatasetDto>>>, GetAllDatasetsQueryHandler>();
+        
+        //services.AddScoped<IODataQueryHandler<GetDatasourceQuery, DatasourceDto>, GetDatasourceQueryHandler>();
+        //services.AddScoped<IODataQueryHandler<GetReportingScopeQuery, ReportingScopeDto>, GetReportingScopeQueryHandler>();
+        //services.AddScoped<IQueryHandler<GetDatasetsByIdQuery, DatasetDto>, GetDatasetsByIdQueryHandler>();
+        
         services.AddLogging(config => config.AddConsole()); // Console logging
 
-        services.AddCommandHandler<CreateDatasetCommand, DatasetDto, CreateDatasetCommandHandler>();
-        services.AddCommandHandler<UpdateDatasetCommand, DatasetDto, UpdateDatasetCommandHandler>();
-        services.AddCommandHandler<UpdateDatasourceCommand, DatasourceDto, UpdateDatasourceCommandHandler>();
-        services.AddCommandHandler<CreateDatasourceCommand, DatasourceDto, CreateDatasourceCommandHandler>();
-        services.AddCommandHandler<CreateReportingScopeCommand, ReportingScopeDto, CreateReportingScopeCommandHandler>();
-        services.AddTransient<UpdateDatasetCommandHandler>();
+        services.AddHttpContextAccessor();
+        services.AddScoped<IUserDetails, HttpContextUserDetails>();
+        services.Scan(scan => scan
+            .FromApplicationDependencies()
+            .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<,>)), publicOnly: false)
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
+
+        services.Decorate(typeof(ICommandHandler<,>), typeof(MetadataEnrichingHandlerDecorator<,>));
+        services.Scan(scan => scan
+            .FromApplicationDependencies()
+            .AddClasses(classes => classes.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
         
-        services.AddTransient<UpdateDatasourceCommandHandler>();
-        services.AddScoped(typeof(ICommandHandler<,>), typeof(MetadataEnrichingHandlerDecorator<,>));
-        services.AddScoped<IUserDetails, UserDetails>();
+        services.Scan(scan => scan
+            .FromAssembliesOf(typeof(IProjection<,>))
+            .AddClasses(classes => classes.AssignableTo(typeof(IProjection<,>)))
+            .AsImplementedInterfaces()
+        .WithScopedLifetime());
         
         services.AddFeatureManagement();
         /*services.AddMassTransit(x =>

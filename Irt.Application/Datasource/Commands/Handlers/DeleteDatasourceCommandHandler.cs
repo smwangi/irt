@@ -1,24 +1,34 @@
 using Irt.Application.Configuration.Commands;
-using Irt.Core.Datasources;
+using Irt.SharedKernel.Common;
+using Irt.SharedKernel.ErrorHandling.Exceptions;
+using Irt.SharedKernel.Providers;
+using Irt.SharedKernel.Repositories;
+using Irt.SharedKernel.Results;
 
-namespace Irt.Application.Datasources.Commands
+namespace Irt.Application.Datasource.Commands.Handlers
 {
-    public class DeleteDatasourceCommandHandler(IDatasourceRepository dataSourceRepository)
-         : ICommandHandler<DeleteDatasourceCommand, DeleteDatasourceResult>
+    internal class DeleteDatasourceCommandHandler(
+        IRepositoryProvider repositoryProvider,
+        IReadOnlyRepository<Core.Datasources.Datasource>repository)
+         : ICommandHandler<DeleteDatasourceCommand, Result<Unit>>
     {
-        private readonly IDatasourceRepository _datasourceRepository = dataSourceRepository;
 
-        public async Task<DeleteDatasourceResult> HandleAsync(DeleteDatasourceCommand request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> HandleAsync(DeleteDatasourceCommand request, CancellationToken cancellationToken)
         {
-            var datasource = await _datasourceRepository.GetByIdAsync(DatasourceId.Create(request.DatasourceId), cancellationToken);
-            if (datasource is null)
-            {
-                return new DeleteDatasourceResult(false);
-            }
+            var datasourceRepository = repositoryProvider
+                .GetRepository<Core.Datasources.Datasource>();
+            var datasourceResult = await repository
+                .FindByIdAsync(request.DatasourceId, cancellationToken);
 
-            //datasource.Delete();
-            await _datasourceRepository.DeleteAsync(datasource, cancellationToken);
-            return new DeleteDatasourceResult(true);
+            if (datasourceResult is null)
+            {
+                return Result<Unit>.Failure(IrtError.NotFound($"Datasource {request.DatasourceId} not found."));
+            }
+            
+            datasourceResult.MarkAsDeleted();
+            
+            await datasourceRepository.UpdateAsync(datasourceResult, cancellationToken: cancellationToken);
+            return Result<Unit>.Success(Unit.Value);
         }
     }
 }

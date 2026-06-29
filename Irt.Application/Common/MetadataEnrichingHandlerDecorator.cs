@@ -13,10 +13,10 @@ public class MetadataEnrichingHandlerDecorator<TCommand, TResult>(
         if (request is IRequireMetadata requireMetadata)
         {
             requireMetadata.SetMetadata(
-                userDetails.UserId,
-                userDetails.UserName,
-                userDetails.Application,
-                userDetails.IpAddress);
+                userDetails.UserId ?? "anonymous",
+                userDetails.UserName ?? "unknown",
+                userDetails.Application ?? "api",
+                userDetails.IpAddress ?? "0.0.0.0");
         }
 
         return await innerHandler.HandleAsync(request, cancellationToken);

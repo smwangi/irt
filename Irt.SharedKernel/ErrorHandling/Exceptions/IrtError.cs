@@ -9,6 +9,15 @@ public class IrtError
     public string Message { get; }
     public HttpStatusCode StatusCode { get; }
     public IDictionary<string, object> Details { get; }
+    public string Type { get; set; }
+    
+    public IrtError(string type, string message, string? code = null, Dictionary<string, object>? details = null)
+    {
+        Type = type;
+        Message = message;
+        Code = code;
+        Details = details;
+    }
     
     protected IrtError(
         string code, 
@@ -49,4 +58,25 @@ public class IrtError
         => new("NOT_FOUND", msg, HttpStatusCode.NotFound);
     public static IrtError Unexpected(string msg) 
         => new("UNEXPECTED_ERROR", msg, HttpStatusCode.InternalServerError);
+    // Factory methods for common error types
+    public static IrtError NotFound(string message, string? code = null) 
+        => new("NotFound", message, code);
+        
+    public static IrtError Validation(string message, string? code = null) 
+        => new("Validation", message, code);
+        
+    public static IrtError Unauthorized(string message, string? code = null) 
+        => new("Unauthorized", message, code);
+        
+    public static IrtError Internal(string message, string? code = null) 
+        => new("Internal", message, code);
+        
+    public static IrtError BadRequest(string message, string? code = null) 
+        => new("BadRequest", message, code);
+        
+    public static IrtError Forbidden(string message, string? code = null) 
+        => new("Forbidden", message, code);
+        
+    public static IrtError Conflict(string message, string? code = null) 
+        => new("Conflict", message, code);
 }

@@ -33,6 +33,14 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        foreach (var entity in modelBuilder.Model.GetEntityTypes())
+        {
+            /*if (typeof(ISoftDeletable).IsAssignableFrom(entity.ClrType))
+            {
+                modelBuilder.Entity(entity.ClrType)
+                    .HasQueryFilter(e => EF.Property<bool>(e, "IsDeleted") == false);
+            }*/
+        }
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Datasource>()
             .ToTable("datasources", schema: "irt");
@@ -87,6 +95,11 @@ public class ApplicationDbContext : DbContext
             .HasConversion(
                 name => name.Value,
                 value => Name.Of(value));
+        modelBuilder.Entity<Dataset>()
+            .Property(prop => prop.DatasetType)
+            .HasConversion(
+                v => v.Value,
+                v => DatasetType.From(v));
         modelBuilder.Entity<Dataset>().OwnsOne(e => e.CreatedBy, cb =>
         {
             cb.Property(p => p.UserId).HasColumnName("created_by_id");

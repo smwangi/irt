@@ -2,8 +2,8 @@ namespace Irt.Application.Common;
 
 public interface IUserDetails
 {
-    public string UserId { get; set; }
-    public string UserName { get; set; }
-    public string Application { get; set; }
-    public string IpAddress { get; set; }
+    string? UserId { get; }
+    string? UserName { get; }
+    string? Application { get; }
+    string? IpAddress { get; }
 }

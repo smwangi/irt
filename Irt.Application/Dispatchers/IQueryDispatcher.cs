@@ -1,5 +1,4 @@
 using Irt.Application.Configuration.Queries;
-
 namespace Irt.Application.Dispatchers;
 
 public interface IQueryDispatcher

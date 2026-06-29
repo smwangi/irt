@@ -3,12 +3,12 @@ using Irt.SharedKernel.Results;
 
 namespace Irt.Application.Datasets.Queries;
 
-public class GetDatasetsByIdQuery(string id) : IQuery<Result<DatasetDto>>
+public class GetDatasetsByIdQuery(string id) : IQuery<Result<IQueryable<DatasetDto>>>
 {
     public string Id { get; } = id;
 }
 
-public class GetDatasetsQuery : IQuery<Result<List<DatasetDto>>> //IQuery<List<DatasetDto>>
+public class GetDatasetsQuery : BaseODataQuery<Result<IQueryable<DatasetDto>>>
 {
 }
 
@@ -18,13 +18,13 @@ public abstract class GetPagedDatasetQuery(int page, int size) : IQuery<List<Dat
     public int Size { get; } = size;
 }
 
-public abstract class GetDatasetsByTypeQuery(string type) : IQuery<Result<List<DatasetDto>>>
+public abstract class GetDatasetsByTypeQuery(string type) : BaseODataQuery<Result<IQueryable<DatasetDto>>>
 {
     public string Type { get; } = type;
 }
 
 public abstract class GetDatasetsByDatasourceIdQuery(string datasourceId) :
-    IQuery<Result<List<DatasetDto>>>
+    BaseODataQuery<Result<IQueryable<DatasetDto>>>
 {
     public string DatasourceId { get; } = datasourceId;
 }
@@ -36,7 +36,7 @@ public class GetDatasetsByIndicatorDefinitionIdQuery(string indicatorDefinitionI
 }
 
 public abstract class GetDatasetsByDatasourceIdAndTypeQuery(string type, string datasourceId) 
-    : IQuery<Result<List<DatasetDto>>>
+    : BaseODataQuery<Result<IQueryable<DatasetDto>>>
 {
     public string Type { get; } = type;
     public string DatasourceId { get; } = datasourceId;

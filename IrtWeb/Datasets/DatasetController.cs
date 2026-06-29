@@ -12,7 +12,7 @@ namespace IrtWeb.Datasets
 {
     [ApiController]
     [ControllerName("Datasets")]
-    [Route("api/v{version:apiVersion}")]
+    [Route("irt/api/v{version:apiVersion}")]
     [ApiVersion("1.0")]
     public class DatasetsController(
         ICommandDispatcher commandDispatcher,
@@ -20,34 +20,46 @@ namespace IrtWeb.Datasets
         ILogger<DatasetsController> logger) : ODataController
     {
         private const string ApiPrefix = "datasets";
-        private readonly ICommandDispatcher _commandDispatcher = commandDispatcher ?? throw new ArgumentNullException(nameof(commandDispatcher));
-        private readonly IQueryDispatcher _queryDispatcher = queryDispatcher ?? throw new ArgumentNullException(nameof(queryDispatcher));
+        private readonly ICommandDispatcher _commandDispatcher = commandDispatcher
+                                                                 ?? throw new ArgumentNullException(nameof(commandDispatcher));
+        private readonly IQueryDispatcher _queryDispatcher = queryDispatcher
+                                                             ?? throw new ArgumentNullException(nameof(queryDispatcher));
 
         [HttpGet(ApiPrefix)]
         [EnableQuery]
         public async Task<IActionResult> GetDatasets()
         {
-            var datasets = await _queryDispatcher.DispatchAsync<GetDatasetsQuery, Result<List<DatasetDto>>>(new GetDatasetsQuery(), CancellationToken.None);
+            var datasets = await _queryDispatcher
+                .DispatchAsync<GetDatasetsQuery, Irt.SharedKernel.Results.Result<IQueryable<DatasetDto>>>(
+                    new GetDatasetsQuery(), CancellationToken.None);
+            
+            //datasets.ToActionResult();
             return Ok(datasets);
         }
 
         [HttpPost(ApiPrefix)]
-        public async Task<IActionResult> CreateDataset([FromBody] DatasetDto request)
+        public async Task<IActionResult> CreateDataset([FromBody] CreateDatasetCommand request)
         {
-            var resp = await _commandDispatcher.DispatchAsync<CreateDatasetCommand, Result<DatasetDto>>(new CreateDatasetCommand(request), CancellationToken.None);
+            var resp = await _commandDispatcher
+                .DispatchAsync<CreateDatasetCommand, Irt.SharedKernel.Results.Result<DatasetDto>>(
+                    request, CancellationToken.None);
             return Ok(resp);
         }
 
         [HttpGet(ApiPrefix+ "/{id}")]
         public async Task<IActionResult> GetDataset([FromRoute]string id)
         {
-            var dataset = await _queryDispatcher.DispatchAsync<GetDatasetsByIdQuery, Result<DatasetDto>>(new GetDatasetsByIdQuery(id), CancellationToken.None);
+            var dataset = await _queryDispatcher
+                .DispatchAsync<GetDatasetsByIdQuery, Irt.SharedKernel.Results.Result<IQueryable<DatasetDto>>>(
+                    new GetDatasetsByIdQuery(id), CancellationToken.None);
             
             return Ok(dataset);
         }
 
         [HttpPut(ApiPrefix+ "/{{id}}")]
-        public async Task<IActionResult> UpdateDataset([FromRoute]string id, [FromBody] DatasetDto request)
+        public async Task<IActionResult> UpdateDataset(
+            [FromRoute]string id,
+            [FromBody] UpdateDatasetCommand request)
         {
             if (id != request.Id)
             {
@@ -56,7 +68,9 @@ namespace IrtWeb.Datasets
             }
 
             logger.LogInformation("Updating dataset with ID {DatasetId}", id);
-            var resp = await _commandDispatcher.DispatchAsync<UpdateDatasetCommand, Result<DatasetDto>>(new UpdateDatasetCommand(request), CancellationToken.None);
+            var resp = await _commandDispatcher
+                .DispatchAsync<UpdateDatasetCommand, Irt.SharedKernel.Results.Result<DatasetDto>>(
+                    request, CancellationToken.None);
             if (!resp.IsSuccess)
             {
                 logger.LogWarning("Update not successful!");
@@ -68,13 +82,15 @@ namespace IrtWeb.Datasets
         }
 
         [HttpPatch(ApiPrefix+ "/{{id}}")]
-        public async Task<IActionResult> PatchDataset([FromRoute]string id, [FromBody] DatasetDto request)
+        public async Task<IActionResult> PatchDataset([FromRoute]string id, [FromBody] UpdateDatasetCommand request)
         {
             if (id != request.Id)
             {
                 return BadRequest("Id in the request body does not match the id in the route");
             }
-            var resp = await _commandDispatcher.DispatchAsync<UpdateDatasetCommand, Result<DatasetDto>>(new UpdateDatasetCommand(request), CancellationToken.None);
+            var resp = await _commandDispatcher
+                .DispatchAsync<UpdateDatasetCommand, Irt.SharedKernel.Results.Result<DatasetDto>>(
+                    request, CancellationToken.None);
             return Ok(resp);
         }
     }

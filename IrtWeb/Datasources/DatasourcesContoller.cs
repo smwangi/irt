@@ -1,9 +1,9 @@
 using Asp.Versioning;
+using Irt.Application.Datasource;
 using Irt.Application.Datasource.Commands;
 using Irt.Application.Datasource.Queries;
-using Irt.Application.Datasources;
-using Irt.Application.Datasources.Commands;
 using Irt.Application.Dispatchers;
+using Irt.SharedKernel.Common;
 using Irt.SharedKernel.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -13,7 +13,7 @@ namespace IrtWeb.Datasources
 {
     [ApiController]
     [ControllerName("Datasource")]
-    [Route("api/v{version:apiVersion}")]
+    [Route("irt/api/v{version:apiVersion}")]
     [ApiVersion("1.0")]
     public class DatasourcesController(
         ICommandDispatcher commandDispatcher,
@@ -31,7 +31,7 @@ namespace IrtWeb.Datasources
         public async Task<IActionResult> GetDatasources()
         {
             var datasources = await _queryDispatcher
-                .DispatchAsync<GetDatasourceQuery, Result<List<DatasourceDto>>>(
+                .DispatchAsync<GetDatasourceQuery, Irt.SharedKernel.Results.Result<IQueryable<DatasourceDto>>>(
                     new GetDatasourceQuery(), CancellationToken.None);
             return Ok(datasources);
         }
@@ -42,7 +42,7 @@ namespace IrtWeb.Datasources
             var createDatasourceCommand = new CreateDatasourceCommand(datasourceDto);
          
             var resp = await _commandDispatcher
-                .DispatchAsync<CreateDatasourceCommand, Result<DatasourceDto>>(
+                .DispatchAsync<CreateDatasourceCommand, Irt.SharedKernel.Results.Result<DatasourceDto>>(
                     createDatasourceCommand, cancellationToken: CancellationToken.None);
             
             if (!resp.IsSuccess)
@@ -56,34 +56,34 @@ namespace IrtWeb.Datasources
         public async Task<IActionResult> GetDatasource([FromRoute]string id)
         {
             var datasource = await _queryDispatcher
-                .DispatchAsync<GetDatasourceByIdQuery, Result<DatasourceDto>>(
+                .DispatchAsync<GetDatasourceByIdQuery, Irt.SharedKernel.Results.Result<IQueryable<DatasourceDto>>>(
                     new GetDatasourceByIdQuery(id), CancellationToken.None);
             return Ok(datasource);
         }
 
         [HttpPut(ApiPrefix+ "/{id}")]
-        public async Task<IActionResult> UpdateDatasource([FromRoute]string id, [FromBody] DatasourceDto request)
-        {
-            if (request.Id != id)
-            {
-                throw new ArgumentException("Id mismatch");
-            }
-            
-            var command = new UpdateDatasourceCommand(request);
-            var resp = await _commandDispatcher.DispatchAsync<UpdateDatasourceCommand, Result<DatasourceDto>>(command, cancellationToken: CancellationToken.None);
-            return Ok(resp);
-        }
-
-        [HttpPatch(ApiPrefix+ "/{id}")]
-        public async Task<IActionResult> PatchDatasource([FromRoute]string id, [FromBody] DatasourceDto request)
+        public async Task<IActionResult> UpdateDatasource([FromRoute]string id, [FromBody] UpdateDatasourceCommand request)
         {
             if (request.Id != id)
             {
                 throw new ArgumentException("Id mismatch");
             }
             var resp = await _commandDispatcher
-                .DispatchAsync<UpdateDatasourceCommand, Result<DatasourceDto>>(
-                    new UpdateDatasourceCommand(request), CancellationToken.None);
+                .DispatchAsync<UpdateDatasourceCommand, Irt.SharedKernel.Results.Result<DatasourceDto>>(
+                    request, cancellationToken: CancellationToken.None);
+            return Ok(resp);
+        }
+
+        [HttpPatch(ApiPrefix+ "/{id}")]
+        public async Task<IActionResult> PatchDatasource([FromRoute]string id, [FromBody] UpdateDatasourceCommand request)
+        {
+            if (request.Id != id)
+            {
+                throw new ArgumentException("Id mismatch");
+            }
+            var resp = await _commandDispatcher
+                .DispatchAsync<UpdateDatasourceCommand, Irt.SharedKernel.Results.Result<DatasourceDto>>(
+                    request, CancellationToken.None);
             return Ok(resp);
         }
 
@@ -91,7 +91,7 @@ namespace IrtWeb.Datasources
         public async Task<IActionResult> DeleteDatasource([FromRoute]string id)
         {
             var resp = await _commandDispatcher
-                .DispatchAsync<DeleteDatasourceCommand, DeleteDatasourceResult>(
+                .DispatchAsync<DeleteDatasourceCommand, Irt.SharedKernel.Results.Result<Unit>>(
                     new DeleteDatasourceCommand(id), CancellationToken.None);
             return Ok(resp);
         }

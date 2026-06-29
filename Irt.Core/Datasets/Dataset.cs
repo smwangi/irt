@@ -63,13 +63,22 @@ public sealed class Dataset : Entity<DatasetId>
         IndicatorDefinition indicatorDefinition,
         DatasetType datasetType)
     {
-        return new Dataset(
-            id: Id,
-            name: name,
-            description: description,
-            source: datasource,
-            datasetType: datasetType,
-            indicatorDefinition: indicatorDefinition
-        );
+        Name = name;
+        Description = description;
+        Datasource = datasource;
+        DatasetType = datasetType;
+        IndicatorDefinition = indicatorDefinition;
+
+        return this;
+    }
+
+    public void ChangeType(DatasetType newDatasetType)
+    {
+        if (newDatasetType == DatasetType)
+        {
+            return;
+        }
+        
+        DatasetType = newDatasetType;
     }
 }

@@ -39,9 +39,6 @@ public static class DependencyInjection
             new GenericNameUniquenessChecker<Datasource, DatasourceId>(
                 sp.GetRequiredService<ApplicationDbContext>()));
         
-        services.AddScoped<IRepositoryProvider, RepositoryProvider>();
-        services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
-        
         return services;
     }
 }

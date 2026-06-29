@@ -1,5 +1,7 @@
 using System.Linq.Expressions;
-using Irt.Infrastructure.Shared;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Irt.Core.SharedKernel;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
 using Irt.SharedKernel.Repositories;
 using Irt.SharedKernel.Results;
@@ -18,9 +20,9 @@ public class GenericRepository<T>(
         return await _context
             .Set<T>()
             .ToListAsync()
-            .ToResult(
+            /*.ToResult(
                 IrtError.NotFound($"{typeof(T).Name}  Not Found."),
-                includeCountMetadata: true);
+                includeCountMetadata: true)*/;
     }
     
     public async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
@@ -71,8 +73,8 @@ public class GenericRepository<T>(
         return await _context
             .Set<T>()
             .Where(predicate)
-            .ToListAsync(cancellationToken)
-            .ToResult(IrtError.NotFound("No items found matching the filter."), includeCountMetadata: true);
+            .ToListAsync(cancellationToken);
+        //.ToResult(IrtError.NotFound("No items found matching the filter."), includeCountMetadata: true);
     }
     public async Task<PaginationResult<T>> GetPaginatedAsync(int page, int pageSize)
     {
@@ -89,10 +91,34 @@ public class GenericRepository<T>(
         };
     }
 
-    public Task<Result<T>> FindByIdAsync<TKey>(TKey id)
+    public ValueTask<T?> FindByIdAsync<TKey>(TKey id)
     {
         return  _context
             .Set<T>()
-            .FindByIdAsync(id: id);
+            .FindAsync([id]);
+            //.ToResult(IrtError.NotFound($"Entity Not Found: {typeof(TKey).Name}"));
+    }
+
+    public IQueryable<T> Query()
+    {
+        var query = _context.Set<T>().AsQueryable();
+
+        // Soft delete filter in infra
+        if (typeof(ISoftDeletable).IsAssignableFrom(typeof(T)))
+        {
+            query = query.Where(e => EF.Property<bool>(e, "IsDeleted") == false);
+        }
+
+        return query.AsNoTracking();
+    }
+
+    public IQueryable<T> Query(Expression<Func<T, bool>> predicate)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IQueryable<TDto> Query<TDto>(IMapper mapper)
+    {
+        return Query().ProjectTo<TDto>(mapper.ConfigurationProvider);
     }
 }

@@ -1,33 +1,41 @@
-using AutoMapper;
+using Irt.Application.Common;
 using Irt.Application.Configuration.Queries;
 using Irt.Core.ReportingScopes;
-using Irt.SharedKernel.Providers;
+using Irt.SharedKernel.ErrorHandling.Exceptions;
+using Irt.SharedKernel.Repositories;
 using Irt.SharedKernel.Results;
+using Microsoft.EntityFrameworkCore;
 
 namespace Irt.Application.ReportingScopes.Queries.Handlers;
 
-public class GetReportingScopeQueryHandler(
-    IRepositoryProvider repositoryProvider,
-    IMapper mapper) : IQueryHandler<GetReportingScopeQuery, Result<List<ReportingScopeDto>>>
+internal sealed class GetReportingScopeQueryHandler(
+    IReadOnlyRepository<ReportingScope> repository,
+    IProjection<ReportingScope, ReportingScopeDto> projection)
+    : IQueryHandler<GetReportingScopeQuery, Result<List<ReportingScopeDto>>>
 {
-    public async Task<Result<List<ReportingScopeDto>>> HandleAsync(GetReportingScopeQuery query, CancellationToken cancellationToken)
+    public async Task<Result<List<ReportingScopeDto>>> HandleAsync(
+        GetReportingScopeQuery query, CancellationToken cancellationToken)
     {
-        var reportingScopeRepository = repositoryProvider.GetRepository<ReportingScope>();
-        return await reportingScopeRepository
-            .GetAllAsync()
-            .MapAsync(mapper.Map<List<ReportingScopeDto>>);
+        var items = await repository.Query(projection.Expression)
+            .ToListAsync(cancellationToken);
+        return Result<List<ReportingScopeDto>>.Success(items);
     }
 }
 
-public class GetReportingScopeByIdQueryHandler(
-    IRepositoryProvider repositoryProvider,
-    IMapper mapper) : IQueryHandler<GetReportingScopeByIdQuery, Result<ReportingScopeDto>>
+internal sealed class GetReportingScopeByIdQueryHandler(
+    IReadOnlyRepository<ReportingScope> repository,
+    IProjection<ReportingScope, ReportingScopeDto> projection)
+    : IQueryHandler<GetReportingScopeByIdQuery, Result<ReportingScopeDto>>
 {
-    public async Task<Result<ReportingScopeDto>> HandleAsync(GetReportingScopeByIdQuery query, CancellationToken cancellationToken)
+    public async Task<Result<ReportingScopeDto>> HandleAsync(
+        GetReportingScopeByIdQuery query, CancellationToken cancellationToken)
     {
-        var reportingScopeRepository = repositoryProvider.GetRepository<ReportingScope>();
-        return await reportingScopeRepository
-            .FindByIdAsync(query.Id)
-            .MapAsync(mapper.Map<ReportingScopeDto>);
+        var item = await repository.QueryById(query.Id, projection.Expression)
+            .FirstOrDefaultAsync(cancellationToken);
+        
+        return item is not null
+            ? Result<ReportingScopeDto>.Success(item)
+            : Result<ReportingScopeDto>.Failure(
+                IrtError.NotFound($"ReportingScope with id {query.Id} not found"));
     }
 }

@@ -32,7 +32,7 @@ namespace Irt.UnitTests.Domain
             // Act
             var updatedDatasourceName = Name.Of("UpdatedDatasourceName") ;
             var updatedDatasourceDescription = "UpdatedDatasourceDescription";
-            datasource.WithUpdatedDatasource(
+            datasource.UpdateDatasource(
                 updatedDatasourceName,
                 updatedDatasourceDescription);
 

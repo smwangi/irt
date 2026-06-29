@@ -15,7 +15,8 @@ namespace Irt.SharedKernel.Repositories
         Task<bool> DeleteAsync(T entity, CancellationToken cancellationToken);
         
         Task<Result<bool>> ExistsAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken);
-        Task<Result<T>> FindByIdAsync<TKey>(TKey id);
+        
+        //ValueTask<T?> FindByIdAsync<TKey>(TKey id, CancellationToken cancellationToken);
     }
 
     public class PaginationResult<TR>

@@ -13,8 +13,8 @@ public class DatasetMappingTests
         var configuration = new MapperConfiguration(cfg =>
         {
             cfg.CreateMap<Dataset, DatasetDto>()
-                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => string.IsNullOrEmpty(src.Description) ? "N/A" : src.Description))
-                .ForMember(dest => dest.DatasetType, opt => opt.MapFrom(src => Enum.Parse<Core.Datasets.DatasetType>(src.DatasetType.ToString())));
+                .ForMember(dest => dest.Description,
+                    opt => opt.MapFrom(src => string.IsNullOrEmpty(src.Description) ? "N/A" : src.Description));
         });
 
         configuration.AssertConfigurationIsValid(); // validate the configuration at startup
@@ -29,8 +29,7 @@ public class DatasetMappingTests
         var configuration = new MapperConfiguration(cfg =>
         {
             cfg.CreateMap<Dataset, DatasetDto>()
-                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => string.IsNullOrEmpty(src.Description) ? "N/A" : src.Description))
-                .ForMember(dest => dest.DatasetType, opt => opt.MapFrom(src => Enum.Parse<Core.Datasets.DatasetType>(src.DatasetType.ToString())));
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => string.IsNullOrEmpty(src.Description) ? "N/A" : src.Description));
         });
 
         // This will throw if there are issues

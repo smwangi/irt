@@ -1,11 +1,12 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Irt.Core.SharedKernel;
 using Irt.Core.ValueObjects;
 
 namespace Irt.Core.SeedWork;
     /// <summary>
     /// Base class for all entities.
     /// </summary>
-    public abstract class Entity<TId> : IHasDomainEvents, IEntity where TId : TypedIdValueBase<TId>
+    public abstract class Entity<TId> : IHasDomainEvents, IEntity, ISoftDeletable where TId : TypedIdValueBase<TId>
     {
         [NotMapped]
         private readonly List<IDomainEvent> _domainEvents = new();
@@ -131,5 +132,6 @@ namespace Irt.Core.SeedWork;
                 application
             ));
         }
-    
+        
+        public void MarkAsDeleted() => IsDeleted = true;
     }

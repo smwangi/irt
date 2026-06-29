@@ -5,7 +5,7 @@ using Irt.SharedKernel.Results;
 
 namespace Irt.SharedKernel.Repositories;
 
-public interface IReadOnlyRepository<T> : IRepository<T> where T : class
+public interface IReadOnlyRepository<T> where T : class
 {
     // Core OData Repository Interface
     IQueryable<T> Query();

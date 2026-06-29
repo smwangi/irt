@@ -10,13 +10,12 @@ namespace Irt.SharedKernel.Repositories
         Task<PaginationResult<T>> GetPaginatedAsync(int page, int pageSize);
         Task<Result<List<T>>> GetAllAsync();
         Task<Result<List<T>>> FilterAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken);
+        Task<T?> GetByIdAsync<TKey>(TKey id, CancellationToken cancellationToken = default);
         Task<T> AddAsync(T entity, CancellationToken cancellationToken);
         Task<T> UpdateAsync(T entity, CancellationToken cancellationToken);
         Task<bool> DeleteAsync(T entity, CancellationToken cancellationToken);
-        
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task<Result<bool>> ExistsAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken);
-        
-        //ValueTask<T?> FindByIdAsync<TKey>(TKey id, CancellationToken cancellationToken);
     }
 
     public class PaginationResult<TR>

@@ -1,5 +1,6 @@
 using Irt.Application.Configuration.Commands;
 using Irt.Core.ReportingScopes;
+using Irt.Core.SharedKernel;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
 using Irt.SharedKernel.Repositories;
 using Irt.SharedKernel.Results;
@@ -7,7 +8,8 @@ using Irt.SharedKernel.Results;
 namespace Irt.Application.ReportingScopes.Commands.Handlers;
 
 public class PatchReportingScopeCommandHandler(
-    IRepository<ReportingScope> repository)
+    IRepository<ReportingScope> repository,
+    INameUniquenessChecker<ReportingScope, ReportingScopeId> uniquenessChecker)
 : ICommandHandler<PatchReportingScopeCommand, Result<ReportingScopeDto>>
 {
     public async Task<Result<ReportingScopeDto>> HandleAsync(
@@ -22,11 +24,17 @@ public class PatchReportingScopeCommandHandler(
                 IrtError.NotFound($"Reporting scope with id {command.Id} not found."));
         }
 
-        scope.SetName(command.Name);
+        if (!await uniquenessChecker.IsNameUniqueAsync(
+                command.Name,
+                scope.Id,
+                cancellationToken))
+        {
+            return Result<ReportingScopeDto>.Failure(
+                IrtError.Conflict($"A reporting scope named '{command.Name}' already exists."));
+        }
 
-        scope.SetDescription(command.Description);
-
-        await repository.UpdateAsync(scope, cancellationToken);
+        scope.Update(command.Name, command.Description);
+        await repository.SaveChangesAsync(cancellationToken);
         return Result<ReportingScopeDto>.Success(ReportingScopeDto.Projection.Compile()(scope));
     }
 }

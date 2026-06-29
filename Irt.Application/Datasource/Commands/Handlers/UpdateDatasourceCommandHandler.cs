@@ -3,14 +3,13 @@ using Irt.Application.Common;
 using Irt.Application.Configuration.Commands;
 using Irt.Core.ValueObjects;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
-using Irt.SharedKernel.Providers;
 using Irt.SharedKernel.Repositories;
 using Irt.SharedKernel.Results;
 
 namespace Irt.Application.Datasource.Commands.Handlers
 {
     internal class UpdateDatasourceCommandHandler(
-        IRepositoryProvider repositoryProvider,
+        IRepository<Core.Datasources.Datasource> datasourceRepository,
         IReadOnlyRepository<Core.Datasources.Datasource> repository,
         IMapper mapper)
         : ICommandHandler<UpdateDatasourceCommand, Result<DatasourceDto>>
@@ -19,7 +18,6 @@ namespace Irt.Application.Datasource.Commands.Handlers
             UpdateDatasourceCommand request, 
             CancellationToken cancellationToken)
         {
-            var datasourceRepository = repositoryProvider.GetRepository<Core.Datasources.Datasource>();
             var existingDatasource = await repository.FindByIdAsync(request.Id, cancellationToken);
             
             if (existingDatasource is null)
@@ -33,6 +31,7 @@ namespace Irt.Application.Datasource.Commands.Handlers
             
             AuditRegistrar.RegisterModificationOnly(existingDatasource, command: request);
             var updatedDatasource = await datasourceRepository.UpdateAsync(existingDatasource, cancellationToken);
+            await datasourceRepository.SaveChangesAsync(cancellationToken);
             return Result<DatasourceDto>.Success(mapper.Map<DatasourceDto>(updatedDatasource));
         }
     }

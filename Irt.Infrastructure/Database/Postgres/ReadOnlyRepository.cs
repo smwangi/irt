@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Irt.Core.SeedWork;
 using Irt.SharedKernel.Common;
 using Irt.SharedKernel.Repositories;
 using Irt.SharedKernel.Results;
@@ -13,36 +14,6 @@ public class ReadOnlyRepository<T>(
 {
     private DbSet<T> dbSet =  dbContext.Set<T>();
     
-    public Task<PaginationResult<T>> GetPaginatedAsync(int page, int pageSize)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Result<List<T>>> GetAllAsync()
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Result<List<T>>> FilterAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<T> AddAsync(T entity, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<T> UpdateAsync(T entity, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> DeleteAsync(T entity, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
     Task<bool> IReadOnlyRepository<T>.ExistsAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
@@ -256,7 +227,8 @@ public class ReadOnlyRepository<T>(
     {
         var parameter = Expression.Parameter(typeof(T), "x");
         var idProperty = Expression.Property(parameter, "Id");
-        var constant = Expression.Constant(id, typeof(TId));
+        var key = CoerceKey(id, idProperty.Type);
+        var constant = Expression.Constant(key, idProperty.Type);
         var equality = Expression.Equal(idProperty, constant);
         var lambda = Expression.Lambda<Func<T, bool>>(equality, parameter);
         
@@ -267,7 +239,7 @@ public class ReadOnlyRepository<T>(
         => QueryById(id).Select(projection);
 
     public virtual async Task<T?> FindByIdAsync<TId>(TId id, CancellationToken cancellationToken = default)
-        => await dbSet.FindAsync([id], cancellationToken);
+        => await dbSet.FindAsync([CoerceKey(id, GetIdPropertyType())], cancellationToken);
 
     public virtual async Task<T?> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
         => await dbSet.FirstOrDefaultAsync(predicate, cancellationToken);
@@ -287,13 +259,34 @@ public class ReadOnlyRepository<T>(
         throw new NotImplementedException();
     }
 
-    Task<Result<bool>> IRepository<T>.ExistsAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken)
+    private static Type GetIdPropertyType()
+        => typeof(T).GetProperty("Id")?.PropertyType
+           ?? throw new InvalidOperationException($"{typeof(T).Name} does not expose an Id property.");
+
+    private static object? CoerceKey<TId>(TId id, Type keyType)
     {
-        throw new NotImplementedException();
+        if (id is null || keyType.IsInstanceOfType(id))
+        {
+            return id;
+        }
+
+        if (id is string stringId && IsTypedId(keyType))
+        {
+            var createMethod = keyType.GetMethod(
+                "Create",
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static,
+                [typeof(string)]);
+
+            if (createMethod is not null)
+            {
+                return createMethod.Invoke(null, [stringId]);
+            }
+        }
+
+        return Convert.ChangeType(id, keyType);
     }
 
-    public ValueTask<T?> FindByIdAsync<TKey>(TKey id)
-    {
-        throw new NotImplementedException();
-    }
+    private static bool IsTypedId(Type type)
+        => type.BaseType?.IsGenericType == true
+           && type.BaseType.GetGenericTypeDefinition() == typeof(TypedIdValueBase<>);
 }

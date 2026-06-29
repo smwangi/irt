@@ -1,18 +1,18 @@
 using AutoMapper;
 using FluentValidation;
 using Irt.Application.Configuration.Commands;
-using Irt.Application.Helpers;
 using Irt.Core.Datasources;
 using Irt.Core.SharedKernel;
 using Irt.Core.ValueObjects;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
+using Irt.SharedKernel.Repositories;
 using Irt.SharedKernel.Results;
 using ValidationException = Irt.SharedKernel.ErrorHandling.Exceptions.ValidationException;
 
 namespace Irt.Application.Datasource.Commands.Handlers
 {
     internal class CreateDatasourceCommandHandler(
-        IRepositoryFactory datasourceRepository,
+        IRepository<Core.Datasources.Datasource> repository,
         IMapper mapper,
         IValidator<DatasourceDto> validator,
         INameUniquenessChecker<Core.Datasources.Datasource, DatasourceId> uniquenessChecker) : ICommandHandler<CreateDatasourceCommand, Result<DatasourceDto>>
@@ -54,9 +54,8 @@ namespace Irt.Application.Datasource.Commands.Handlers
                 command.DatasourceCreateRequest.Source,
                 datasourceType);
 
-            var savedDatasource = await datasourceRepository
-                .CreateFactory<Core.Datasources.Datasource>()
-                .AddAsync(datasource, cancellationToken);
+            var savedDatasource = await repository.AddAsync(datasource, cancellationToken);
+            await repository.SaveChangesAsync(cancellationToken);
             return Result<DatasourceDto>.Success(mapper.Map<DatasourceDto>(savedDatasource));
         }
     }

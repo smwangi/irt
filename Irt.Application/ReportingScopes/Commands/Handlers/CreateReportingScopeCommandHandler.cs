@@ -1,40 +1,38 @@
 using Irt.Application.Common;
 using Irt.Application.Configuration.Commands;
 using Irt.Core.ReportingScopes;
+using Irt.Core.SharedKernel;
 using Irt.Core.ValueObjects;
-using Irt.SharedKernel.Providers;
+using Irt.SharedKernel.ErrorHandling.Exceptions;
+using Irt.SharedKernel.Repositories;
 using Irt.SharedKernel.Results;
 
 namespace Irt.Application.ReportingScopes.Commands.Handlers;
 
 public class CreateReportingScopeCommandHandler(
-    IRepositoryProvider repositoryProvider)
+    IRepository<ReportingScope> repository,
+    INameUniquenessChecker<ReportingScope, ReportingScopeId> uniquenessChecker)
     : ICommandHandler<CreateReportingScopeCommand, Result<ReportingScopeDto>>
 {
     public async Task<Result<ReportingScopeDto>> HandleAsync(CreateReportingScopeCommand command, CancellationToken cancellationToken)
     {
-        var reportingScopeRepository = repositoryProvider.GetRepository<ReportingScope>();
+        if (!await uniquenessChecker.IsNameUniqueAsync(command.Name, cancellationToken))
+        {
+            return Result<ReportingScopeDto>.Failure(
+                IrtError.Conflict($"A reporting scope named '{command.Name}' already exists."));
+        }
 
-        return null; /*await reportingScopeRepository
-            .ExistsAsync(x => x.Name == Name.Of(command.Name), cancellationToken)
-            //.EnsureNotExistsAsync("A reporting scope with that name already exists.")
-           .BindAsync(async sp =>
-            {
-                var reportingScope = ReportingScope.CreateReportingScope(
-                    name: Name.Of(command.Name),
-                    command.Description);
-                AuditRegistrar.RegisterAuditFromCommand(
-                    reportingScope,
-                    command);
+        var reportingScope = ReportingScope.CreateReportingScope(
+            name: Name.Of(command.Name),
+            description: command.Description);
 
-                await reportingScopeRepository.AddAsync(reportingScope, cancellationToken);
-                return Result<ReportingScopeDto>.Success(new ReportingScopeDto
-                (
-                    Id: reportingScope.Id,
-                    reportingScope.Name.Value,
-                    reportingScope.Description
-                ));
-            })*/;
+        AuditRegistrar.RegisterCreationOnly(reportingScope, command);
+
+        await repository.AddAsync(reportingScope, cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
+
+        return Result<ReportingScopeDto>.Success(
+            ReportingScopeDto.Projection.Compile()(reportingScope));
         
     }
 }

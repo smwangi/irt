@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Irt.Core.SeedWork;
 using Irt.Core.SharedKernel;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
 using Irt.SharedKernel.Repositories;
@@ -30,7 +31,6 @@ public class GenericRepository<T>(
         await _context
             .Set<T>()
             .AddAsync(entity, cancellationToken);
-        await SaveChangesAsync();
         return entity;
     }
     
@@ -39,7 +39,6 @@ public class GenericRepository<T>(
         _context
             .Set<T>()
             .Update(entity);
-        await SaveChangesAsync();
         return entity;
     }
     public async Task<bool> DeleteAsync(T entity, CancellationToken cancellationToken)
@@ -47,13 +46,13 @@ public class GenericRepository<T>(
         _context
             .Set<T>()
             .Remove(entity);
-        return await _context
-            .SaveChangesAsync() > 0;
+        await Task.CompletedTask;
+        return true;
     }
 
-    public async Task SaveChangesAsync()
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        await _context.SaveChangesAsync();
+        return await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<Result<bool>> ExistsAsync(
@@ -91,11 +90,11 @@ public class GenericRepository<T>(
         };
     }
 
-    public ValueTask<T?> FindByIdAsync<TKey>(TKey id)
+    public async Task<T?> GetByIdAsync<TKey>(TKey id, CancellationToken cancellationToken = default)
     {
-        return  _context
+        return await _context
             .Set<T>()
-            .FindAsync([id]);
+            .FindAsync([CoerceKey(id, GetIdPropertyType())], cancellationToken);
             //.ToResult(IrtError.NotFound($"Entity Not Found: {typeof(TKey).Name}"));
     }
 
@@ -121,4 +120,35 @@ public class GenericRepository<T>(
     {
         return Query().ProjectTo<TDto>(mapper.ConfigurationProvider);
     }
+
+    private static Type GetIdPropertyType()
+        => typeof(T).GetProperty("Id")?.PropertyType
+           ?? throw new InvalidOperationException($"{typeof(T).Name} does not expose an Id property.");
+
+    private static object? CoerceKey<TKey>(TKey id, Type keyType)
+    {
+        if (id is null || keyType.IsInstanceOfType(id))
+        {
+            return id;
+        }
+
+        if (id is string stringId && IsTypedId(keyType))
+        {
+            var createMethod = keyType.GetMethod(
+                "Create",
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static,
+                [typeof(string)]);
+
+            if (createMethod is not null)
+            {
+                return createMethod.Invoke(null, [stringId]);
+            }
+        }
+
+        return Convert.ChangeType(id, keyType);
+    }
+
+    private static bool IsTypedId(Type type)
+        => type.BaseType?.IsGenericType == true
+           && type.BaseType.GetGenericTypeDefinition() == typeof(TypedIdValueBase<>);
 }

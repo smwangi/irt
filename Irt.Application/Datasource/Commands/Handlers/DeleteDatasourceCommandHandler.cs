@@ -1,22 +1,19 @@
 using Irt.Application.Configuration.Commands;
 using Irt.SharedKernel.Common;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
-using Irt.SharedKernel.Providers;
 using Irt.SharedKernel.Repositories;
 using Irt.SharedKernel.Results;
 
 namespace Irt.Application.Datasource.Commands.Handlers
 {
     internal class DeleteDatasourceCommandHandler(
-        IRepositoryProvider repositoryProvider,
+        IRepository<Core.Datasources.Datasource> datasourceRepository,
         IReadOnlyRepository<Core.Datasources.Datasource>repository)
          : ICommandHandler<DeleteDatasourceCommand, Result<Unit>>
     {
 
         public async Task<Result<Unit>> HandleAsync(DeleteDatasourceCommand request, CancellationToken cancellationToken)
         {
-            var datasourceRepository = repositoryProvider
-                .GetRepository<Core.Datasources.Datasource>();
             var datasourceResult = await repository
                 .FindByIdAsync(request.DatasourceId, cancellationToken);
 
@@ -28,6 +25,7 @@ namespace Irt.Application.Datasource.Commands.Handlers
             datasourceResult.MarkAsDeleted();
             
             await datasourceRepository.UpdateAsync(datasourceResult, cancellationToken: cancellationToken);
+            await datasourceRepository.SaveChangesAsync(cancellationToken);
             return Result<Unit>.Success(Unit.Value);
         }
     }

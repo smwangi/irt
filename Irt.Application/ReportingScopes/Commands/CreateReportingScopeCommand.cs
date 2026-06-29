@@ -4,9 +4,8 @@ using Irt.SharedKernel.Results;
 
 namespace Irt.Application.ReportingScopes.Commands;
 
-public record CreateReportingScopeCommand(string Name) : ICommand<Result<ReportingScopeDto>>, IRequireMetadata
+public record CreateReportingScopeCommand(string Name, string Description) : ICommand<Result<ReportingScopeDto>>, IRequireMetadata
 {
-    public string? Description { get; private set; }
     public string? UserId { get; private set; }
     public string? UserName { get; private set; }
     public string? Application { get; private set; }

@@ -5,7 +5,6 @@ using Irt.Core.Datasets;
 using Irt.Core.IndicatorDefinitions;
 using Irt.Core.ValueObjects;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
-using Irt.SharedKernel.Providers;
 using Irt.SharedKernel.Repositories;
 using Irt.SharedKernel.Results;
 using CoreDatasource = Irt.Core.Datasources.Datasource;
@@ -13,7 +12,7 @@ using CoreDatasource = Irt.Core.Datasources.Datasource;
 namespace Irt.Application.Datasets.Commands.Handlers
 {
     internal class CreateDatasetCommandHandler(
-        IRepositoryProvider repositoryProvider,
+        IRepository<Dataset> datasetRepository,
         IReadOnlyRepository<Dataset> repository,
         IReadOnlyRepository<Core.Datasources.Datasource> datasourcesRepository,
         IReadOnlyRepository<IndicatorDefinition> indicatorDefinitionRepository,
@@ -23,7 +22,6 @@ namespace Irt.Application.Datasets.Commands.Handlers
             CreateDatasetCommand command, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(command);
-            var datasetRepository = repositoryProvider.GetRepository<Dataset>();
             var datasourceTask=  datasourcesRepository.FindByIdAsync(command.DatasourceId, cancellationToken);
             var indicatorDefinitionTask = indicatorDefinitionRepository.FindByIdAsync(command.IndicatorDefinitionId, cancellationToken);
                     
@@ -50,6 +48,7 @@ namespace Irt.Application.Datasets.Commands.Handlers
                 source: datasource);
             
             await datasetRepository.AddAsync(dataset, cancellationToken);
+            await datasetRepository.SaveChangesAsync(cancellationToken);
 
             return Result<DatasetDto>.Success(mapper.Map<DatasetDto>(dataset));
         }

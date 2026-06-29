@@ -5,6 +5,7 @@ using Irt.Application.ReportingScopes.Commands;
 using Irt.Application.ReportingScopes.Queries;
 using Irt.SharedKernel.Results;
 using Microsoft.AspNetCore.Mvc;
+using IrtResultOfReportingScope = Irt.SharedKernel.Results.Result<Irt.Application.ReportingScopes.ReportingScopeDto>;
 
 
 namespace IrtWeb.ReportingScopes;
@@ -31,7 +32,7 @@ public class ReportingScopesController(
     public async Task<IActionResult> Get([FromRoute] string key)
     {
         var reportingScope = await queryDispatcher
-            .DispatchAsync<GetReportingScopeByIdQuery, Irt.SharedKernel.Results.Result<ReportingScopeDto>>(
+            .DispatchAsync<GetReportingScopeByIdQuery, IrtResultOfReportingScope>(
                 new GetReportingScopeByIdQuery(key), CancellationToken.None);
         return reportingScope.IsSuccess ? Ok(reportingScope.Value) : reportingScope.ToActionResult();
         //return reportingScope.ToActionResult();
@@ -44,7 +45,7 @@ public class ReportingScopesController(
     public async Task<IActionResult> CreateReportingScope([FromBody] CreateReportingScopeCommand command)
     {
         var response = await commandDispatcher
-            .DispatchCommandAsync<CreateReportingScopeCommand, Result<ReportingScopeDto>>(
+            .DispatchCommandAsync<CreateReportingScopeCommand, IrtResultOfReportingScope>(
                 command, CancellationToken.None);
 
         return response.Match(
@@ -69,7 +70,7 @@ public class ReportingScopesController(
         }
         
         var result = await commandDispatcher
-            .DispatchCommandAsync<UpdateReportingScopeCommand, Result<ReportingScopeDto>>(
+            .DispatchCommandAsync<UpdateReportingScopeCommand, IrtResultOfReportingScope>(
                 command, CancellationToken.None);
         return result.ToActionResult();
     }
@@ -88,19 +89,8 @@ public class ReportingScopesController(
         }
         
         var result = await commandDispatcher
-            .DispatchCommandAsync<PatchReportingScopeCommand, Result<ReportingScopeDto>>(
+            .DispatchCommandAsync<PatchReportingScopeCommand, IrtResultOfReportingScope>(
                 command, CancellationToken.None);
         return result.ToActionResult();
-    }
-    
-    [HttpDelete(ApiPrefix + "/{key}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteReportingScope([FromRoute] string key)
-    {
-        var result = await commandDispatcher
-            .DispatchCommandAsync<DeleteReportingScopeCommand, Result>(
-                new DeleteReportingScopeCommand(key), CancellationToken.None);
-        return result.IsSuccess ? NoContent() : result.ToActionResult();
     }
 }

@@ -4,7 +4,6 @@ using Irt.Core.IndicatorDefinitions;
 using Irt.Core.SeedWork;
 using Irt.Core.SharedKernel;
 using Irt.Infrastructure.Shared;
-using Irt.SharedKernel.Providers;
 using Irt.SharedKernel.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,8 +18,8 @@ public static class RegisterRepositories
         //services.AddScoped<IGenericRepository<IndicatorDefinition>, GenericRepository<IndicatorDefinition>>();
         
         services.AddScoped(typeof(IReadOnlyRepository<>), typeof(ReadOnlyRepository<>));
+        services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-        services.AddScoped<IRepositoryProvider, RepositoryProvider>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         return services;
     }

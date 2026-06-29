@@ -58,7 +58,7 @@ namespace Irt.Infrastructure.Database.Postgres;
             // Execute the query using Dapper
             var count = await connection.ExecuteScalarAsync<int>(
                 sql, 
-                new { nameValue, excludeId }, 
+                new { nameValue, currentId = excludeId.Value }, 
                 commandType: CommandType.Text
             );
 

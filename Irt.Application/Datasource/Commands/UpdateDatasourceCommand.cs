@@ -1,5 +1,4 @@
 using FluentValidation;
-using Irt.Application.Common;
 using Irt.Application.Configuration.Commands;
 using Irt.Application.Datasources;
 using Irt.SharedKernel.Results;
@@ -11,20 +10,7 @@ namespace Irt.Application.Datasource.Commands
         string Name,
         string Description,
         string Source,
-        string DatasourceType) : ICommand<Result<DatasourceDto>>, IRequireMetadata
-    {
-        public string? UserId { get; private set; }
-        public string? UserName { get; private set; }
-        public string? Application { get; private set; }
-        public string? IpAddress { get; private set; }
-        public void SetMetadata(string userId, string userName, string application, string ipAddress)
-        {
-            UserId = userId;
-            UserName = userName;
-            Application = application;
-            IpAddress = ipAddress;
-        }
-    }
+        string DatasourceType) : ICommand<Result<DatasourceDto>>;
 
     public class UpdateDatasourceCommandValidator : AbstractValidator<UpdateDatasourceCommand>
     {

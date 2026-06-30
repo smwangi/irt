@@ -61,7 +61,6 @@ public class UpdateDatasetCommandHandler(
 
         var updatedDataset = await datasetRepository
             .UpdateAsync(existingDataset, cancellationToken);
-        await datasetRepository.SaveChangesAsync(cancellationToken);
 
         return Result<DatasetDto>.Success(mapper.Map<DatasetDto>(updatedDataset));
     }

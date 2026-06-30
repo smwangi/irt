@@ -1,6 +1,5 @@
 
 using FluentValidation;
-using Irt.Application.Common;
 using Irt.Application.Configuration.Commands;
 using Irt.SharedKernel.Results;
 
@@ -11,20 +10,7 @@ public record CreateDatasetCommand(
     string Description,
     string DatasourceId,
     string DatasetType,
-    string IndicatorDefinitionId) : ICommand<Result<DatasetDto>>, IRequireMetadata
-{
-    public string? UserId { get; private set; }
-    public string? UserName { get; private set; }
-    public string? Application { get; private set; }
-    public string? IpAddress { get; private set; }
-    public void SetMetadata(string userId, string userName, string application, string ipAddress)
-    {
-        UserId = userId;
-        UserName = userName;
-        Application = application;
-        IpAddress = ipAddress;
-    }
-}
+    string IndicatorDefinitionId) : ICommand<Result<DatasetDto>>;
 
 
 public class CreateDatasetCommandValidator : AbstractValidator<CreateDatasetCommand>

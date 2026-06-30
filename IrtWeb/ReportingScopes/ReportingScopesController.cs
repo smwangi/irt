@@ -10,23 +10,25 @@ using IrtResultOfReportingScope = Irt.SharedKernel.Results.Result<Irt.Applicatio
 
 namespace IrtWeb.ReportingScopes;
 
+[ApiController]
+[Route("irt/v1/reporting-scopes")]
 public class ReportingScopesController(
     ICommandDispatcher commandDispatcher,
-    IQueryDispatcher queryDispatcher) : Controller
+    IQueryDispatcher queryDispatcher) : ControllerBase
 {
-    private const string ApiPrefix = "reporting-scope";
-    
+    [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> List([FromQuery] string? search = null)
     {
         var result = await queryDispatcher
             .DispatchAsync<GetReportingScopeQuery, Irt.SharedKernel.Results.Result<List<ReportingScopeDto>>>(
-                new GetReportingScopeQuery(), CancellationToken.None);
+                new GetReportingScopeQuery(search), CancellationToken.None);
 
         return result.IsSuccess ? Ok(result.Value) : result.ToActionResult();
     }
     
+    [HttpGet("{key}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get([FromRoute] string key)
@@ -35,10 +37,9 @@ public class ReportingScopesController(
             .DispatchAsync<GetReportingScopeByIdQuery, IrtResultOfReportingScope>(
                 new GetReportingScopeByIdQuery(key), CancellationToken.None);
         return reportingScope.IsSuccess ? Ok(reportingScope.Value) : reportingScope.ToActionResult();
-        //return reportingScope.ToActionResult();
     }
     
-    [HttpPost(ApiPrefix)]
+    [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -56,7 +57,7 @@ public class ReportingScopesController(
             onFailure: _ => response.ToActionResult());
     }
 
-    [HttpPut(ApiPrefix + "/{key}")]
+    [HttpPut("{key}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -64,7 +65,7 @@ public class ReportingScopesController(
         [FromRoute] string? key,
         [FromBody] UpdateReportingScopeCommand command)
     {
-        if ( key is null || key != command.Id )
+        if (key is null || key != command.Id)
         {
             return BadRequest("Key in route does not match key in body.");
         }
@@ -75,7 +76,7 @@ public class ReportingScopesController(
         return result.ToActionResult();
     }
     
-    [HttpPatch(ApiPrefix + "/{key}")]
+    [HttpPatch("{key}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -83,7 +84,7 @@ public class ReportingScopesController(
         [FromRoute] string? key,
         [FromBody] PatchReportingScopeCommand command)
     {
-        if ( key is null || key != command.Id )
+        if (key is null || key != command.Id)
         {
             return BadRequest("Key in route does not match key in body.");
         }

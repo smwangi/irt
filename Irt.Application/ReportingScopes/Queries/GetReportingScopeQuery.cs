@@ -3,10 +3,9 @@ using Irt.SharedKernel.Results;
 
 namespace Irt.Application.ReportingScopes.Queries;
 
-public sealed record GetReportingScopeQuery
+public sealed record GetReportingScopeQuery(string? Search = null)
     : IQuery<Result<List<ReportingScopeDto>>>;
 
 public sealed record GetReportingScopeByIdQuery(string Id)
     : IQuery<Result<ReportingScopeDto>>;
-
 

@@ -25,7 +25,6 @@ namespace Irt.Application.Datasource.Commands.Handlers
             datasourceResult.MarkAsDeleted();
             
             await datasourceRepository.UpdateAsync(datasourceResult, cancellationToken: cancellationToken);
-            await datasourceRepository.SaveChangesAsync(cancellationToken);
             return Result<Unit>.Success(Unit.Value);
         }
     }

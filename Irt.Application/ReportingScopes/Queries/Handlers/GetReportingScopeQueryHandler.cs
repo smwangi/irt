@@ -16,8 +16,18 @@ internal sealed class GetReportingScopeQueryHandler(
     public async Task<Result<List<ReportingScopeDto>>> HandleAsync(
         GetReportingScopeQuery query, CancellationToken cancellationToken)
     {
-        var items = await repository.Query(projection.Expression)
+        var items = await repository.Query(scope => !scope.IsDeleted, projection.Expression)
             .ToListAsync(cancellationToken);
+
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            var search = query.Search.Trim();
+
+            items = items
+                .Where(item => item.Name.Contains(search, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
         return Result<List<ReportingScopeDto>>.Success(items);
     }
 }

@@ -9,7 +9,7 @@ using Irt.SharedKernel.Results;
 
 namespace Irt.Application.ReportingScopes.Commands.Handlers;
 
-public class CreateReportingScopeCommandHandler(
+internal sealed class CreateReportingScopeCommandHandler(
     IRepository<ReportingScope> repository,
     INameUniquenessChecker<ReportingScope, ReportingScopeId> uniquenessChecker)
     : ICommandHandler<CreateReportingScopeCommand, Result<ReportingScopeDto>>
@@ -26,10 +26,7 @@ public class CreateReportingScopeCommandHandler(
             name: Name.Of(command.Name),
             description: command.Description);
 
-        AuditRegistrar.RegisterCreationOnly(reportingScope, command);
-
         await repository.AddAsync(reportingScope, cancellationToken);
-        await repository.SaveChangesAsync(cancellationToken);
 
         return Result<ReportingScopeDto>.Success(
             ReportingScopeDto.Projection.Compile()(reportingScope));

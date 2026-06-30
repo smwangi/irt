@@ -48,7 +48,6 @@ namespace Irt.Application.Datasets.Commands.Handlers
                 source: datasource);
             
             await datasetRepository.AddAsync(dataset, cancellationToken);
-            await datasetRepository.SaveChangesAsync(cancellationToken);
 
             return Result<DatasetDto>.Success(mapper.Map<DatasetDto>(dataset));
         }

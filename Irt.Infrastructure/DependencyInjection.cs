@@ -30,8 +30,9 @@ public static class DependencyInjection
             opt.UseNpgsql(configuration.GetConnectionString("PostgresConnection")));
         services.AddScoped(typeof(IEntityRepository), typeof(EntityRepository));
         services.AddScoped<IDomainEventInterface.IDomainEventDispatcher, DomainEvents_DomainEventsDispatcher>();
-        services.AddScoped<IDomainEventInterface.IDomainEventHandler<EntityCreatedEvent>, EntityCreatedEventHandler>();
-        services.AddScoped<IDomainEventInterface.IDomainEventHandler<EntityModifiedEvent>, EntityModifiedEventHandler>();
+        // Audit (CreatedBy/LastModifiedBy) is centrally applied by ApplicationDbContext.SaveChangesAsync
+        // via IUserDetails, so the legacy EntityCreated/Modified event handlers are intentionally
+        // not registered to avoid clobbering audit values with stale ctor-time data.
         
         services.AddScoped<INameUniquenessChecker<Datasource, DatasourceId>>(sp =>
             new GenericNameUniquenessChecker<Datasource, DatasourceId>(

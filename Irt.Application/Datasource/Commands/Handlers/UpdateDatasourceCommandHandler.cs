@@ -29,9 +29,7 @@ namespace Irt.Application.Datasource.Commands.Handlers
                 Name.Of(request.Name),
                 request.Description);
             
-            AuditRegistrar.RegisterModificationOnly(existingDatasource, command: request);
             var updatedDatasource = await datasourceRepository.UpdateAsync(existingDatasource, cancellationToken);
-            await datasourceRepository.SaveChangesAsync(cancellationToken);
             return Result<DatasourceDto>.Success(mapper.Map<DatasourceDto>(updatedDatasource));
         }
     }

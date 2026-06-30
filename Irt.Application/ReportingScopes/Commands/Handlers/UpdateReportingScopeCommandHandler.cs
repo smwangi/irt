@@ -1,3 +1,4 @@
+using Irt.Application.Common;
 using Irt.Application.Configuration.Commands;
 using Irt.Core.ReportingScopes;
 using Irt.Core.SharedKernel;
@@ -34,7 +35,6 @@ internal sealed class UpdateReportingScopeCommandHandler(
         }
         
         scope.Update(command.Name, command.Description); // full replace
-        await repository.SaveChangesAsync(cancellationToken);
         
         return Result<ReportingScopeDto>.Success(ReportingScopeDto.Projection.Compile()(scope));
     }

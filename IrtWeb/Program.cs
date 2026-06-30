@@ -13,6 +13,7 @@ using Irt.Infrastructure.Database.Postgres;
 using Irt.SharedKernel.ErrorHandling.MiddleWare;
 using IrtWeb.Configuration;
 using IrtWeb.GraphQL;
+using IrtWeb.GraphQL.ReportingScopes;
 using Microsoft.AspNetCore.OData;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,36 +47,43 @@ builder.Services
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddHttpsRedirection(options =>
+if (!builder.Environment.IsDevelopment())
 {
-    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
-    options.HttpsPort = 5001;
-});
+    builder.Services.AddHttpsRedirection(options =>
+    {
+        options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
+        options.HttpsPort = 5001;
+    });
+}
 
  // RegisterDbContext<ApplicationDbContext>(DbContextKind.Resolver) is important — it tells HotChocolate to resolve a fresh ApplicationDbContext per resolver invocation (correct for the [Service] ApplicationDbContext db parameter and avoids the "DbContext is not thread-safe" pitfall when GraphQL executes resolvers in parallel).
 builder.Services
     .AddGraphQLServer()
     .RegisterDbContextFactory<ApplicationDbContext>()
     .AddQueryType()
-    .AddObjectTypeExtension<Query>(_ => { })
+    .AddMutationType()
+    .AddTypeExtension<ReportingScopeMutations>()
+    .AddTypeExtension<ReportingScopeQueries>()
     .AddProjections()
     .AddFiltering()
-    .AddSorting();
+    .AddSorting()
+    .ModifyRequestOptions(o => o.IncludeExceptionDetails = builder.Environment.IsDevelopment())
+    .AddErrorFilter(err => builder.Environment.IsDevelopment() && err.Exception is not null
+        ? err.WithMessage(err.Exception.GetBaseException().Message + " | " + err.Exception.GetType().Name)
+        : err);
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithThreadId()
     .Enrich.WithMachineName()
+    .Enrich.FromLogContext()
     .WriteTo.Console()
     .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
-    .Enrich.FromLogContext()
     .CreateLogger();
 
-builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
-
-builder.Host.UseSerilog((context, configuration)
-=> configuration.ReadFrom.Configuration(context.Configuration)
-.Enrich.FromLogContext()
-.WriteTo.Console());
+builder.Host.UseSerilog((context, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console());
 
 // health checks
 builder.Services.AddHealthChecks();
@@ -100,16 +108,15 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/error");
     app.UseHsts();
+    app.UseHttpsRedirection();
 }
-
-app.UseHttpsRedirection();
 app.UseMiddleware<GlobalExceptionHandlerMiddleWare>();
 app.UseMiddleware<ResultErrorHandlingMiddleWare>();
 
-app.MapControllers();
-app.MapGraphQL("/graphql");
+app.UseSerilogRequestLogging(); // Must run before endpoint middleware so Path is logged
 
-app.UseSerilogRequestLogging(); // Logging incoming http requests
+app.MapControllers();
+app.MapGraphQL("/irt/v1/graphql");
 
 app.MapHealthChecks("/health");
 

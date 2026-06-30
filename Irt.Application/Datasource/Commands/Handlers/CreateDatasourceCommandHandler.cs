@@ -55,7 +55,6 @@ namespace Irt.Application.Datasource.Commands.Handlers
                 datasourceType);
 
             var savedDatasource = await repository.AddAsync(datasource, cancellationToken);
-            await repository.SaveChangesAsync(cancellationToken);
             return Result<DatasourceDto>.Success(mapper.Map<DatasourceDto>(savedDatasource));
         }
     }

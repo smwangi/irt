@@ -1,3 +1,4 @@
+using Irt.Application.Common;
 using Irt.Core.Datasets;
 using Irt.Core.Datasources;
 using Irt.Core.IndicatorCategories;
@@ -15,11 +16,14 @@ namespace Irt.Infrastructure.Database.Postgres;
 public class ApplicationDbContext : DbContext
 {
     private readonly IDomainEventInterface.IDomainEventDispatcher _domainEventDispatcher;
+    private readonly IUserDetails? _userDetails;
     public ApplicationDbContext(
         DbContextOptions<ApplicationDbContext> options,
-        IDomainEventInterface.IDomainEventDispatcher domainEventDispatcher) : base(options)
+        IDomainEventInterface.IDomainEventDispatcher domainEventDispatcher,
+        IUserDetails? userDetails = null) : base(options)
     {
         _domainEventDispatcher = domainEventDispatcher;
+        _userDetails = userDetails;
     }
     
     private ApplicationDbContext(){}
@@ -301,6 +305,8 @@ public class ApplicationDbContext : DbContext
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        ApplyAuditInformation();
+
         // Get all entities that implement HasDomainEvents and has pending changes
         var entities = ChangeTracker.Entries<IHasDomainEvents>()
             //.Where(e => e.Entity.DomainEvents.Any() && e.State == EntityState.Modified)
@@ -317,5 +323,31 @@ public class ApplicationDbContext : DbContext
             cancellationToken);
 
         return result;
+    }
+
+    private void ApplyAuditInformation()
+    {
+        var userId = _userDetails?.UserId ?? "system";
+        var userName = _userDetails?.UserName ?? "system";
+        var application = _userDetails?.Application ?? "system";
+        var ipAddress = _userDetails?.IpAddress ?? "127.0.0.1";
+        var now = DateTime.UtcNow;
+
+        foreach (var entry in ChangeTracker.Entries<IEntity>())
+        {
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    entry.Entity.SetCreatedByInfo(
+                        CreatedBy.Create(userId, userName, application, now, ipAddress));
+                    entry.Entity.SetLastModifiedByInfo(
+                        LastModifiedBy.Create(userId, userName, application, now, ipAddress));
+                    break;
+                case EntityState.Modified:
+                    entry.Entity.SetLastModifiedByInfo(
+                        LastModifiedBy.Create(userId, userName, application, now, ipAddress));
+                    break;
+            }
+        }
     }
 }

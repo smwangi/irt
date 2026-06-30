@@ -6,8 +6,10 @@ namespace Irt.Application.ReportingScopes.Queries;
 
 public class ReportingScopeToDtoProjection : IProjection<ReportingScope, ReportingScopeDto>
 {
-    public Expression<Func<ReportingScope, ReportingScopeDto>> Expression => entity => new ReportingScopeDto(
-        entity.Id,
-        entity.Name.Value,
-        entity.Description);
+    public Expression<Func<ReportingScope, ReportingScopeDto>> Expression => entity => new ReportingScopeDto
+    {
+        Id = entity.Id.Value,
+        Name = entity.Name.Value,
+        Description = entity.Description
+    };
 }

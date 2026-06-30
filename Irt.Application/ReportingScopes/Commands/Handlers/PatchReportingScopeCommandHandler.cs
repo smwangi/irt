@@ -1,3 +1,4 @@
+using Irt.Application.Common;
 using Irt.Application.Configuration.Commands;
 using Irt.Core.ReportingScopes;
 using Irt.Core.SharedKernel;
@@ -7,7 +8,7 @@ using Irt.SharedKernel.Results;
 
 namespace Irt.Application.ReportingScopes.Commands.Handlers;
 
-public class PatchReportingScopeCommandHandler(
+internal sealed class PatchReportingScopeCommandHandler(
     IRepository<ReportingScope> repository,
     INameUniquenessChecker<ReportingScope, ReportingScopeId> uniquenessChecker)
 : ICommandHandler<PatchReportingScopeCommand, Result<ReportingScopeDto>>
@@ -34,7 +35,6 @@ public class PatchReportingScopeCommandHandler(
         }
 
         scope.Update(command.Name, command.Description);
-        await repository.SaveChangesAsync(cancellationToken);
         return Result<ReportingScopeDto>.Success(ReportingScopeDto.Projection.Compile()(scope));
     }
 }

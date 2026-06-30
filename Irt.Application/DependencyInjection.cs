@@ -57,7 +57,8 @@ public static class DependencyInjection
             .AsImplementedInterfaces()
             .WithScopedLifetime());
 
-        services.Decorate(typeof(ICommandHandler<,>), typeof(MetadataEnrichingHandlerDecorator<,>));
+        services.Decorate(typeof(ICommandHandler<,>), typeof(UnitOfWorkCommandHandlerDecorator<,>));
+
         services.Scan(scan => scan
             .FromApplicationDependencies()
             .AddClasses(classes => classes.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)

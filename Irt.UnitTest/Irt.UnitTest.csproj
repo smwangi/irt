@@ -28,7 +28,11 @@
    <ItemGroup>
     <ProjectReference Include="..\Irt.Core\Irt.Core.csproj" />
     <ProjectReference Include="..\Irt.Application\Irt.Application.csproj" />
-    <ProjectReference Include="..\Irt.Core\Irt.Core.csproj" />
+    <ProjectReference Include="..\Irt.SharedKernel\Irt.SharedKernel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
 </Project>

@@ -1,17 +1,21 @@
 
 using Asp.Versioning;
 using Irt.Application;
-using Irt.Application.Configuration.ApiResponse;
-using Irt.Application.Datasources;
 using Irt.Infrastructure;
-using IrtWeb.Middlewares;
-using Microsoft.AspNetCore.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
-using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using MassTransit.DependencyInjection;
 using Irt.Application.Datasets;
+using Irt.Application.Datasource;
+using Irt.Application.ReportingScopes;
+using Irt.Infrastructure.Database.Postgres;
+using IrtWeb.Configuration;
+using IrtWeb.GraphQL;
+using IrtWeb.GraphQL.IndicatorDefinitions;
+using IrtWeb.GraphQL.ReportingScopes;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +23,25 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-//builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    .AddOData(options => options
+        .Select()
+        .Filter()
+        .OrderBy()
+        .Expand()
+        .Count());
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+    options.UseProblemDetailsValidationResponse());
+
+builder.Services
+    .AddApiVersioning(options =>
+    {
+        options.DefaultApiVersion = new ApiVersion(1, 0);
+        options.AssumeDefaultVersionWhenUnspecified = true;
+        options.ReportApiVersions = true;
+    })
+    .AddMvc();
 
 builder.Services
         .AddApplication()
@@ -28,82 +50,43 @@ builder.Services
 
 builder.Services.AddHttpContextAccessor();
 
-IEdmModel GetEdmModel()
+if (!builder.Environment.IsDevelopment())
 {
-    var odataBuilder = new ODataConventionModelBuilder();
-    odataBuilder.EnableLowerCamelCase();
-    odataBuilder.EntitySet<DatasourceDto>("Datasources").EntityType.HasKey(x => x.Id);
-    odataBuilder.EntitySet<DatasetDto>("Datasets").EntityType.HasKey(x => x.Id);
-    return odataBuilder.GetEdmModel();
+    builder.Services.AddHttpsRedirection(options =>
+    {
+        options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
+        options.HttpsPort = 5001;
+    });
 }
 
+ // RegisterDbContext<ApplicationDbContext>(DbContextKind.Resolver) is important — it tells HotChocolate to resolve a fresh ApplicationDbContext per resolver invocation (correct for the [Service] ApplicationDbContext db parameter and avoids the "DbContext is not thread-safe" pitfall when GraphQL executes resolvers in parallel).
 builder.Services
-.AddControllers()
-.AddOData(opt => opt
-    .Select()
-    .Filter()
-    .OrderBy()
-    .Count()
-    .SetMaxTop(100)
-    .AddRouteComponents("irt/api/v{version:apiVersion}", GetEdmModel()));
-
-builder.Services.AddApiVersioning(opt =>
-{
-    opt.ReportApiVersions = true;
-    opt.AssumeDefaultVersionWhenUnspecified = true;
-    opt.DefaultApiVersion = new ApiVersion(1, 0);
-    opt.ApiVersionReader = ApiVersionReader.Combine(
-        new HeaderApiVersionReader("api-version"),
-        new QueryStringApiVersionReader("api-version"),
-        new UrlSegmentApiVersionReader());
-}).AddMvc()
-.AddApiExplorer(opt =>
-{
-    opt.GroupNameFormat = "'v'VVV";
-    opt.SubstituteApiVersionInUrl = true;
-    opt.AssumeDefaultVersionWhenUnspecified = true;
-});
-
-builder.Services.AddHttpsRedirection(options =>
-{
-    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
-    options.HttpsPort = 5001;
-});
+    .AddGraphQLServer()
+    .RegisterDbContextFactory<ApplicationDbContext>()
+    .AddQueryType()
+    .AddMutationType()
+    .AddTypeExtension<ReportingScopeMutations>()
+    .AddTypeExtension<ReportingScopeQueries>()
+    .AddTypeExtension<IndicatorDefinitionMutations>()
+    .AddTypeExtension<IndicatorDefinitionQueries>()
+    .AddProjections()
+    .AddFiltering()
+    .AddSorting()
+    .ModifyRequestOptions(o => o.IncludeExceptionDetails = builder.Environment.IsDevelopment())
+    .AddErrorFilter(error => GraphQlErrorFilter.OnError(error, builder.Environment.IsDevelopment()));
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithThreadId()
     .Enrich.WithMachineName()
+    .Enrich.FromLogContext()
     .WriteTo.Console()
     .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
-    .Enrich.FromLogContext()
     .CreateLogger();
 
-builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
-//builder.Host.UseSerilog();
-
-builder.Services.Configure<ApiBehaviorOptions>(options =>
-{
-    options.InvalidModelStateResponseFactory = context =>
-    {
-        /*var errors = context.ModelState.Values.SelectMany(x => x.Errors.Select(e => e.ErrorMessage));
-        return new BadRequestObjectResult(new { Errors = errors });*/
-        var errors = context.ModelState
-            .Where(ms => ms.Value.Errors.Count > 0)
-            .ToDictionary(
-                ms => ms.Key,
-                ms => ms.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-            );
-
-        var response = ApiResponse<object>.Error(new List<ApiError> { new ApiError($"Validation error{errors.Values}") { Code = "400" } });
-
-        return new BadRequestObjectResult(response);
-    };
-});
-
-builder.Host.UseSerilog((context, configuration)
-=> configuration.ReadFrom.Configuration(context.Configuration)
-.Enrich.FromLogContext()
-.WriteTo.Console());
+builder.Host.UseSerilog((context, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console());
 
 // health checks
 builder.Services.AddHealthChecks();
@@ -121,26 +104,23 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseDeveloperExceptionPage();
 }
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/error");
     app.UseHsts();
+    app.UseHttpsRedirection();
 }
+app.UseMiddleware<GlobalExceptionHandlerMiddleWare>();
 
-app.UseHttpsRedirection();
+app.UseSerilogRequestLogging(); // Must run before endpoint middleware so Path is logged
 
 app.MapControllers();
-
-app.UseMiddleware<ErrorHandlingMiddleware>();
-
-
-app.UseSerilogRequestLogging(); // Logging incoming http requests
+app.MapGraphQL("/irt/v1/graphql");
 
 app.MapHealthChecks("/health");
 
 app.Run();
+return;
 
 public partial class Program {} // Marked partial to allow testing with WebApplicationFactory

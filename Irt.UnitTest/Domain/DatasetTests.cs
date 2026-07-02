@@ -1,5 +1,6 @@
 using Irt.Core.Datasets;
 using Irt.Core.SharedKernel;
+using Irt.Core.ValueObjects;
 using Moq;
 
 namespace Irt.UnitTest.Domain
@@ -32,10 +33,9 @@ namespace Irt.UnitTest.Domain
             // Act
             var updatedName = "new-dataset-name";
             var updatedDescription = Guid.NewGuid().ToString();
-            dataset.UpdateDataset(
-                updatedName,
+            dataset.WithUpdatedDataset(
+                Name.Of(updatedName),
                 updatedDescription,
-                null,
                 datasource: TestData.CreateDatasource(),
                 indicatorDefinition: TestData.CreateIndicatorDefinition(),
                 datasetType: DatasetType.Internal);
@@ -57,10 +57,9 @@ namespace Irt.UnitTest.Domain
             //Action act = () => dataset.UpdateDataset(updatedName, updatedDescription, dataset.Id, nameValidationChecker);
 
             // Act && Assert
-            Assert.Throws<ArgumentException>(() => dataset.UpdateDataset(
-                updatedName,
+            Assert.Throws<ArgumentException>(() => dataset.WithUpdatedDataset(
+                Name.Of(updatedName), 
                 updatedDescription,
-                null,
                 datasource: TestData.CreateDatasource(),
                 indicatorDefinition: TestData.CreateIndicatorDefinition(),
                 datasetType: DatasetType.Internal));

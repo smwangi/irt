@@ -1,15 +1,16 @@
 using Irt.Core.SeedWork;
 using Irt.Core.SharedKernel;
 using Irt.Infrastructure.Database.Postgres;
+using Irt.SharedKernel.Repositories;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Irt.Infrastructure.Shared;
 
-public class UnitOfWork : IUnitOfWork
+public class UnitOfWork(ApplicationDbContext context) : IUnitOfWork
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ApplicationDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
     private IDbContextTransaction? _transaction;
-    private readonly Dictionary<Type, object> _repositories;
+    private readonly Dictionary<Type, object> _repositories = new();
     
     public void Dispose()
     {
@@ -26,9 +27,9 @@ public class UnitOfWork : IUnitOfWork
         return (IGenericRepository<T>)value;
     }
 
-    public async Task<int> SaveChangesAsync()
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        return await _context.SaveChangesAsync();
+        return await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task BeginTransactionAsync()
@@ -38,11 +39,17 @@ public class UnitOfWork : IUnitOfWork
 
     public async Task CommitTransactionAsync()
     {
-        await _transaction?.CommitAsync();
+        if (_transaction is not null)
+        {
+            await _transaction.CommitAsync();
+        }
     }
 
     public async Task RollbackTransactionAsync()
     {
-        await _transaction?.RollbackAsync();
+        if (_transaction is not null)
+        {
+            await _transaction.RollbackAsync();
+        }
     }
 }

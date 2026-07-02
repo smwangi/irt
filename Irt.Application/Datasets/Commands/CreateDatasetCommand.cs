@@ -1,26 +1,25 @@
-using System.Data;
+
 using FluentValidation;
 using Irt.Application.Configuration.Commands;
-using Irt.Application.Configuration.Results;
+using Irt.SharedKernel.Results;
 
-namespace Irt.Application.Datasets.Commands
+namespace Irt.Application.Datasets.Commands;
+
+public record CreateDatasetCommand(
+    string Name,
+    string Description,
+    string DatasourceId,
+    string DatasetType,
+    string IndicatorDefinitionId) : ICommand<Result<DatasetDto>>;
+
+
+public class CreateDatasetCommandValidator : AbstractValidator<CreateDatasetCommand>
 {
-    public class CreateDatasetCommand(
-        DatasetDto request) : CommandBase<Result<DatasetDto, string>>
+    public CreateDatasetCommandValidator()
     {
-        public DatasetDto Request { get; } = request ?? throw new ArgumentNullException(nameof(request));
-        public DatasetType DatasetType { get; } = Enum.Parse<DatasetType>(request.DatasetType.ToString());
-    }
-
-    public class CreateDatasetCommandValidator : AbstractValidator<CreateDatasetCommand>
-    {
-        public CreateDatasetCommandValidator()
-        {
-            RuleFor(x => x.Request).NotNull().WithMessage("Request is required.");
-            RuleFor(x => x.Request.Name).NotEmpty().WithMessage("Name is required.");
-            RuleFor(x => x.Request.DatasourceId).NotEmpty().WithMessage("DatasourceId is required.");
-            RuleFor(x => x.Request.IndicatorDefinitionId).NotEmpty().WithMessage("IndicatorDefinitionId is required.");
-            RuleFor(x => x.Request.DatasetType).IsInEnum().WithMessage("DatasetType is required.");
-        }
+        RuleFor(x => x.Name).NotEmpty().WithMessage("Name is required.");
+        RuleFor(x => x.DatasourceId).NotEmpty().WithMessage("DatasourceId is required.");
+        RuleFor(x => x.IndicatorDefinitionId).NotEmpty().WithMessage("IndicatorDefinitionId is required.");
+        RuleFor(x => x.DatasetType).NotEmpty().WithMessage("DatasetType is required.");
     }
 }

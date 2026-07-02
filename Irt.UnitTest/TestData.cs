@@ -23,7 +23,7 @@ namespace Irt.UnitTest
                     new IndicatorDefinitionId(ObjectId.GenerateNewId().ToString()),
                     Name.Of("IndicatorDefinition1"),
                     "Description1",
-                    new ReportingScope("ReportingScope1"),
+                    new ReportingScopes("ReportingScope1"),
                     new UnitOfMeasure("UnitOfMeasure1"),
                     new IndicatorCategory("IndicatorCategory1"),
                     1,
@@ -55,6 +55,7 @@ namespace Irt.UnitTest
         public static IndicatorCategory CreateIndicatorCategory()
         {
             return IndicatorCategory.CreateIndicatorCategory(
+                name: Name.Of(Guid.NewGuid().ToString()), 
                 description: Guid.NewGuid().ToString(),
                 indicatorMainCategory: CreateIndicatorMainCategory()
             );

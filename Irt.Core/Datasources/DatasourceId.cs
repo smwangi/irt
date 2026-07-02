@@ -5,7 +5,7 @@ namespace Irt.Core.Datasources
     public sealed class DatasourceId : TypedIdValueBase<DatasourceId>
     {
         public string Value { get; }
-        public DatasourceId(string value) : base(value)
+        private DatasourceId(string value) : base(value)
         {
             Value = value;
         }
@@ -14,5 +14,17 @@ namespace Irt.Core.Datasources
         {
             
         }
+
+        public static DatasourceId Create(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException("DatasourceId cannot be empty", nameof(value));
+            }
+            
+            return new DatasourceId(value);
+        }
+
+        public override string ToString() => Value;
     }
 }

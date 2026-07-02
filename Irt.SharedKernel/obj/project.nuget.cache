@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "dgSpecHash": "9H57K46RE4A=",
+  "success": true,
+  "projectFilePath": "/Users/samwan/projects/irtool/Irt.SharedKernel/Irt.SharedKernel.csproj",
+  "expectedPackageFiles": [
+    "/Users/samwan/.nuget/packages/automapper/13.0.1/automapper.13.0.1.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/microsoft.aspnetcore.odata/8.2.5/microsoft.aspnetcore.odata.8.2.5.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/microsoft.bcl.asyncinterfaces/8.0.0/microsoft.bcl.asyncinterfaces.8.0.0.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/9.0.2/microsoft.extensions.dependencyinjection.abstractions.9.0.2.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/microsoft.extensions.logging.abstractions/9.0.2/microsoft.extensions.logging.abstractions.9.0.2.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/microsoft.extensions.options/6.0.0/microsoft.extensions.options.6.0.0.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/microsoft.extensions.primitives/6.0.0/microsoft.extensions.primitives.6.0.0.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/microsoft.odata.core/7.20.0/microsoft.odata.core.7.20.0.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/microsoft.odata.edm/7.20.0/microsoft.odata.edm.7.20.0.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/microsoft.odata.modelbuilder/1.0.9/microsoft.odata.modelbuilder.1.0.9.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/microsoft.spatial/7.20.0/microsoft.spatial.7.20.0.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/system.componentmodel.annotations/4.6.0/system.componentmodel.annotations.4.6.0.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/system.runtime.compilerservices.unsafe/6.0.0/system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/system.text.encodings.web/4.7.2/system.text.encodings.web.4.7.2.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/system.text.json/4.6.0/system.text.json.4.6.0.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/microsoft.netcore.app.ref/9.0.11/microsoft.netcore.app.ref.9.0.11.nupkg.sha512",
+    "/Users/samwan/.nuget/packages/microsoft.aspnetcore.app.ref/9.0.11/microsoft.aspnetcore.app.ref.9.0.11.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'AutoMapper' 13.0.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-rvv3-g6hj-g44x",
+      "projectPath": "/Users/samwan/projects/irtool/Irt.SharedKernel/Irt.SharedKernel.csproj",
+      "warningLevel": 1,
+      "filePath": "/Users/samwan/projects/irtool/Irt.SharedKernel/Irt.SharedKernel.csproj",
+      "libraryId": "AutoMapper",
+      "targetGraphs": [
+        "net9.0"
+      ]
+    }
+  ]
+}

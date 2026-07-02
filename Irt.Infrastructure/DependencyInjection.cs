@@ -1,19 +1,20 @@
-using Couchbase;
+
+using Irt.Application.Configuration.DomainEvents;
 using Irt.Application.Dispatchers;
 using Irt.Application.Helpers;
-using Irt.Infrastructure.Database;
-using Microsoft.Extensions.DependencyInjection;
-using Irt.Infrastructure.Processing;
-using Microsoft.Extensions.Configuration;
 using Irt.Core.Datasources;
-using Irt.Infrastructure.Domain.Datasources;
-using Irt.Core.Datasets;
 using Irt.Core.IndicatorDefinitions;
+using Irt.Core.ReportingScopes;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using Irt.Core.SeedWork;
 using Irt.Core.SharedKernel;
 using Irt.Infrastructure.Database.Postgres;
-using Irt.Infrastructure.Domain.Datasets;
-using Irt.Infrastructure.Domain.IndicatorDefinitions;
+using Irt.Infrastructure.Shared;
+using Irt.SharedKernel.Repositories;
 using Microsoft.EntityFrameworkCore;
+using DomainEvents_DomainEventsDispatcher = Irt.Application.Configuration.DomainEvents.DomainEventsDispatcher;
+
 
 namespace Irt.Infrastructure;
 
@@ -23,41 +24,29 @@ public static class DependencyInjection
 
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var cluster = Cluster.ConnectAsync("couchbase://localhost", "samwan", "P@55w.rd");
-        
-        services.AddSingleton<ICluster>(cluster.Result);
-        services.AddScoped<IDomainEventsDispatcher, DomainEventsDispatcher>();
-        
         services.AddDispatchers();
         services.AddRepositories();
-        //services.AddScoped<IDatasourceRepository, DatasourceRepository>();
-        //services.AddScoped<IIndicatorDefinitionRepository, IndicatorDefinitionRepository>();
         
         services.AddDbContext<ApplicationDbContext>(opt =>
             opt.UseNpgsql(configuration.GetConnectionString("PostgresConnection")));
+        services.AddScoped(typeof(IEntityRepository), typeof(EntityRepository));
+        services.AddScoped<IDomainEventInterface.IDomainEventDispatcher, DomainEvents_DomainEventsDispatcher>();
+        // Audit (CreatedBy/LastModifiedBy) is centrally applied by ApplicationDbContext.SaveChangesAsync
+        // via IUserDetails, so the legacy EntityCreated/Modified event handlers are intentionally
+        // not registered to avoid clobbering audit values with stale ctor-time data.
         
-        services.AddSingleton<ICluster>(sp =>
-        {
-            var connectionString = configuration.GetSection("Couchbase:ConnectionString").Value;
-            var username = configuration.GetSection("Couchbase:Username").Value;
-            var password = configuration.GetSection("Couchbase:Password").Value;
+        services.AddScoped<INameUniquenessChecker<Datasource, DatasourceId>>(sp =>
+            new GenericNameUniquenessChecker<Datasource, DatasourceId>(
+                sp.GetRequiredService<ApplicationDbContext>()));
 
-            var cluster = Cluster.ConnectAsync(connectionString, username, password).Result;
-            return cluster;
-        });
-        services.AddSingleton<IBucket>(sp =>
-        {
-            var cluster = sp.GetRequiredService<ICluster>();
-            var bucketName = configuration.GetSection("Couchbase:BucketName").Value;
-            return cluster.BucketAsync(bucketName).Result;
-        });
-        services.AddSingleton<ICouchbaseCollectionProvider, CouchbaseCollectionProvider>();
-        services.AddScoped(typeof(IRepository<>), typeof(CouchbaseRepository<>)); // couchbase as default
-        services.AddScoped<IRepositoryFactory, RepositoryFactory>();
-        services.AddScoped(typeof(CouchbaseRepository<>));
-        services.AddScoped(typeof(PostgresRepository<>));
-        services.AddScoped(typeof(DatasetService));
-        
+        services.AddScoped<INameUniquenessChecker<ReportingScope, ReportingScopeId>>(sp =>
+            new GenericNameUniquenessChecker<ReportingScope, ReportingScopeId>(
+                sp.GetRequiredService<ApplicationDbContext>()));
+
+        services.AddScoped<INameUniquenessChecker<IndicatorDefinition, IndicatorDefinitionId>>(sp =>
+            new GenericNameUniquenessChecker<IndicatorDefinition, IndicatorDefinitionId>(
+                sp.GetRequiredService<ApplicationDbContext>()));
+
         return services;
     }
 }

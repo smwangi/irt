@@ -4,16 +4,15 @@ using Irt.Core.ValueObjects;
 
 namespace Irt.Core.ReportingScopes
 {
-    public class ReportingScope : Entity<ReportingScopeId>
+    public class ReportingScope : NamedMetadataEntity<ReportingScopeId>
     {
-        public string Description { get; private set; }
-        public Name ReportingScopeName { get; private set; }
-
-        private ReportingScope(ReportingScopeId id, Name name, string description) : base(id)
+        private ReportingScope()
         {
-            Id = id;
-            ReportingScopeName = name;
-            Description = description;
+        }
+
+        private ReportingScope(ReportingScopeId id, Name name, string description)
+            : base(id, name, description)
+        {
         }
 
         public static ReportingScope CreateReportingScope(
@@ -21,7 +20,7 @@ namespace Irt.Core.ReportingScopes
             string description)
         {
             return new ReportingScope(
-                new ReportingScopeId(UniqueIdGenerator.NextId()),
+                ReportingScopeId.Create(UniqueIdGenerator.NextId()),
                 name,
                 description);
         }

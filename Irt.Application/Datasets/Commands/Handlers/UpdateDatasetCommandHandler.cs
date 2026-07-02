@@ -1,48 +1,70 @@
 using AutoMapper;
 using Irt.Application.Configuration.Commands;
-using Irt.Application.Configuration.Results;
-using Irt.Application.Exceptions;
-using Irt.Application.Helpers;
+using Irt.Application.Datasource;
 using Irt.Core.Datasets;
-using Irt.Core.Datasources;
 using Irt.Core.IndicatorDefinitions;
-using Irt.Core.SharedKernel;
+using Irt.Core.ValueObjects;
+using Irt.SharedKernel.Common;
+using Irt.SharedKernel.ErrorHandling.Exceptions;
+using Irt.SharedKernel.Repositories;
+using Irt.SharedKernel.Results;
+using CoreDatasource = Irt.Core.Datasources.Datasource;
 
 namespace Irt.Application.Datasets.Commands.Handlers;
 
 public class UpdateDatasetCommandHandler(
-    IRepositoryFactory datasetRepository,
-    IRepositoryFactory datasourceRepository,
-    IRepositoryFactory indicatorDefinitionRepository,
+    IRepository<Dataset> datasetRepository,
+    IReadOnlyRepository<Dataset> repository,
+    IReadOnlyRepository<Core.Datasources.Datasource> datasourcesRepository,
+    IReadOnlyRepository<IndicatorDefinition> indicatorDefinitionRepository,
     IMapper mapper)
-    : ICommandHandler<UpdateDatasetCommand, Result<DatasetDto,string>>
+    : ICommandHandler<UpdateDatasetCommand, Result<DatasetDto>>
 {
-    public async Task<Result<DatasetDto,string>> HandleAsync(UpdateDatasetCommand request, CancellationToken cancellationToken)
+    public async Task<Result<DatasetDto>> HandleAsync(
+        UpdateDatasetCommand request,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var dataset = await datasetRepository
-            .CreateFactory<Dataset>()
-            .FindByIdAsync(request.DatasetDto.Id) ?? throw new NotFoundException("Dataset not found");
-
-        var datasource = datasourceRepository
-            .CreateFactory<Datasource>()
-            .FindByIdAsync(request.DatasetDto.DatasourceId) ?? throw new NotFoundException("Datasource not found");
-
-        var indicatorDefinition = indicatorDefinitionRepository
-            .CreateFactory<IndicatorDefinition>()
-            .FindByIdAsync(request.DatasetDto.IndicatorDefinitionId) ?? throw new NotFoundException("IndicatorDefinition not found");
+        var datasourceTask=  datasourcesRepository.FindByIdAsync(request.DatasourceId, cancellationToken);
+        var indicatorDefinitionTask = indicatorDefinitionRepository.FindByIdAsync(request.IndicatorDefinitionId, cancellationToken);
+        var existingDatasetTask = repository.FindByIdAsync(request.Id, cancellationToken);
         
-        var hasChanges = dataset.Name.Value != request.DatasetDto.Name ||
-                          dataset.Description != request.DatasetDto.Description;
-        if (!hasChanges)
+        await Task.WhenAll(datasourceTask, indicatorDefinitionTask, existingDatasetTask);
+        
+        var existingDataset = await existingDatasetTask;
+        var datasource = await datasourceTask;
+        var indicatorDefinition = await indicatorDefinitionTask;
+        
+        if (datasource == null)
         {
-            return Result<DatasetDto, string>.Success(mapper.Map<DatasetDto>(dataset), false);
+            return NotFound($"Datasource {request.DatasourceId} not found.");
+        }
+
+        if (indicatorDefinition == null)
+        {
+            return NotFound($"Indicator definition {request.IndicatorDefinitionId} not found.");
         }
         
+        if (existingDataset is null)
+        {
+            return NotFound($"Dataset with id {request.Id} not found");
+        }
+
+        var datasetType = DatasetType.Parse(request.DatasetType);
+        existingDataset.WithUpdatedDataset(
+            name: Name.Of(request.Name),
+            description: request.Description,
+            datasource: datasource,
+            indicatorDefinition: indicatorDefinition,
+            datasetType: datasetType);
+
         var updatedDataset = await datasetRepository
-            .CreateFactory<Dataset>()
-            .UpdateAsync(dataset, cancellationToken);
-        return Result<DatasetDto, string>.Success(mapper.Map<DatasetDto>(updatedDataset), true);
+            .UpdateAsync(existingDataset, cancellationToken);
+
+        return Result<DatasetDto>.Success(mapper.Map<DatasetDto>(updatedDataset));
     }
+    
+    private static Result<DatasetDto> NotFound(string message)
+        => Result<DatasetDto>.Failure(IrtError.NotFound(message));
 }

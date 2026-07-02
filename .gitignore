@@ -1,0 +1,13 @@
+IrtWeb/bin
+Irt.UnitTests/bin
+Irt.IntegrationTest/bin
+Irt.Core/bin
+Irt.Core/obj
+IrtWeb/obj
+Irt.UnitTests/obj
+Irt.IntegrationTest/obj
+Irt.Infrastructure/obj
+Irt.Infrastructure/bin
+Irt.Application/obj
+Irt.Application/bin
+

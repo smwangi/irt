@@ -1,10 +1,6 @@
-using Irt.Application.Behaviors;
 using Irt.Core.Datasets;
 using Irt.Core.Datasources;
 using Irt.Core.IndicatorDefinitions;
-using Irt.Infrastructure.Database;
-using Irt.Infrastructure.Domain.Datasources;
-using Irt.Infrastructure.Domain.IndicatorDefinitions;
 using Irt.Infrastructure.Shared;
 using Irt.IntegrationTest.Setup;
 using Microsoft.AspNetCore.Hosting;
@@ -13,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Irt.IntegrationTest
 {
-    public abstract class CustomWebApplicationFactory<Program> : WebApplicationFactory<Program> where Program : class
+    public class CustomWebApplicationFactory<Program> : WebApplicationFactory<Program> where Program : class
     {
         public HttpClient HttpClient { get; private set; } = null!;
 
@@ -25,9 +21,7 @@ namespace Irt.IntegrationTest
         {
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
             Environment.SetEnvironmentVariable("ConnectionStrings:DefaultConnection", "Data Source=irt.db");
-            string dbConnection = Environment.GetEnvironmentVariable("MongoDbConnection") ?? "mongodb://localhost:27017";
-            string db = Environment.GetEnvironmentVariable("IrtDbName") ?? "irtDb";
-
+            
             builder.ConfigureAppConfiguration((context, config) =>
             {
                 //config.AddJsonFile("appsettings.json");

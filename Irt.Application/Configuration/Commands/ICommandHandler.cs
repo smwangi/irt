@@ -1,4 +1,6 @@
 
+using Irt.SharedKernel.Results;
+
 namespace Irt.Application.Configuration.Commands
 {
     public interface ICommandHandler<in TCommand, TResult> where TCommand : ICommand<TResult>

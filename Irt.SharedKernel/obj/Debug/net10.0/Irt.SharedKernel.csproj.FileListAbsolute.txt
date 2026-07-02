@@ -1,0 +1,13 @@
+/Users/samwan/projects/irtool/Irt.SharedKernel/bin/Debug/net10.0/Irt.SharedKernel.deps.json
+/Users/samwan/projects/irtool/Irt.SharedKernel/bin/Debug/net10.0/Irt.SharedKernel.dll
+/Users/samwan/projects/irtool/Irt.SharedKernel/bin/Debug/net10.0/Irt.SharedKernel.pdb
+/Users/samwan/projects/irtool/Irt.SharedKernel/obj/Debug/net10.0/Irt.SharedKernel.csproj.AssemblyReference.cache
+/Users/samwan/projects/irtool/Irt.SharedKernel/obj/Debug/net10.0/Irt.SharedKernel.GeneratedMSBuildEditorConfig.editorconfig
+/Users/samwan/projects/irtool/Irt.SharedKernel/obj/Debug/net10.0/Irt.SharedKernel.AssemblyInfoInputs.cache
+/Users/samwan/projects/irtool/Irt.SharedKernel/obj/Debug/net10.0/Irt.SharedKernel.AssemblyInfo.cs
+/Users/samwan/projects/irtool/Irt.SharedKernel/obj/Debug/net10.0/Irt.SharedKernel.csproj.CoreCompileInputs.cache
+/Users/samwan/projects/irtool/Irt.SharedKernel/obj/Debug/net10.0/Irt.SharedKernel.sourcelink.json
+/Users/samwan/projects/irtool/Irt.SharedKernel/obj/Debug/net10.0/Irt.SharedKernel.dll
+/Users/samwan/projects/irtool/Irt.SharedKernel/obj/Debug/net10.0/refint/Irt.SharedKernel.dll
+/Users/samwan/projects/irtool/Irt.SharedKernel/obj/Debug/net10.0/Irt.SharedKernel.pdb
+/Users/samwan/projects/irtool/Irt.SharedKernel/obj/Debug/net10.0/ref/Irt.SharedKernel.dll

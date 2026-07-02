@@ -16,7 +16,7 @@ namespace Irt.Core.Datasources
         public DatasourceType DatasourceType { get; private set; }
 
         // for migration
-        private Datasource():base(id: new DatasourceId(""))
+        private Datasource()
         {
         }
         private Datasource(
@@ -24,10 +24,11 @@ namespace Irt.Core.Datasources
             Name name,
             string description,
             string? source,
-            DatasourceType datasourceType) : base(id)
+            DatasourceType datasourceType)
         {
-            Description = description;
             Id = id;
+            Name = name;
+            Description = description;
             Source = source;
             DatasourceType = datasourceType;
             //this.AddDomainEvent(new Events.DatasourceCreatedEvent(id));
@@ -40,29 +41,23 @@ namespace Irt.Core.Datasources
             DatasourceType datasourceType)
         {
             return new Datasource(
-                new DatasourceId(UniqueIdGenerator.NextId()),
-                name,
+                DatasourceId.Create(UniqueIdGenerator.NextId()),
+                name: name,
                 description,
                 source,
                 datasourceType
             );
         }
 
-        public void UpdateDatasource(
+        public Datasource UpdateDatasource(
             Name name,
-            string description,
-            DatasourceId datasourceId)
+            string description)
         {
             Name = name;
             Description = description;
-            SetModified();
 
             AddDomainEvent(new Events.DatasourceUpdatedEvent(this));
+            return this;
         }
-
-        /*private static async void Validate(DatasourceName name, string description, IDatasourceUniqueChecker datasourceUniqueChecker)
-        {
-            await CheckRuleAsync(new NameValidationChecker(datasourceUniqueChecker, name));
-        }*/
     }
 }

@@ -39,7 +39,7 @@ namespace Irt.Application.Behaviors
             {
                 timer.Stop();
                 Console.WriteLine(e);
-                logger.LogError(e, "Error handling {RequestName} after {ElapsedMilliseconds}ms", typeof(TRequest).Name, timer.ElapsedMilliseconds);
+                logger.LogError(e, "IrtError handling {RequestName} after {ElapsedMilliseconds}ms", typeof(TRequest).Name, timer.ElapsedMilliseconds);
                 throw;
             }
         }

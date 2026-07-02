@@ -1,20 +1,23 @@
 using FluentValidation;
-using Irt.Application.Behaviors;
-using Irt.Application.Configuration.Behaviors;
+using Irt.Application.Common;
 using Irt.Application.Configuration.Commands;
+using Irt.Application.Configuration.ContextAccessor;
 using Irt.Application.Configuration.Emails;
 using Irt.Application.Configuration.Queries;
-using Irt.Application.Configuration.Results;
+using Irt.Application.Configuration.Validation;
 using Irt.Application.Datasets;
 using Irt.Application.Datasets.Commands;
-using Irt.Application.Datasets.Commands.Handlers;
 using Irt.Application.Datasets.Queries;
-using Irt.Application.Datasources;
-using Irt.Application.Datasources.Commands;
-using Irt.Application.Datasources.Commands.Handlers;
-using Irt.Application.Datasources.Queries;
+using Irt.Application.Datasource;
+using Irt.Application.Datasource.Queries;
 using Irt.Application.Mappers;
-using Irt.Core.Datasources;
+using Irt.Application.ReportingScopes;
+using Irt.Application.ReportingScopes.Queries;
+using Irt.Application.ReportingScopes.Queries.Handlers;
+using Irt.Core.Datasets;
+using Irt.Core.ReportingScopes;
+using Irt.SharedKernel.Repositories;
+using Irt.SharedKernel.Results;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -33,46 +36,41 @@ public static class DependencyInjection
         // using the <,> notation to specify the behavior that can be used for any generic type parameters
         
         services.AddScoped<IEmailSender, EmailSender>();
-        /*services.AddScoped<ICommandHandler<UpdateDatasetCommand, UpdateResult<string>>, UpdateDatasetCommandHandler>();
-        services.AddScoped<ICommandHandler<CreateDatasetCommand, Result<DatasetDto, string>>, CreateDatasetCommandHandler>();
-
-        services.AddScoped<ICommandHandler<UpdateDatasourceCommand, UpdateResult<string>>>(
-            x =>
-            new UpdateDatasourceCommandHandler(
-                x.GetService<IDatasourceRepository>()!));
-        services.AddScoped<ICommandHandler<CreateDatasourceCommand, Result<DatasourceDto, string>>>(
-            x =>
-            new CreateDatasourceCommandHandler(
-                x.GetService<IDatasourceRepository>()!));*/
+        services.AddDtoValidators();
 
         services.AddTransient<IValidator<UpdateDatasetCommand>, UpdateDatasetCommandValidator>();
         services.AddTransient<IValidator<CreateDatasetCommand>, CreateDatasetCommandValidator>();
         
-        // Validation pipeline
-        //services.AddScoped(typeof(ICommandHandler<,>), typeof(ValidationBehavior<,>));
-        // Logging behavior
-        //services.AddScoped(typeof(ICommandHandler<,>), typeof(LoggingBehavior<,>));
-        //services.AddScoped<ICommandHandler<CreateDatasetCommand, Result<DatasetDto, string>>, CreateDatasetCommandHandler>();
-        //services.AddScoped<ICommandHandler<UpdateDatasetCommand, UpdateResult<string>>, UpdateDatasetCommandHandler>();
-
-        services.AddScoped<IQueryHandler<GetDatasetsQuery, Result<List<DatasetDto>, string>>, GetAllDatasetsQueryHandler>();
-        services
-            .AddScoped<IQueryHandler<GetDatasourcesQuery, Result<List<DatasourceDto>, string>>,
-                GetDatasourcesQueryHandler>();
+        services.AddScoped<IODataQueryHandler<GetDatasetsQuery, Result<IQueryable<DatasetDto>>>, GetAllDatasetsQueryHandler>();
+        
+        //services.AddScoped<IODataQueryHandler<GetDatasourceQuery, DatasourceDto>, GetDatasourceQueryHandler>();
+        //services.AddScoped<IODataQueryHandler<GetReportingScopeQuery, ReportingScopeDto>, GetReportingScopeQueryHandler>();
+        //services.AddScoped<IQueryHandler<GetDatasetsByIdQuery, DatasetDto>, GetDatasetsByIdQueryHandler>();
+        
         services.AddLogging(config => config.AddConsole()); // Console logging
 
-        services.AddCommandHandler<CreateDatasetCommand, DatasetDto, string, CreateDatasetCommandHandler>();
-        services.AddCommandHandler<UpdateDatasetCommand,DatasetDto, string, UpdateDatasetCommandHandler>();
-        services.AddCommandHandler<UpdateDatasourceCommand, DatasourceDto, string, UpdateDatasourceCommandHandler>();
-        services.AddCommandHandler<CreateDatasourceCommand, DatasourceDto, string, CreateDatasourceCommandHandler>();
-        services.AddTransient<UpdateDatasetCommandHandler>();
-        
-        services.AddTransient<UpdateDatasourceCommandHandler>();
-        
-        //services.AddTransient<CreateDatasourceCommandHandler>();
-        //services.AddTransient(typeof(ICommand<>), typeof(CommandBase<>));
+        services.AddHttpContextAccessor();
+        services.AddScoped<IUserDetails, HttpContextUserDetails>();
+        services.Scan(scan => scan
+            .FromApplicationDependencies()
+            .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<,>)), publicOnly: false)
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
 
-        //services.AddScoped<ValidationBehavior<,>, IPipelineBehavior<,>>();
+        services.Decorate(typeof(ICommandHandler<,>), typeof(UnitOfWorkCommandHandlerDecorator<,>));
+
+        services.Scan(scan => scan
+            .FromApplicationDependencies()
+            .AddClasses(classes => classes.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
+        
+        services.Scan(scan => scan
+            .FromAssembliesOf(typeof(IProjection<,>))
+            .AddClasses(classes => classes.AssignableTo(typeof(IProjection<,>)))
+            .AsImplementedInterfaces()
+        .WithScopedLifetime());
+        
         services.AddFeatureManagement();
         /*services.AddMassTransit(x =>
         {
@@ -129,6 +127,8 @@ public static class DependencyInjection
         //var busControl = services.BuildServiceProvider().GetRequiredService<IBusControl>();
         //busControl.StartAsync().GetAwaiter().GetResult();
         services.AddAutoMapper(typeof(DatasetMappingProfile));
+        services.AddHttpContextAccessor();
+        services.AddScoped<IOperationContextAccessor, OperationContextAccessor>();
         return services;
     }
 }

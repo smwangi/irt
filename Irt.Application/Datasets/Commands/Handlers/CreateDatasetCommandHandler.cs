@@ -1,71 +1,58 @@
 
 using AutoMapper;
 using Irt.Application.Configuration.Commands;
-using Irt.Application.Configuration.Results;
-using Irt.Application.Exceptions;
-using Irt.Application.Helpers;
 using Irt.Core.Datasets;
-using Irt.Core.Datasources;
 using Irt.Core.IndicatorDefinitions;
-using Irt.Core.SeedWork;
-using Irt.Core.SharedKernel;
 using Irt.Core.ValueObjects;
-using BusinessRuleValidationException = Irt.Core.Datasources.BusinessRuleValidationException;
+using Irt.SharedKernel.ErrorHandling.Exceptions;
+using Irt.SharedKernel.Repositories;
+using Irt.SharedKernel.Results;
+using CoreDatasource = Irt.Core.Datasources.Datasource;
 
 namespace Irt.Application.Datasets.Commands.Handlers
 {
     internal class CreateDatasetCommandHandler(
-        IRepositoryFactory datasetRepository,
-        IRepositoryFactory datasourceRepository,
-        IRepositoryFactory indicatorDefinitionRepository,
-        IMapper mapper) : ICommandHandler<CreateDatasetCommand, Result<DatasetDto, string>>
+        IRepository<Dataset> datasetRepository,
+        IReadOnlyRepository<Dataset> repository,
+        IReadOnlyRepository<Core.Datasources.Datasource> datasourcesRepository,
+        IReadOnlyRepository<IndicatorDefinition> indicatorDefinitionRepository,
+        IMapper mapper) : ICommandHandler<CreateDatasetCommand, Result<DatasetDto>>
     {
-        public async Task<Result<DatasetDto,string>> HandleAsync(
+        public async Task<Result<DatasetDto>> HandleAsync(
             CreateDatasetCommand command, CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(command.Request);
-            var datasource = await datasourceRepository
-                .CreateFactory<Datasource>()
-                .FilterByIdAsync(command.Request.DatasourceId);
-            
-            if (datasource == null || datasource.IsDeleted)
-            {
-                throw new NotFoundException("Datasource not found");
-            }
-            
-            var indicatorDefinition = await indicatorDefinitionRepository.CreateFactory<IndicatorDefinition>().FindByIdAsync(command.Request.IndicatorDefinitionId);
-            
-            if (indicatorDefinition == null || indicatorDefinition.IsDeleted)
-            {
-                throw new NotFoundException("IndicatorDefinition not found");
-            }
-            var name = Name.Of(command.Request.Name);
-            //var nameRule = new NameMustBeUniqueRule<Dataset>(name, datasetRepository, x => x.Name);
-            var compositeRule = new CompositeRule(new List<IBusinessRule>
-            {
-                //nameRule
+            ArgumentNullException.ThrowIfNull(command);
+            var datasourceTask=  datasourcesRepository.FindByIdAsync(command.DatasourceId, cancellationToken);
+            var indicatorDefinitionTask = indicatorDefinitionRepository.FindByIdAsync(command.IndicatorDefinitionId, cancellationToken);
+                    
+            await Task.WhenAll(datasourceTask, indicatorDefinitionTask);
+        
+            var datasource = await datasourceTask;
+            var indicatorDefinition = await indicatorDefinitionTask;
 
-            });
-            if (await compositeRule.IsBrokenAsync())
+            if (datasource == null)
             {
-                throw new BusinessRuleValidationException(compositeRule.Message);
+                return NotFound($"Datasource {command.DatasourceId} not found");
             }
-            /*if (await nameRule.IsBrokenAsync())
+
+            if (indicatorDefinition == null)
             {
-                throw new BusinessRuleValidationException(nameRule.Message);
-            }*/
+                return NotFound($"Indicator definition {command.IndicatorDefinitionId} not found");
+            }
+            
             var dataset = Dataset.CreateDataset(
-                Name.Of(command.Request.Name),
-                command.Request.Description,
-                datasource,
-                (Core.Datasets.DatasetType)command.DatasetType,
-                indicatorDefinition);
+                name: Name.Of(command.Name),
+                description: command.Description,
+                datasetType: DatasetType.Parse(command.DatasetType), 
+                indicatorDefinition: indicatorDefinition,
+                source: datasource);
+            
+            await datasetRepository.AddAsync(dataset, cancellationToken);
 
-            await datasetRepository.CreateFactory<Dataset>().AddAsync(dataset, cancellationToken);
-
-            //return MapDatasetToResponse(dataset);
-            var datasetDto = mapper.Map<DatasetDto>(dataset);
-            return Result<DatasetDto, string>.Success(datasetDto);
+            return Result<DatasetDto>.Success(mapper.Map<DatasetDto>(dataset));
         }
+        
+        private static Result<DatasetDto> NotFound(string message)
+            => Result<DatasetDto>.Failure(IrtError.NotFound(message));
     }
 }

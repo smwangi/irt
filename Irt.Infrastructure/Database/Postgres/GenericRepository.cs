@@ -1,71 +1,79 @@
 using System.Linq.Expressions;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Irt.Core.SeedWork;
 using Irt.Core.SharedKernel;
+using Irt.SharedKernel.ErrorHandling.Exceptions;
+using Irt.SharedKernel.Repositories;
+using Irt.SharedKernel.Results;
 using Microsoft.EntityFrameworkCore;
 
 namespace Irt.Infrastructure.Database.Postgres;
 
-public class GenericRepository<T>(ApplicationDbContext applicationDbContext) : IGenericRepository<T> where T : class
+public class GenericRepository<T>(
+    ApplicationDbContext applicationDbContext) 
+    : IGenericRepository<T> where T : class
 {
     private readonly ApplicationDbContext _context = applicationDbContext ?? throw new ArgumentNullException(nameof(applicationDbContext));
     
-    public async Task<T?> GetByIdAsync(object id)
+    public async Task<Result<List<T>>> GetAllAsync()
     {
-        return await _context.Set<T>().FindAsync(id);
+        return await _context
+            .Set<T>()
+            .ToListAsync()
+            /*.ToResult(
+                IrtError.NotFound($"{typeof(T).Name}  Not Found."),
+                includeCountMetadata: true)*/;
     }
-    public async Task<List<T>> GetAllAsync()
-    {
-        return await _context.Set<T>().ToListAsync();
-    }
-
-    public async Task<List<T>> GetAllAsync(string query, CancellationToken cancellationToken)
-    {
-        return await _context.Set<T>().FromSqlRaw(query).ToListAsync(cancellationToken);
-    }
-
+    
     public async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
     {
-        await _context.Set<T>().AddAsync(entity);
-        await SaveChangesAsync();
+        await _context
+            .Set<T>()
+            .AddAsync(entity, cancellationToken);
         return entity;
     }
     
-    public async Task<T> UpdateAsync(T entity)
+    public async Task<T> UpdateAsync(T entity, CancellationToken cancellationToken)
     {
-        _context.Set<T>().Update(entity);
-        await SaveChangesAsync();
+        _context
+            .Set<T>()
+            .Update(entity);
         return entity;
     }
-    public async Task<bool> DeleteAsync(T entity)
+    public async Task<bool> DeleteAsync(T entity, CancellationToken cancellationToken)
     {
-        _context.Set<T>().Remove(entity);
-        return await _context.SaveChangesAsync() > 0;
+        _context
+            .Set<T>()
+            .Remove(entity);
+        await Task.CompletedTask;
+        return true;
     }
 
-    public async Task SaveChangesAsync()
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        await _context.SaveChangesAsync();
+        return await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<bool> ExistsAsync(string id)
+    public async Task<Result<bool>> ExistsAsync(
+        Expression<Func<T, bool>> predicate,
+        CancellationToken cancellationToken)
     {
-        return await _context.Set<T>().FindAsync(id) != null;
+        var exists = await _context
+            .Set<T>()
+            .AnyAsync(predicate, cancellationToken);
+        return Result<bool>.Success(exists);
     }
     
-    public async Task<List<T>> FindByFilterAsync(string whereClause)
+    public async Task<Result<List<T>>> FilterAsync(
+        Expression<Func<T, bool>> predicate, 
+        CancellationToken cancellationToken)
     {
-        return await _context.Set<T>().FromSqlRaw(whereClause).ToListAsync();
-    }
-    
-    public async Task<T?> FilterByIdAsync(string id)
-    {
-        return await _context.Set<T>()
-            .FromSqlInterpolated($"SELECT * FROM irt.datasources WHERE \"Id\" = {id}")
-            .FirstOrDefaultAsync();
-    }
-    
-    public async Task<List<T>> FindByN1qlAsync(string n1qlQuery)
-    {
-        return await _context.Set<T>().FromSqlRaw(n1qlQuery).ToListAsync();
+        return await _context
+            .Set<T>()
+            .Where(predicate)
+            .ToListAsync(cancellationToken);
+        //.ToResult(IrtError.NotFound("No items found matching the filter."), includeCountMetadata: true);
     }
     public async Task<PaginationResult<T>> GetPaginatedAsync(int page, int pageSize)
     {
@@ -82,44 +90,65 @@ public class GenericRepository<T>(ApplicationDbContext applicationDbContext) : I
         };
     }
 
-    public Task<T> UpdateAsync(T entity, CancellationToken cancellationToken)
+    public async Task<T?> GetByIdAsync<TKey>(TKey id, CancellationToken cancellationToken = default)
+    {
+        return await _context
+            .Set<T>()
+            .FindAsync([CoerceKey(id, GetIdPropertyType())], cancellationToken);
+            //.ToResult(IrtError.NotFound($"Entity Not Found: {typeof(TKey).Name}"));
+    }
+
+    public IQueryable<T> Query()
+    {
+        var query = _context.Set<T>().AsQueryable();
+
+        // Soft delete filter in infra
+        if (typeof(ISoftDeletable).IsAssignableFrom(typeof(T)))
+        {
+            query = query.Where(e => EF.Property<bool>(e, "IsDeleted") == false);
+        }
+
+        return query.AsNoTracking();
+    }
+
+    public IQueryable<T> Query(Expression<Func<T, bool>> predicate)
     {
         throw new NotImplementedException();
     }
 
-    public Task<bool> DeleteAsync(T entity, CancellationToken cancellationToken)
+    public IQueryable<TDto> Query<TDto>(IMapper mapper)
     {
-        throw new NotImplementedException();
+        return Query().ProjectTo<TDto>(mapper.ConfigurationProvider);
     }
 
-    public Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
+    private static Type GetIdPropertyType()
+        => typeof(T).GetProperty("Id")?.PropertyType
+           ?? throw new InvalidOperationException($"{typeof(T).Name} does not expose an Id property.");
+
+    private static object? CoerceKey<TKey>(TKey id, Type keyType)
     {
-        throw new NotImplementedException();
+        if (id is null || keyType.IsInstanceOfType(id))
+        {
+            return id;
+        }
+
+        if (id is string stringId && IsTypedId(keyType))
+        {
+            var createMethod = keyType.GetMethod(
+                "Create",
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static,
+                [typeof(string)]);
+
+            if (createMethod is not null)
+            {
+                return createMethod.Invoke(null, [stringId]);
+            }
+        }
+
+        return Convert.ChangeType(id, keyType);
     }
 
-    public async Task<T?> FindByIdAsync(string id)
-    {
-        return await _context.Set<T>().FindAsync(new object[] { id });
-    }
-
-    public async Task<List<T>> QueryAsync(string n1QlQuery, object parameters = null)
-    {
-        var result = await _context.Set<T>().FromSqlRaw(n1QlQuery, parameters).ToListAsync();
-        return result;
-    }
-    public async Task<List<T>> QueryAsync(string n1qlQuery)
-    {
-        var result = await _context.Set<T>().FromSqlRaw(n1qlQuery).ToListAsync();
-        return result;
-    }
-    public async Task<List<T>> QueryAsync(string n1qlQuery, object parameters = null, CancellationToken cancellationToken = default)
-    {
-        var result = await _context.Set<T>().FromSqlRaw(n1qlQuery, parameters).ToListAsync(cancellationToken);
-        return result;
-    }
-    public async Task<List<T>> QueryAsync(string n1qlQuery, CancellationToken cancellationToken = default)
-    {
-        var result = await _context.Set<T>().FromSqlRaw(n1qlQuery).ToListAsync(cancellationToken);
-        return result;
-    }
+    private static bool IsTypedId(Type type)
+        => type.BaseType?.IsGenericType == true
+           && type.BaseType.GetGenericTypeDefinition() == typeof(TypedIdValueBase<>);
 }

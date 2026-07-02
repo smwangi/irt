@@ -1,0 +1,28 @@
+
+
+using System.Linq.Expressions;
+using Irt.SharedKernel.Results;
+
+namespace Irt.SharedKernel.Repositories
+{
+    public interface IRepository<T> where T : class
+    {
+        Task<PaginationResult<T>> GetPaginatedAsync(int page, int pageSize);
+        Task<Result<List<T>>> GetAllAsync();
+        Task<Result<List<T>>> FilterAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken);
+        Task<T?> GetByIdAsync<TKey>(TKey id, CancellationToken cancellationToken = default);
+        Task<T> AddAsync(T entity, CancellationToken cancellationToken);
+        Task<T> UpdateAsync(T entity, CancellationToken cancellationToken);
+        Task<bool> DeleteAsync(T entity, CancellationToken cancellationToken);
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+        Task<Result<bool>> ExistsAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken);
+    }
+
+    public class PaginationResult<TR>
+    {
+        public List<TR> Items { get; set; } = [];
+        public long TotalCount { get; set; }
+        public int CurrentPage { get; set; }
+        public int PageSize { get; set; }
+    }
+}

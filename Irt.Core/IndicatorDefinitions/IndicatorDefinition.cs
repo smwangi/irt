@@ -1,6 +1,7 @@
 using Irt.Core.IndicatorCategories;
 using Irt.Core.ReportingScopes;
 using Irt.Core.SeedWork;
+using Irt.Core.SharedKernel;
 using Irt.Core.UnitOfMeasurements;
 using Irt.Core.ValueObjects;
 namespace Irt.Core.IndicatorDefinitions
@@ -8,7 +9,6 @@ namespace Irt.Core.IndicatorDefinitions
     public class IndicatorDefinition : Entity<IndicatorDefinitionId>
     {
         public string Description { get; private set; }
-        public Name IndicatorDefinitionName { get; private set; }
         public ReportingScope ReportingScope { get; private set; }
         public UnitOfMeasure UnitOfMeasure { get; private set; }
         public IndicatorCategory IndicatorCategory { get; private set; }
@@ -19,6 +19,10 @@ namespace Irt.Core.IndicatorDefinitions
         public string? Metadata { get; private set; }
         public string? DPSIR { get; private set; }
 
+        private IndicatorDefinition()
+        {
+        }
+
         private IndicatorDefinition(
             IndicatorDefinitionId id,
             Name name,
@@ -28,12 +32,13 @@ namespace Irt.Core.IndicatorDefinitions
             IndicatorCategory indicatorCategory,
             decimal minThreshold,
             decimal maxThreshold,
-            string formula,
-            string formulaDescription,
-            string metadata,
-            string dpsir) : base(id)
+            string? formula,
+            string? formulaDescription,
+            string? metadata,
+            string? dpsir)
         {
             Id = id;
+            Name = name;
             Description = description;
             ReportingScope = reportingScope;
             UnitOfMeasure = unitOfMeasure;
@@ -54,13 +59,16 @@ namespace Irt.Core.IndicatorDefinitions
             IndicatorCategory indicatorCategory,
             decimal minThreshold,
             decimal maxThreshold,
-            string formula,
-            string formulaDescription,
-            string metadata,
-            string dpsir)
+            string? formula,
+            string? formulaDescription,
+            string? metadata,
+            string? dpsir)
         {
+            EnsureThresholds(minThreshold, maxThreshold);
+            EnsureReferences(reportingScope, unitOfMeasure, indicatorCategory);
+
             return new IndicatorDefinition(
-                new IndicatorDefinitionId(new Guid().ToString()),
+                IndicatorDefinitionId.Create(UniqueIdGenerator.NextId()),
                 name,
                 description,
                 reportingScope,
@@ -73,6 +81,85 @@ namespace Irt.Core.IndicatorDefinitions
                 metadata,
                 dpsir
             );
+        }
+
+        public void Update(
+            Name name,
+            string description,
+            ReportingScope reportingScope,
+            UnitOfMeasure unitOfMeasure,
+            IndicatorCategory indicatorCategory,
+            decimal minThreshold,
+            decimal maxThreshold,
+            string? formula,
+            string? formulaDescription,
+            string? metadata,
+            string? dpsir)
+        {
+            EnsureThresholds(minThreshold, maxThreshold);
+            EnsureReferences(reportingScope, unitOfMeasure, indicatorCategory);
+
+            Name = name;
+            Description = description;
+            ReportingScope = reportingScope;
+            UnitOfMeasure = unitOfMeasure;
+            IndicatorCategory = indicatorCategory;
+            MinThreshold = minThreshold;
+            MaxThreshold = maxThreshold;
+            Formula = formula;
+            FormulaDescription = formulaDescription;
+            Metadata = metadata;
+            DPSIR = dpsir;
+        }
+
+        public void Patch(
+            Name? name,
+            string? description,
+            ReportingScope? reportingScope,
+            UnitOfMeasure? unitOfMeasure,
+            IndicatorCategory? indicatorCategory,
+            decimal? minThreshold,
+            decimal? maxThreshold,
+            string? formula,
+            string? formulaDescription,
+            string? metadata,
+            string? dpsir)
+        {
+            if (name is not null) Name = name;
+            if (description is not null) Description = description;
+            if (reportingScope is not null) ReportingScope = reportingScope;
+            if (unitOfMeasure is not null) UnitOfMeasure = unitOfMeasure;
+            if (indicatorCategory is not null) IndicatorCategory = indicatorCategory;
+
+            var effectiveMin = minThreshold ?? MinThreshold;
+            var effectiveMax = maxThreshold ?? MaxThreshold;
+            EnsureThresholds(effectiveMin, effectiveMax);
+            MinThreshold = effectiveMin;
+            MaxThreshold = effectiveMax;
+
+            if (formula is not null) Formula = formula;
+            if (formulaDescription is not null) FormulaDescription = formulaDescription;
+            if (metadata is not null) Metadata = metadata;
+            if (dpsir is not null) DPSIR = dpsir;
+        }
+
+        private static void EnsureThresholds(decimal min, decimal max)
+        {
+            if (min > max)
+            {
+                throw new ArgumentException(
+                    $"MinThreshold ({min}) cannot be greater than MaxThreshold ({max}).");
+            }
+        }
+
+        private static void EnsureReferences(
+            ReportingScope reportingScope,
+            UnitOfMeasure unitOfMeasure,
+            IndicatorCategory indicatorCategory)
+        {
+            ArgumentNullException.ThrowIfNull(reportingScope);
+            ArgumentNullException.ThrowIfNull(unitOfMeasure);
+            ArgumentNullException.ThrowIfNull(indicatorCategory);
         }
     }
 }

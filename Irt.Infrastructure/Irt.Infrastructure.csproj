@@ -31,11 +31,4 @@
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
      <!-- <PackageReference Include="MongoDB.EntityFrameworkCore" Version="8.0.3" />-->
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Domain\IndicatorDefinitions\" />
-    <Folder Include="ErrorHandling\Exceptions\" />
-    <Folder Include="ErrorHandling\MiddleWare\" />
-    <Folder Include="Migrations\" />
-  </ItemGroup>
 </Project>

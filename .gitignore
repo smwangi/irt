@@ -11,3 +11,7 @@ Irt.Infrastructure/bin
 Irt.Application/obj
 Irt.Application/bin
 
+# Build artifacts (all projects)
+**/bin/
+**/obj/
+

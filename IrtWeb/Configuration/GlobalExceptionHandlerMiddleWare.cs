@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Irt.Application.Configuration.Validation;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
 using Irt.SharedKernel.Results;
 using Microsoft.AspNetCore.Mvc;
@@ -30,18 +29,6 @@ public class GlobalExceptionHandlerMiddleWare(
                 IrtError.Validation(
                     "One or more validation errors occurred.",
                     details: ValidationErrorDetails.FromFluentValidation(validationException)));
-        }
-        catch (InvalidCommandException invalidCommandException)
-        {
-            logger.LogWarning(invalidCommandException, "Invalid Command");
-            await WriteErrorAsync(
-                context,
-                IrtError.BadRequest(
-                    invalidCommandException.Message,
-                    details: new Dictionary<string, object>
-                    {
-                        ["details"] = invalidCommandException.Details
-                    }));
         }
         catch (AppException appException)
         {

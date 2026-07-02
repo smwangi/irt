@@ -1,4 +1,3 @@
-using Irt.Application.Exceptions;
 using Irt.Application.Helpers;
 using Irt.Core.SeedWork;
 using Irt.Core.ValueObjects;

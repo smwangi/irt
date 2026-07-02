@@ -17,19 +17,19 @@ internal sealed class GetReportingScopeQueryHandler(
     public async Task<Result<List<ReportingScopeDto>>> HandleAsync(
         GetReportingScopeQuery query, CancellationToken cancellationToken)
     {
-        var items = await repository
+        var queryable = repository
             .Query(scope => !scope.IsDeleted)
-            .ProjectTo<ReportingScopeDto>(mapper.ConfigurationProvider)
-            .ToListAsync(cancellationToken);
+            .ProjectTo<ReportingScopeDto>(mapper.ConfigurationProvider);
 
         if (!string.IsNullOrWhiteSpace(query.Search))
         {
-            var search = query.Search.Trim();
+            var search = query.Search.Trim().ToLower();
 
-            items = items
-                .Where(item => item.Name.Contains(search, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            queryable = queryable
+                .Where(item => item.Name.ToLower().Contains(search));
         }
+
+        var items = await queryable.ToListAsync(cancellationToken);
 
         return Result<List<ReportingScopeDto>>.Success(items);
     }

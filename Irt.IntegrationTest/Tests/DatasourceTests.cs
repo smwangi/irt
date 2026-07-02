@@ -1,8 +1,9 @@
 // Purpose: Contains tests for the Datasource controller.
+
 using System.Text.Json;
 using Irt.IntegrationTest.Setup;
 
-namespace Irt.IntegrationTest;
+namespace Irt.IntegrationTest.Tests;
 public class DatasourceTests : IClassFixture<CustomWebApplicationFactory<Program>>
 {
     private readonly CustomWebApplicationFactory<Program> _factory;

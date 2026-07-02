@@ -1,4 +1,4 @@
-using Irt.Application.Common;
+using AutoMapper;
 using Irt.Application.Configuration.Commands;
 using Irt.Core.ReportingScopes;
 using Irt.Core.SharedKernel;
@@ -11,7 +11,8 @@ namespace Irt.Application.ReportingScopes.Commands.Handlers;
 
 internal sealed class CreateReportingScopeCommandHandler(
     IRepository<ReportingScope> repository,
-    INameUniquenessChecker<ReportingScope, ReportingScopeId> uniquenessChecker)
+    INameUniquenessChecker<ReportingScope, ReportingScopeId> uniquenessChecker,
+    IMapper mapper)
     : ICommandHandler<CreateReportingScopeCommand, Result<ReportingScopeDto>>
 {
     public async Task<Result<ReportingScopeDto>> HandleAsync(CreateReportingScopeCommand command, CancellationToken cancellationToken)
@@ -28,8 +29,7 @@ internal sealed class CreateReportingScopeCommandHandler(
 
         await repository.AddAsync(reportingScope, cancellationToken);
 
-        return Result<ReportingScopeDto>.Success(
-            ReportingScopeDto.Projection.Compile()(reportingScope));
+        return Result<ReportingScopeDto>.Success(mapper.Map<ReportingScopeDto>(reportingScope));
         
     }
 }

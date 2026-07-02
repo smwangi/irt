@@ -3,7 +3,6 @@ using Irt.Application.Dispatchers;
 using Irt.Application.ReportingScopes;
 using Irt.Application.ReportingScopes.Commands;
 using Irt.Application.ReportingScopes.Queries;
-using Irt.SharedKernel.ErrorHandling.Exceptions;
 using Irt.SharedKernel.Results;
 using Microsoft.AspNetCore.Mvc;
 using IrtResultOfReportingScope = Irt.SharedKernel.Results.Result<Irt.Application.ReportingScopes.ReportingScopeDto>;
@@ -67,13 +66,6 @@ public class ReportingScopesController(
         [FromRoute] string? key,
         [FromBody] UpdateReportingScopeRequest request)
     {
-        if (key is null)
-        {
-            return Irt.SharedKernel.Results.Result
-                .Failure(IrtError.BadRequest("Key is required."))
-                .ToActionResult();
-        }
-        
         var command = request.ToCommand(key);
         var result = await commandDispatcher
             .DispatchCommandAsync<UpdateReportingScopeCommand, IrtResultOfReportingScope>(
@@ -89,13 +81,6 @@ public class ReportingScopesController(
         [FromRoute] string? key,
         [FromBody] PatchReportingScopeRequest request)
     {
-        if (key is null)
-        {
-            return Irt.SharedKernel.Results.Result
-                .Failure(IrtError.BadRequest("Key is required."))
-                .ToActionResult();
-        }
-        
         var command = request.ToCommand(key);
         var result = await commandDispatcher
             .DispatchCommandAsync<PatchReportingScopeCommand, IrtResultOfReportingScope>(

@@ -1,3 +1,4 @@
+using AutoMapper;
 using Irt.Application.Configuration.Commands;
 using Irt.Core.IndicatorCategories;
 using Irt.Core.IndicatorDefinitions;
@@ -16,7 +17,8 @@ internal sealed class CreateIndicatorDefinitionCommandHandler(
     IRepository<ReportingScope> reportingScopeRepository,
     IRepository<UnitOfMeasure> unitOfMeasureRepository,
     IRepository<IndicatorCategory> indicatorCategoryRepository,
-    INameUniquenessChecker<IndicatorDefinition, IndicatorDefinitionId> uniquenessChecker)
+    INameUniquenessChecker<IndicatorDefinition, IndicatorDefinitionId> uniquenessChecker,
+    IMapper mapper)
     : ICommandHandler<CreateIndicatorDefinitionCommand, Result<IndicatorDefinitionDto>>
 {
     public async Task<Result<IndicatorDefinitionDto>> HandleAsync(
@@ -75,7 +77,6 @@ internal sealed class CreateIndicatorDefinitionCommandHandler(
 
         await repository.AddAsync(entity, cancellationToken);
 
-        return Result<IndicatorDefinitionDto>.Success(
-            IndicatorDefinitionDto.Projection.Compile()(entity));
+        return Result<IndicatorDefinitionDto>.Success(mapper.Map<IndicatorDefinitionDto>(entity));
     }
 }

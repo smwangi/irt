@@ -4,10 +4,8 @@ using Irt.Application.IndicatorDefinitions;
 using Irt.Application.IndicatorDefinitions.Commands;
 using Irt.Application.IndicatorDefinitions.Queries;
 using Irt.SharedKernel.Common;
-using Irt.SharedKernel.ErrorHandling.Exceptions;
 using Irt.SharedKernel.Results;
 using Microsoft.AspNetCore.Mvc;
-using IrtResult = Irt.SharedKernel.Results.Result;
 using IrtResultOfIndicatorDefinition = Irt.SharedKernel.Results.Result<Irt.Application.IndicatorDefinitions.IndicatorDefinitionDto>;
 using IrtResultOfIndicatorDefinitions = Irt.SharedKernel.Results.Result<System.Collections.Generic.List<Irt.Application.IndicatorDefinitions.IndicatorDefinitionDto>>;
 using IrtResultOfUnit = Irt.SharedKernel.Results.Result<Irt.SharedKernel.Common.Unit>;
@@ -77,11 +75,6 @@ public class IndicatorDefinitionController(
         [FromRoute] string id,
         [FromBody] UpdateIndicatorDefinitionRequest request)
     {
-        if (string.IsNullOrWhiteSpace(id))
-        {
-            return IrtResult.Failure(IrtError.BadRequest("Id is required.")).ToActionResult();
-        }
-
         var command = request.ToCommand(id);
         var result = await commandDispatcher
             .DispatchCommandAsync<UpdateIndicatorDefinitionCommand, IrtResultOfIndicatorDefinition>(
@@ -99,11 +92,6 @@ public class IndicatorDefinitionController(
         [FromRoute] string id,
         [FromBody] PatchIndicatorDefinitionRequest request)
     {
-        if (string.IsNullOrWhiteSpace(id))
-        {
-            return IrtResult.Failure(IrtError.BadRequest("Id is required.")).ToActionResult();
-        }
-
         var command = request.ToCommand(id);
         var result = await commandDispatcher
             .DispatchCommandAsync<PatchIndicatorDefinitionCommand, IrtResultOfIndicatorDefinition>(
@@ -117,11 +105,6 @@ public class IndicatorDefinitionController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete([FromRoute] string id)
     {
-        if (string.IsNullOrWhiteSpace(id))
-        {
-            return IrtResult.Failure(IrtError.BadRequest("Id is required.")).ToActionResult();
-        }
-
         var result = await commandDispatcher
             .DispatchCommandAsync<DeleteIndicatorDefinitionCommand, IrtResultOfUnit>(
                 new DeleteIndicatorDefinitionCommand(id), CancellationToken.None);

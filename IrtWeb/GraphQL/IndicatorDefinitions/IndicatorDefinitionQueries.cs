@@ -1,3 +1,5 @@
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Irt.Application.IndicatorDefinitions;
 using Irt.Core.IndicatorDefinitions;
 using Irt.Infrastructure.Database.Postgres;
@@ -11,6 +13,7 @@ public sealed class IndicatorDefinitionQueries
     [UseProjection, UseFiltering, UseSorting]
     public IQueryable<IndicatorDefinitionDto> GetIndicatorDefinitions(
         [Service] ApplicationDbContext db,
+        [Service] IMapper mapper,
         string? search = null)
     {
         var query = db.IndicatorDefinitions
@@ -24,20 +27,21 @@ public sealed class IndicatorDefinitionQueries
             query = query.Where(x => EF.Functions.ILike(x.Name.Value, pattern, "\\"));
         }
 
-        return query
-            .Select(IndicatorDefinitionDto.Projection);
+        return query.ProjectTo<IndicatorDefinitionDto>(mapper.ConfigurationProvider);
     }
 
     [UseProjection]
     public IQueryable<IndicatorDefinitionDto> GetIndicatorDefinitionById(
-        [Service] ApplicationDbContext db, string id)
+        [Service] ApplicationDbContext db,
+        [Service] IMapper mapper,
+        string id)
     {
         var indicatorDefinitionId = IndicatorDefinitionId.Create(id);
 
         return db.IndicatorDefinitions
             .AsNoTracking()
             .Where(x => !x.IsDeleted && x.Id == indicatorDefinitionId)
-            .Select(IndicatorDefinitionDto.Projection);
+            .ProjectTo<IndicatorDefinitionDto>(mapper.ConfigurationProvider);
     }
 
     private static string EscapeLikePattern(string value) =>

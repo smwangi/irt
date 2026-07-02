@@ -10,22 +10,9 @@ public static class ProblemDetailsApiBehaviorOptions
     {
         options.InvalidModelStateResponseFactory = context =>
         {
-            var errors = context.ModelState
-                .Where(item => item.Value?.Errors.Count > 0)
-                .ToDictionary(
-                    item => item.Key,
-                    item => item.Value!.Errors
-                        .Select(error => string.IsNullOrWhiteSpace(error.ErrorMessage)
-                            ? "The input was not valid."
-                            : error.ErrorMessage)
-                        .ToArray());
-
             return IrtError.Validation(
                     "One or more validation errors occurred.",
-                    details: new Dictionary<string, object>
-                    {
-                        ["errors"] = errors
-                    })
+                    details: ValidationErrorDetails.FromModelState(context.ModelState))
                 .ToProblemDetailsResult(context.HttpContext);
         };
     }

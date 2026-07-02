@@ -1,3 +1,4 @@
+using AutoMapper;
 using Irt.Application.Configuration.Commands;
 using Irt.Core.IndicatorCategories;
 using Irt.Core.IndicatorDefinitions;
@@ -16,7 +17,8 @@ internal sealed class PatchIndicatorDefinitionCommandHandler(
     IRepository<ReportingScope> reportingScopeRepository,
     IRepository<UnitOfMeasure> unitOfMeasureRepository,
     IRepository<IndicatorCategory> indicatorCategoryRepository,
-    INameUniquenessChecker<IndicatorDefinition, IndicatorDefinitionId> uniquenessChecker)
+    INameUniquenessChecker<IndicatorDefinition, IndicatorDefinitionId> uniquenessChecker,
+    IMapper mapper)
     : ICommandHandler<PatchIndicatorDefinitionCommand, Result<IndicatorDefinitionDto>>
 {
     public async Task<Result<IndicatorDefinitionDto>> HandleAsync(
@@ -98,7 +100,6 @@ internal sealed class PatchIndicatorDefinitionCommandHandler(
             return Result<IndicatorDefinitionDto>.Failure(IrtError.Validation(ex.Message));
         }
 
-        return Result<IndicatorDefinitionDto>.Success(
-            IndicatorDefinitionDto.Projection.Compile()(entity));
+        return Result<IndicatorDefinitionDto>.Success(mapper.Map<IndicatorDefinitionDto>(entity));
     }
 }

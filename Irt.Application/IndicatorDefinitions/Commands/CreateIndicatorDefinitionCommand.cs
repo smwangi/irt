@@ -15,4 +15,4 @@ public sealed record CreateIndicatorDefinitionCommand(
     string? FormulaDescription = null,
     string? Metadata = null,
     string? DPSIR = null)
-    : ICommand<Result<IndicatorDefinitionDto>>;
+    : ICommand<Result<IndicatorDefinitionDto>>, IIndicatorDefinitionUpsertCommand;

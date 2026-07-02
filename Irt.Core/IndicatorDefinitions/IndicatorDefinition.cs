@@ -32,10 +32,10 @@ namespace Irt.Core.IndicatorDefinitions
             IndicatorCategory indicatorCategory,
             decimal minThreshold,
             decimal maxThreshold,
-            string formula,
-            string formulaDescription,
-            string metadata,
-            string dpsir)
+            string? formula,
+            string? formulaDescription,
+            string? metadata,
+            string? dpsir)
         {
             Id = id;
             Name = name;
@@ -59,14 +59,17 @@ namespace Irt.Core.IndicatorDefinitions
             IndicatorCategory indicatorCategory,
             decimal minThreshold,
             decimal maxThreshold,
-            string formula,
-            string formulaDescription,
-            string metadata,
-            string dpsir)
+            string? formula,
+            string? formulaDescription,
+            string? metadata,
+            string? dpsir)
         {
+            EnsureThresholds(minThreshold, maxThreshold);
+            EnsureReferences(reportingScope, unitOfMeasure, indicatorCategory);
+
             return new IndicatorDefinition(
                 IndicatorDefinitionId.Create(UniqueIdGenerator.NextId()),
-                name, 
+                name,
                 description,
                 reportingScope,
                 unitOfMeasure,
@@ -78,6 +81,85 @@ namespace Irt.Core.IndicatorDefinitions
                 metadata,
                 dpsir
             );
+        }
+
+        public void Update(
+            Name name,
+            string description,
+            ReportingScope reportingScope,
+            UnitOfMeasure unitOfMeasure,
+            IndicatorCategory indicatorCategory,
+            decimal minThreshold,
+            decimal maxThreshold,
+            string? formula,
+            string? formulaDescription,
+            string? metadata,
+            string? dpsir)
+        {
+            EnsureThresholds(minThreshold, maxThreshold);
+            EnsureReferences(reportingScope, unitOfMeasure, indicatorCategory);
+
+            Name = name;
+            Description = description;
+            ReportingScope = reportingScope;
+            UnitOfMeasure = unitOfMeasure;
+            IndicatorCategory = indicatorCategory;
+            MinThreshold = minThreshold;
+            MaxThreshold = maxThreshold;
+            Formula = formula;
+            FormulaDescription = formulaDescription;
+            Metadata = metadata;
+            DPSIR = dpsir;
+        }
+
+        public void Patch(
+            Name? name,
+            string? description,
+            ReportingScope? reportingScope,
+            UnitOfMeasure? unitOfMeasure,
+            IndicatorCategory? indicatorCategory,
+            decimal? minThreshold,
+            decimal? maxThreshold,
+            string? formula,
+            string? formulaDescription,
+            string? metadata,
+            string? dpsir)
+        {
+            if (name is not null) Name = name;
+            if (description is not null) Description = description;
+            if (reportingScope is not null) ReportingScope = reportingScope;
+            if (unitOfMeasure is not null) UnitOfMeasure = unitOfMeasure;
+            if (indicatorCategory is not null) IndicatorCategory = indicatorCategory;
+
+            var effectiveMin = minThreshold ?? MinThreshold;
+            var effectiveMax = maxThreshold ?? MaxThreshold;
+            EnsureThresholds(effectiveMin, effectiveMax);
+            MinThreshold = effectiveMin;
+            MaxThreshold = effectiveMax;
+
+            if (formula is not null) Formula = formula;
+            if (formulaDescription is not null) FormulaDescription = formulaDescription;
+            if (metadata is not null) Metadata = metadata;
+            if (dpsir is not null) DPSIR = dpsir;
+        }
+
+        private static void EnsureThresholds(decimal min, decimal max)
+        {
+            if (min > max)
+            {
+                throw new ArgumentException(
+                    $"MinThreshold ({min}) cannot be greater than MaxThreshold ({max}).");
+            }
+        }
+
+        private static void EnsureReferences(
+            ReportingScope reportingScope,
+            UnitOfMeasure unitOfMeasure,
+            IndicatorCategory indicatorCategory)
+        {
+            ArgumentNullException.ThrowIfNull(reportingScope);
+            ArgumentNullException.ThrowIfNull(unitOfMeasure);
+            ArgumentNullException.ThrowIfNull(indicatorCategory);
         }
     }
 }

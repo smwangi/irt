@@ -3,8 +3,14 @@ using Irt.Application.Dispatchers;
 using Irt.Application.IndicatorDefinitions;
 using Irt.Application.IndicatorDefinitions.Commands;
 using Irt.Application.IndicatorDefinitions.Queries;
+using Irt.SharedKernel.Common;
+using Irt.SharedKernel.ErrorHandling.Exceptions;
 using Irt.SharedKernel.Results;
 using Microsoft.AspNetCore.Mvc;
+using IrtResult = Irt.SharedKernel.Results.Result;
+using IrtResultOfIndicatorDefinition = Irt.SharedKernel.Results.Result<Irt.Application.IndicatorDefinitions.IndicatorDefinitionDto>;
+using IrtResultOfIndicatorDefinitions = Irt.SharedKernel.Results.Result<System.Collections.Generic.List<Irt.Application.IndicatorDefinitions.IndicatorDefinitionDto>>;
+using IrtResultOfUnit = Irt.SharedKernel.Results.Result<Irt.SharedKernel.Common.Unit>;
 
 namespace IrtWeb.IndicatorDefinitions;
 
@@ -19,37 +25,107 @@ public class IndicatorDefinitionController(
     private const string ApiPrefix = "indicator-definitions";
 
     [HttpGet(ApiPrefix)]
-    public async Task<IActionResult> GetAll()
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> List([FromQuery] string? search = null)
     {
-        var indicatorDefinitions = await queryDispatcher
-            .DispatchAsync<GetIndicatorDefinitionQuery, Irt.SharedKernel.Results.Result<List<IndicatorDefinitionDto>>>(
-                new GetIndicatorDefinitionQuery(), CancellationToken.None);
+        var result = await queryDispatcher
+            .DispatchAsync<GetIndicatorDefinitionQuery, IrtResultOfIndicatorDefinitions>(
+                new GetIndicatorDefinitionQuery(search), CancellationToken.None);
 
-        return Ok(indicatorDefinitions);
+        return result.IsSuccess ? Ok(result.Value) : result.ToActionResult();
     }
-    
+
     [HttpGet(ApiPrefix + "/{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById([FromRoute] string id)
     {
-        var indicatorDefinition = await queryDispatcher
-            .DispatchAsync<GetIndicatorDefinitionByIdQuery, Irt.SharedKernel.Results.Result<IndicatorDefinitionDto>>(
+        var result = await queryDispatcher
+            .DispatchAsync<GetIndicatorDefinitionByIdQuery, IrtResultOfIndicatorDefinition>(
                 new GetIndicatorDefinitionByIdQuery(id), CancellationToken.None);
 
-        return Ok(indicatorDefinition);
+        return result.IsSuccess ? Ok(result.Value) : result.ToActionResult();
     }
-    
+
     [HttpPost(ApiPrefix)]
-    public async Task<IActionResult> Create([FromBody] CreateIndicatorDefinitionCommand command)
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Create([FromBody] CreateIndicatorDefinitionRequest request)
     {
-        var resp = await commandDispatcher
-            .DispatchCommandAsync<CreateIndicatorDefinitionCommand, Irt.SharedKernel.Results.Result<IndicatorDefinitionDto>>(
+        var command = request.ToCommand();
+        var result = await commandDispatcher
+            .DispatchCommandAsync<CreateIndicatorDefinitionCommand, IrtResultOfIndicatorDefinition>(
                 command, CancellationToken.None);
-        
-        if (!resp.IsSuccess)
+
+        return result.Match(
+            onSuccess: dto => CreatedAtAction(
+                nameof(GetById),
+                new { id = dto.Id, version = "1.0" },
+                dto),
+            onFailure: _ => result.ToActionResult());
+    }
+
+    [HttpPut(ApiPrefix + "/{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Update(
+        [FromRoute] string id,
+        [FromBody] UpdateIndicatorDefinitionRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(resp);
+            return IrtResult.Failure(IrtError.BadRequest("Id is required.")).ToActionResult();
         }
-        
-        return Ok(resp);
+
+        var command = request.ToCommand(id);
+        var result = await commandDispatcher
+            .DispatchCommandAsync<UpdateIndicatorDefinitionCommand, IrtResultOfIndicatorDefinition>(
+                command, CancellationToken.None);
+
+        return result.IsSuccess ? Ok(result.Value) : result.ToActionResult();
+    }
+
+    [HttpPatch(ApiPrefix + "/{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Patch(
+        [FromRoute] string id,
+        [FromBody] PatchIndicatorDefinitionRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return IrtResult.Failure(IrtError.BadRequest("Id is required.")).ToActionResult();
+        }
+
+        var command = request.ToCommand(id);
+        var result = await commandDispatcher
+            .DispatchCommandAsync<PatchIndicatorDefinitionCommand, IrtResultOfIndicatorDefinition>(
+                command, CancellationToken.None);
+
+        return result.IsSuccess ? Ok(result.Value) : result.ToActionResult();
+    }
+
+    [HttpDelete(ApiPrefix + "/{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete([FromRoute] string id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return IrtResult.Failure(IrtError.BadRequest("Id is required.")).ToActionResult();
+        }
+
+        var result = await commandDispatcher
+            .DispatchCommandAsync<DeleteIndicatorDefinitionCommand, IrtResultOfUnit>(
+                new DeleteIndicatorDefinitionCommand(id), CancellationToken.None);
+
+        return result.IsSuccess ? NoContent() : result.ToActionResult();
     }
 }

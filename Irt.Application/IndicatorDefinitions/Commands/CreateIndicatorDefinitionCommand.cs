@@ -3,8 +3,16 @@ using Irt.SharedKernel.Results;
 
 namespace Irt.Application.IndicatorDefinitions.Commands;
 
-public record CreateIndicatorDefinitionCommand : ICommand<Result<IndicatorDefinitionDto>>
-{
-    public string Name { get; init; }
-    public string Description { get; init; }
-}
+public sealed record CreateIndicatorDefinitionCommand(
+    string Name,
+    string Description,
+    string ReportingScopeId,
+    string UnitOfMeasureId,
+    string IndicatorCategoryId,
+    decimal MinThreshold,
+    decimal MaxThreshold,
+    string? Formula = null,
+    string? FormulaDescription = null,
+    string? Metadata = null,
+    string? DPSIR = null)
+    : ICommand<Result<IndicatorDefinitionDto>>;

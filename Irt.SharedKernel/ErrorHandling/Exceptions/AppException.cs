@@ -61,11 +61,27 @@ public sealed class UnauthorizedException(
             message, 
             HttpStatusCode.TooManyRequests, 
             errorCode, 
-            retryAfterSeconds.HasValue 
-                ? new Dictionary<string, object> {["retryAfter"] = retryAfterSeconds.HasValue } 
-                : null, 
+            BuildDetails(details, retryAfterSeconds),
             true, 
-            innerException);
+            innerException)
+    {
+        private static IDictionary<string, object>? BuildDetails(
+            IDictionary<string, object>? details,
+            int? retryAfterSeconds)
+        {
+            if (!retryAfterSeconds.HasValue)
+            {
+                return details;
+            }
+
+            var mergedDetails = details is null
+                ? new Dictionary<string, object>()
+                : new Dictionary<string, object>(details);
+
+            mergedDetails["retryAfter"] = retryAfterSeconds.Value;
+            return mergedDetails;
+        }
+    }
 
         
     public sealed class NotImplementedHttpException(

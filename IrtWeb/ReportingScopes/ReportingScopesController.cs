@@ -3,6 +3,7 @@ using Irt.Application.Dispatchers;
 using Irt.Application.ReportingScopes;
 using Irt.Application.ReportingScopes.Commands;
 using Irt.Application.ReportingScopes.Queries;
+using Irt.SharedKernel.ErrorHandling.Exceptions;
 using Irt.SharedKernel.Results;
 using Microsoft.AspNetCore.Mvc;
 using IrtResultOfReportingScope = Irt.SharedKernel.Results.Result<Irt.Application.ReportingScopes.ReportingScopeDto>;
@@ -43,8 +44,9 @@ public class ReportingScopesController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> CreateReportingScope([FromBody] CreateReportingScopeCommand command)
+    public async Task<IActionResult> CreateReportingScope([FromBody] CreateReportingScopeRequest request)
     {
+        var command = request.ToCommand();
         var response = await commandDispatcher
             .DispatchCommandAsync<CreateReportingScopeCommand, IrtResultOfReportingScope>(
                 command, CancellationToken.None);
@@ -63,13 +65,14 @@ public class ReportingScopesController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateReportingScope(
         [FromRoute] string? key,
-        [FromBody] UpdateReportingScopeCommand command)
+        [FromBody] UpdateReportingScopeRequest request)
     {
-        if (key is null || key != command.Id)
+        if (key is null)
         {
-            return BadRequest("Key in route does not match key in body.");
+            return Result.Failure(IrtError.BadRequest("Key is required.")).ToActionResult();
         }
         
+        var command = request.ToCommand(key);
         var result = await commandDispatcher
             .DispatchCommandAsync<UpdateReportingScopeCommand, IrtResultOfReportingScope>(
                 command, CancellationToken.None);
@@ -82,13 +85,14 @@ public class ReportingScopesController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> PatchReportingScope(
         [FromRoute] string? key,
-        [FromBody] PatchReportingScopeCommand command)
+        [FromBody] PatchReportingScopeRequest request)
     {
-        if (key is null || key != command.Id)
+        if (key is null)
         {
-            return BadRequest("Key in route does not match key in body.");
+            return Result.Failure(IrtError.BadRequest("Key is required.")).ToActionResult();
         }
         
+        var command = request.ToCommand(key);
         var result = await commandDispatcher
             .DispatchCommandAsync<PatchReportingScopeCommand, IrtResultOfReportingScope>(
                 command, CancellationToken.None);

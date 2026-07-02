@@ -3,12 +3,8 @@ using Irt.SharedKernel.Results;
 
 namespace Irt.Application.IndicatorDefinitions.Queries;
 
-public class GetIndicatorDefinitionQuery : IQuery<Result<List<IndicatorDefinitionDto>>>
-{
-    
-}
+public sealed record GetIndicatorDefinitionQuery(string? Search = null)
+    : IQuery<Result<List<IndicatorDefinitionDto>>>;
 
-public class GetIndicatorDefinitionByIdQuery(string id) : IQuery<Result<IndicatorDefinitionDto>>
-{
-    
-}
+public sealed record GetIndicatorDefinitionByIdQuery(string Id)
+    : IQuery<Result<IndicatorDefinitionDto>>;

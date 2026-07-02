@@ -10,10 +10,10 @@ using Irt.Application.Datasets;
 using Irt.Application.Datasource;
 using Irt.Application.ReportingScopes;
 using Irt.Infrastructure.Database.Postgres;
-using Irt.SharedKernel.ErrorHandling.MiddleWare;
 using IrtWeb.Configuration;
 using IrtWeb.GraphQL;
 using IrtWeb.GraphQL.ReportingScopes;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +30,8 @@ builder.Services
         .OrderBy()
         .Expand()
         .Count());
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+    options.UseProblemDetailsValidationResponse());
 
 builder.Services
     .AddApiVersioning(options =>
@@ -101,17 +103,14 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseDeveloperExceptionPage();
 }
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/error");
     app.UseHsts();
     app.UseHttpsRedirection();
 }
 app.UseMiddleware<GlobalExceptionHandlerMiddleWare>();
-app.UseMiddleware<ResultErrorHandlingMiddleWare>();
 
 app.UseSerilogRequestLogging(); // Must run before endpoint middleware so Path is logged
 

@@ -337,6 +337,9 @@
               },
               "/Users/samwan/projects/irtool/Irt.Core/Irt.Core.csproj": {
                 "projectPath": "/Users/samwan/projects/irtool/Irt.Core/Irt.Core.csproj"
+              },
+              "/Users/samwan/projects/irtool/Irt.SharedKernel/Irt.SharedKernel.csproj": {
+                "projectPath": "/Users/samwan/projects/irtool/Irt.SharedKernel/Irt.SharedKernel.csproj"
               }
             }
           }
@@ -408,6 +411,9 @@
             }
           ],
           "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }

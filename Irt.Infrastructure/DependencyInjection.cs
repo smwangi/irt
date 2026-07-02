@@ -3,6 +3,7 @@ using Irt.Application.Configuration.DomainEvents;
 using Irt.Application.Dispatchers;
 using Irt.Application.Helpers;
 using Irt.Core.Datasources;
+using Irt.Core.IndicatorDefinitions;
 using Irt.Core.ReportingScopes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
@@ -41,7 +42,11 @@ public static class DependencyInjection
         services.AddScoped<INameUniquenessChecker<ReportingScope, ReportingScopeId>>(sp =>
             new GenericNameUniquenessChecker<ReportingScope, ReportingScopeId>(
                 sp.GetRequiredService<ApplicationDbContext>()));
-        
+
+        services.AddScoped<INameUniquenessChecker<IndicatorDefinition, IndicatorDefinitionId>>(sp =>
+            new GenericNameUniquenessChecker<IndicatorDefinition, IndicatorDefinitionId>(
+                sp.GetRequiredService<ApplicationDbContext>()));
+
         return services;
     }
 }

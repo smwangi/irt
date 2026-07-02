@@ -11,6 +11,7 @@
           "AutoMapper": "13.0.1",
           "Irt.Application": "1.0.0",
           "Irt.Core": "1.0.0",
+          "Irt.SharedKernel": "1.0.0",
           "Microsoft.NET.Test.Sdk": "17.6.0",
           "Moq": "4.20.70",
           "xunit": "2.4.2"

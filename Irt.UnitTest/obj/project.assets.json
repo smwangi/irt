@@ -9196,6 +9196,7 @@
       "AutoMapper >= 13.0.1",
       "Irt.Application >= 1.0.0",
       "Irt.Core >= 1.0.0",
+      "Irt.SharedKernel >= 1.0.0",
       "Microsoft.NET.Test.Sdk >= 17.6.0",
       "Moq >= 4.20.70",
       "coverlet.collector >= 6.0.0",
@@ -9234,6 +9235,9 @@
             },
             "/Users/samwan/projects/irtool/Irt.Core/Irt.Core.csproj": {
               "projectPath": "/Users/samwan/projects/irtool/Irt.Core/Irt.Core.csproj"
+            },
+            "/Users/samwan/projects/irtool/Irt.SharedKernel/Irt.SharedKernel.csproj": {
+              "projectPath": "/Users/samwan/projects/irtool/Irt.SharedKernel/Irt.SharedKernel.csproj"
             }
           }
         }
@@ -9305,6 +9309,9 @@
           }
         ],
         "frameworkReferences": {
+          "Microsoft.AspNetCore.App": {
+            "privateAssets": "none"
+          },
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
           }

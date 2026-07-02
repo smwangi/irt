@@ -1,126 +1,75 @@
-
-using Irt.SharedKernel.Common;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Irt.SharedKernel.Results;
 
 public static class ResultExtension
 {
-    // Convert Result<T> to IActionResult
     public static IActionResult ToActionResult<T>(this Result<T> result)
-    {
-        if (result.IsSuccess)
-        {
-            return new OkObjectResult(result.Value);
-        }
-        
-        // Map IrtError to appropriate HTTP status codes
-        return result.IrtError switch
-        {
-            { Type: "NotFound" } error => new NotFoundObjectResult(new { 
-                error = error.Message, 
-                code = error.Code,
-                details = error.Details 
-            }),
-            { Type: "Validation" } error => new BadRequestObjectResult(new { 
-                error = error.Message, 
-                code = error.Code,
-                details = error.Details 
-            }),
-            { Type: "BadRequest" } error => new BadRequestObjectResult(new { 
-                error = error.Message, 
-                code = error.Code,
-                details = error.Details 
-            }),
-            { Type: "Unauthorized" } error => new UnauthorizedObjectResult(new { 
-                error = error.Message, 
-                code = error.Code,
-                details = error.Details 
-            }),
-            { Type: "Forbidden" } error => new ObjectResult(new { 
-                error = error.Message, 
-                code = error.Code,
-                details = error.Details 
-            }) { StatusCode = 403 },
-            { Type: "Conflict" } error => new ConflictObjectResult(new { 
-                error = error.Message, 
-                code = error.Code,
-                details = error.Details 
-            }),
-            { Type: "Internal" } error => new ObjectResult(new { 
-                error = error.Message, 
-                code = error.Code,
-                details = error.Details 
-            }) { StatusCode = 500 },
-            { } error => new BadRequestObjectResult(new { 
-                error = error.Message, 
-                code = error.Code,
-                details = error.Details 
-            })
-        };
-    }
-    
-    // Convert non-generic Result to IActionResult
+        => result.IsSuccess
+            ? new OkObjectResult(result.Value)
+            : result.ErrorOrThrow().ToProblemDetailsResult();
+
     public static IActionResult ToActionResult(this Result result)
+        => result.IsSuccess
+            ? new OkResult()
+            : result.ErrorOrThrow().ToProblemDetailsResult();
+
+    public static ProblemDetails ToProblemDetails(this IrtError irtError)
     {
-        if (result.IsSuccess)
+        var problem = new ProblemDetails
         {
-            return new OkResult();
-        }
-        
-        return result.IrtError switch
-        {
-            { Type: "NotFound" } error => new NotFoundObjectResult(new { 
-                error = error.Message, 
-                code = error.Code,
-                details = error.Details 
-            }),
-            { Type: "Validation" } error => new BadRequestObjectResult(new { 
-                error = error.Message, 
-                code = error.Code,
-                details = error.Details 
-            }),
-            { Type: "BadRequest" } error => new BadRequestObjectResult(new { 
-                error = error.Message, 
-                code = error.Code,
-                details = error.Details 
-            }),
-            { Type: "Unauthorized" } error => new UnauthorizedObjectResult(new { 
-                error = error.Message, 
-                code = error.Code,
-                details = error.Details 
-            }),
-            { Type: "Forbidden" } error => new ObjectResult(new { 
-                error = error.Message, 
-                code = error.Code,
-                details = error.Details 
-            }) { StatusCode = 403 },
-            { Type: "Conflict" } error => new ConflictObjectResult(new { 
-                error = error.Message, 
-                code = error.Code,
-                details = error.Details 
-            }),
-            { Type: "Internal" } error => new ObjectResult(new { 
-                error = error.Message, 
-                code = error.Code,
-                details = error.Details 
-            }) { StatusCode = 500 },
-            { } error => new BadRequestObjectResult(new { 
-                error = error.Message, 
-                code = error.Code,
-                details = error.Details 
-            })
+            Title = irtError.Code,
+            Detail = irtError.Message,
+            Status = (int)irtError.StatusCode,
+            Type = $"https://httpstatuses.com/{(int)irtError.StatusCode}"
         };
+
+        problem.Extensions["code"] = irtError.Code;
+        problem.Extensions["errorType"] = irtError.Type;
+
+        foreach (var kv in irtError.Details)
+        {
+            problem.Extensions[kv.Key] = kv.Value;
+        }
+
+        return problem;
     }
-    
-    // For OData specifically - returns the value directly or throws
-    public static T ToODataResult<T>(this Result<T> result)
+
+    public static ProblemDetails ToProblemDetails(this IrtError irtError, HttpContext context)
     {
-        if (result.IsSuccess)
-            return result.Value;
-            
-        throw new InvalidOperationException($"OData query failed: {result.IrtError?.Message}");
+        var problem = irtError.ToProblemDetails();
+        problem.Instance = context.Request.Path;
+        problem.Extensions["traceId"] = context.TraceIdentifier;
+
+        return problem;
+    }
+
+    public static ObjectResult ToProblemDetailsResult(this IrtError irtError)
+        => new ProblemDetailsObjectResult(irtError);
+
+    public static ObjectResult ToProblemDetailsResult(this IrtError irtError, HttpContext context)
+        => new(irtError.ToProblemDetails(context)) { StatusCode = (int)irtError.StatusCode };
+
+    private sealed class ProblemDetailsObjectResult : ObjectResult
+    {
+        private readonly IrtError error;
+
+        public ProblemDetailsObjectResult(IrtError error)
+            : base(error.ToProblemDetails())
+        {
+            this.error = error;
+            StatusCode = (int)error.StatusCode;
+        }
+
+        public override void OnFormatting(ActionContext context)
+        {
+            Value = error.ToProblemDetails(context.HttpContext);
+            StatusCode = (int)error.StatusCode;
+
+            base.OnFormatting(context);
+        }
     }
     
     // Combine multiple results

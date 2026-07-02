@@ -33,17 +33,17 @@ namespace IrtWeb.Datasets
                 .DispatchAsync<GetDatasetsQuery, Irt.SharedKernel.Results.Result<IQueryable<DatasetDto>>>(
                     new GetDatasetsQuery(), CancellationToken.None);
             
-            //datasets.ToActionResult();
-            return Ok(datasets);
+            return datasets.ToActionResult();
         }
 
         [HttpPost(ApiPrefix)]
-        public async Task<IActionResult> CreateDataset([FromBody] CreateDatasetCommand request)
+        public async Task<IActionResult> CreateDataset([FromBody] CreateDatasetRequest request)
         {
+            var command = request.ToCommand();
             var resp = await _commandDispatcher
                 .DispatchAsync<CreateDatasetCommand, Irt.SharedKernel.Results.Result<DatasetDto>>(
-                    request, CancellationToken.None);
-            return Ok(resp);
+                    command, CancellationToken.None);
+            return resp.ToActionResult();
         }
 
         [HttpGet(ApiPrefix+ "/{id}")]
@@ -53,45 +53,37 @@ namespace IrtWeb.Datasets
                 .DispatchAsync<GetDatasetsByIdQuery, Irt.SharedKernel.Results.Result<IQueryable<DatasetDto>>>(
                     new GetDatasetsByIdQuery(id), CancellationToken.None);
             
-            return Ok(dataset);
+            return dataset.ToActionResult();
         }
 
         [HttpPut(ApiPrefix+ "/{{id}}")]
         public async Task<IActionResult> UpdateDataset(
             [FromRoute]string id,
-            [FromBody] UpdateDatasetCommand request)
+            [FromBody] UpdateDatasetRequest request)
         {
-            if (id != request.Id)
-            {
-                logger.LogWarning("ID mismatch: Route ID = {RouteId}, Request ID = {RequestId}", id, request.Id);
-                return BadRequest("ID mismatch: Route ID does not match Request ID");
-            }
-
             logger.LogInformation("Updating dataset with ID {DatasetId}", id);
+            var command = request.ToCommand(id);
             var resp = await _commandDispatcher
                 .DispatchAsync<UpdateDatasetCommand, Irt.SharedKernel.Results.Result<DatasetDto>>(
-                    request, CancellationToken.None);
+                    command, CancellationToken.None);
             if (!resp.IsSuccess)
             {
                 logger.LogWarning("Update not successful!");
-                return BadRequest(resp);
+                return resp.ToActionResult();
             }
             logger.LogInformation("Update Successful!");
-            return Ok(resp);
+            return resp.ToActionResult();
             
         }
 
         [HttpPatch(ApiPrefix+ "/{{id}}")]
-        public async Task<IActionResult> PatchDataset([FromRoute]string id, [FromBody] UpdateDatasetCommand request)
+        public async Task<IActionResult> PatchDataset([FromRoute]string id, [FromBody] UpdateDatasetRequest request)
         {
-            if (id != request.Id)
-            {
-                return BadRequest("Id in the request body does not match the id in the route");
-            }
+            var command = request.ToCommand(id);
             var resp = await _commandDispatcher
                 .DispatchAsync<UpdateDatasetCommand, Irt.SharedKernel.Results.Result<DatasetDto>>(
-                    request, CancellationToken.None);
-            return Ok(resp);
+                    command, CancellationToken.None);
+            return resp.ToActionResult();
         }
     }
 }

@@ -69,7 +69,9 @@ public class ReportingScopesController(
     {
         if (key is null)
         {
-            return Result.Failure(IrtError.BadRequest("Key is required.")).ToActionResult();
+            return Irt.SharedKernel.Results.Result
+                .Failure(IrtError.BadRequest("Key is required."))
+                .ToActionResult();
         }
         
         var command = request.ToCommand(key);
@@ -89,7 +91,9 @@ public class ReportingScopesController(
     {
         if (key is null)
         {
-            return Result.Failure(IrtError.BadRequest("Key is required.")).ToActionResult();
+            return Irt.SharedKernel.Results.Result
+                .Failure(IrtError.BadRequest("Key is required."))
+                .ToActionResult();
         }
         
         var command = request.ToCommand(key);

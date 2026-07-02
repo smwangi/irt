@@ -55,8 +55,6 @@ public sealed class IndicatorDefinitionMutations
                 DeleteIndicatorDefinitionCommand,
                 Results.Result<Unit>>(input, cancellationToken);
 
-        result.ValueOrThrow();
-
-        return true;
+        return result.ValueOrThrow() == Unit.Value;
     }
 }

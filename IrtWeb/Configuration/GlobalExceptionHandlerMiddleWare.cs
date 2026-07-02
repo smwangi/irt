@@ -29,7 +29,7 @@ public class GlobalExceptionHandlerMiddleWare(
                 context,
                 IrtError.Validation(
                     "One or more validation errors occurred.",
-                    details: BuildValidationDetails(validationException)));
+                    details: ValidationErrorDetails.FromFluentValidation(validationException)));
         }
         catch (InvalidCommandException invalidCommandException)
         {
@@ -102,21 +102,5 @@ public class GlobalExceptionHandlerMiddleWare(
         context.Response.ContentType = "application/problem+json";
 
         return WriteProblemAsync(context, error.ToProblemDetails(context));
-    }
-
-    private static IDictionary<string, object> BuildValidationDetails(FluentValidationException validationException)
-    {
-        var errors = validationException.Errors
-            .GroupBy(error => string.IsNullOrWhiteSpace(error.PropertyName)
-                ? "request"
-                : error.PropertyName)
-            .ToDictionary(
-                group => group.Key,
-                group => group.Select(error => error.ErrorMessage).ToArray());
-
-        return new Dictionary<string, object>
-        {
-            ["errors"] = errors
-        };
     }
 }

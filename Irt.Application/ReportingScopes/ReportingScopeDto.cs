@@ -1,6 +1,3 @@
-using System.Linq.Expressions;
-using Irt.Core.ReportingScopes;
-
 namespace Irt.Application.ReportingScopes;
 
 public class ReportingScopeDto
@@ -17,12 +14,4 @@ public class ReportingScopeDto
         Name = name;
         Description = description;
     }
-
-    public static Expression<Func<ReportingScope, ReportingScopeDto>> Projection { get; } =
-        scope => new ReportingScopeDto
-        {
-            Id = scope.Id.Value,
-            Name = scope.Name.Value,
-            Description = scope.Description
-        };
 }

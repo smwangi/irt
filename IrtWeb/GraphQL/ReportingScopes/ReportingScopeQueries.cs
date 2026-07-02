@@ -1,3 +1,5 @@
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Irt.Application.ReportingScopes;
 using Irt.Core.ReportingScopes;
 using Irt.Infrastructure.Database.Postgres;
@@ -11,6 +13,7 @@ public sealed class ReportingScopeQueries
     [UseProjection, UseFiltering, UseSorting]
     public IQueryable<ReportingScopeDto> GetReportingScopes(
         [Service] ApplicationDbContext db,
+        [Service] IMapper mapper,
         string? search = null)
     {
         IQueryable<ReportingScope> query;
@@ -33,20 +36,21 @@ AND ""Name"" ILIKE {pattern} ESCAPE '\'")
                 .AsNoTracking();
         }
 
-        return query
-            .Select(ReportingScopeDto.Projection);
+        return query.ProjectTo<ReportingScopeDto>(mapper.ConfigurationProvider);
     }
     
     [UseProjection]
     public IQueryable<ReportingScopeDto> GetReportingScopeById(
-        [Service] ApplicationDbContext db, string id)
+        [Service] ApplicationDbContext db,
+        [Service] IMapper mapper,
+        string id)
     {
         var reportingScopeId = ReportingScopeId.Create(id);
 
         return db.ReportingScopes
             .AsNoTracking()
             .Where(x => !x.IsDeleted && x.Id == reportingScopeId)
-            .Select(ReportingScopeDto.Projection);
+            .ProjectTo<ReportingScopeDto>(mapper.ConfigurationProvider);
     }
 
     private static string EscapeLikePattern(string value) =>

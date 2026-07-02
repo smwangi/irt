@@ -1,4 +1,4 @@
-using Irt.Application.Common;
+using AutoMapper;
 using Irt.Application.Configuration.Commands;
 using Irt.Core.ReportingScopes;
 using Irt.Core.SharedKernel;
@@ -10,7 +10,8 @@ namespace Irt.Application.ReportingScopes.Commands.Handlers;
 
 internal sealed class UpdateReportingScopeCommandHandler(
     IRepository<ReportingScope> repository,
-    INameUniquenessChecker<ReportingScope, ReportingScopeId> uniquenessChecker)
+    INameUniquenessChecker<ReportingScope, ReportingScopeId> uniquenessChecker,
+    IMapper mapper)
 : ICommandHandler<UpdateReportingScopeCommand, Result<ReportingScopeDto>>
 {
     public async Task<Result<ReportingScopeDto>> HandleAsync(
@@ -36,6 +37,6 @@ internal sealed class UpdateReportingScopeCommandHandler(
         
         scope.Update(command.Name, command.Description); // full replace
         
-        return Result<ReportingScopeDto>.Success(ReportingScopeDto.Projection.Compile()(scope));
+        return Result<ReportingScopeDto>.Success(mapper.Map<ReportingScopeDto>(scope));
     }
 }

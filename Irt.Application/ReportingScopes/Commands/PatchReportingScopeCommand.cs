@@ -6,7 +6,7 @@ namespace Irt.Application.ReportingScopes.Commands;
 
 
 public sealed record PatchReportingScopeCommand(string Name, string Description)
-    : ICommand<Result<ReportingScopeDto>>
+    : ICommand<Result<ReportingScopeDto>>, IReportingScopeUpsertCommand
 {
     public string Id { get; init; } = default!;
 }

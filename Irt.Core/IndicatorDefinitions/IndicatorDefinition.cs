@@ -125,11 +125,11 @@ namespace Irt.Core.IndicatorDefinitions
             string? metadata,
             string? dpsir)
         {
-            if (name is not null) Name = name;
-            if (description is not null) Description = description;
-            if (reportingScope is not null) ReportingScope = reportingScope;
-            if (unitOfMeasure is not null) UnitOfMeasure = unitOfMeasure;
-            if (indicatorCategory is not null) IndicatorCategory = indicatorCategory;
+            Name = name ?? Name;
+            Description = description ?? Description;
+            ReportingScope = reportingScope ?? ReportingScope;
+            UnitOfMeasure = unitOfMeasure ?? UnitOfMeasure;
+            IndicatorCategory = indicatorCategory ?? IndicatorCategory;
 
             var effectiveMin = minThreshold ?? MinThreshold;
             var effectiveMax = maxThreshold ?? MaxThreshold;
@@ -137,10 +137,10 @@ namespace Irt.Core.IndicatorDefinitions
             MinThreshold = effectiveMin;
             MaxThreshold = effectiveMax;
 
-            if (formula is not null) Formula = formula;
-            if (formulaDescription is not null) FormulaDescription = formulaDescription;
-            if (metadata is not null) Metadata = metadata;
-            if (dpsir is not null) DPSIR = dpsir;
+            Formula = formula ?? Formula;
+            FormulaDescription = formulaDescription ?? FormulaDescription;
+            Metadata = metadata ?? Metadata;
+            DPSIR = dpsir ?? DPSIR;
         }
 
         private static void EnsureThresholds(decimal min, decimal max)

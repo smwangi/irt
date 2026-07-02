@@ -1,12 +1,11 @@
 using FluentValidation;
 using Irt.Application.Common;
+using Irt.Application.Configuration.Behaviors;
 using Irt.Application.Configuration.Commands;
 using Irt.Application.Configuration.ContextAccessor;
 using Irt.Application.Configuration.Emails;
 using Irt.Application.Configuration.Queries;
-using Irt.Application.Configuration.Validation;
 using Irt.Application.Datasets;
-using Irt.Application.Datasets.Commands;
 using Irt.Application.Datasets.Queries;
 using Irt.Application.Datasource;
 using Irt.Application.Datasource.Queries;
@@ -36,11 +35,6 @@ public static class DependencyInjection
         // using the <,> notation to specify the behavior that can be used for any generic type parameters
         
         services.AddScoped<IEmailSender, EmailSender>();
-        services.AddDtoValidators();
-
-        services.AddTransient<IValidator<UpdateDatasetCommand>, UpdateDatasetCommandValidator>();
-        services.AddTransient<IValidator<CreateDatasetCommand>, CreateDatasetCommandValidator>();
-        
         services.AddScoped<IODataQueryHandler<GetDatasetsQuery, Result<IQueryable<DatasetDto>>>, GetAllDatasetsQueryHandler>();
         
         //services.AddScoped<IODataQueryHandler<GetDatasourceQuery, DatasourceDto>, GetDatasourceQueryHandler>();
@@ -58,6 +52,7 @@ public static class DependencyInjection
             .WithScopedLifetime());
 
         services.Decorate(typeof(ICommandHandler<,>), typeof(UnitOfWorkCommandHandlerDecorator<,>));
+        services.Decorate(typeof(ICommandHandler<,>), typeof(ValidationBehavior<,>));
 
         services.Scan(scan => scan
             .FromApplicationDependencies()

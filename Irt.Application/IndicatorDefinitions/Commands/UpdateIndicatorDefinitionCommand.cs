@@ -15,7 +15,7 @@ public sealed record UpdateIndicatorDefinitionCommand(
     string? FormulaDescription = null,
     string? Metadata = null,
     string? DPSIR = null)
-    : ICommand<Result<IndicatorDefinitionDto>>
+    : ICommand<Result<IndicatorDefinitionDto>>, IIndicatorDefinitionUpsertCommand
 {
     public string Id { get; init; } = default!;
 }

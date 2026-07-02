@@ -3,8 +3,11 @@ using Irt.Application.Configuration.DomainEvents;
 using Irt.Application.Dispatchers;
 using Irt.Application.Helpers;
 using Irt.Core.Datasources;
+using Irt.Core.IndicatorCategories;
 using Irt.Core.IndicatorDefinitions;
+using Irt.Core.IndicatorMainCategories;
 using Irt.Core.ReportingScopes;
+using Irt.Core.UnitOfMeasurements;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Irt.Core.SeedWork;
@@ -45,6 +48,18 @@ public static class DependencyInjection
 
         services.AddScoped<INameUniquenessChecker<IndicatorDefinition, IndicatorDefinitionId>>(sp =>
             new GenericNameUniquenessChecker<IndicatorDefinition, IndicatorDefinitionId>(
+                sp.GetRequiredService<ApplicationDbContext>()));
+
+        services.AddScoped<INameUniquenessChecker<UnitOfMeasure, UnitOfMeasureId>>(sp =>
+            new GenericNameUniquenessChecker<UnitOfMeasure, UnitOfMeasureId>(
+                sp.GetRequiredService<ApplicationDbContext>()));
+
+        services.AddScoped<INameUniquenessChecker<IndicatorMainCategory, IndicatorMainCategoryId>>(sp =>
+            new GenericNameUniquenessChecker<IndicatorMainCategory, IndicatorMainCategoryId>(
+                sp.GetRequiredService<ApplicationDbContext>()));
+
+        services.AddScoped<INameUniquenessChecker<IndicatorCategory, IndicatorCategoryId>>(sp =>
+            new GenericNameUniquenessChecker<IndicatorCategory, IndicatorCategoryId>(
                 sp.GetRequiredService<ApplicationDbContext>()));
 
         return services;

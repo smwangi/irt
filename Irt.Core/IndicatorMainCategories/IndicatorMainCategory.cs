@@ -4,20 +4,16 @@ using Irt.Core.ValueObjects;
 
 namespace Irt.Core.IndicatorMainCategories
 {
-    public class IndicatorMainCategory : Entity<IndicatorMainCategoryId>
+    public class IndicatorMainCategory : NamedMetadataEntity<IndicatorMainCategoryId>
     {
-        public string Description { get; private set; }
-        
         private IndicatorMainCategory() { }
 
         private IndicatorMainCategory(
             IndicatorMainCategoryId id,
             Name indicatorMainCategoryName,
             string description)
+            : base(id, indicatorMainCategoryName, description)
         {
-            Id = id;
-            Name = indicatorMainCategoryName;
-            Description = description;
         }
 
         public static IndicatorMainCategory Create(

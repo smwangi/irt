@@ -1,5 +1,6 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Irt.Application.Common;
 using Irt.Application.Configuration.Queries;
 using Irt.Core.IndicatorDefinitions;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
@@ -19,16 +20,9 @@ internal sealed class GetIndicatorDefinitionQueryHandler(
     {
         var items = await repository
             .Query(e => !e.IsDeleted)
+            .WhereContainsInsensitive(query.Search, e => e.Name.Value)
             .ProjectTo<IndicatorDefinitionDto>(mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
-
-        if (!string.IsNullOrWhiteSpace(query.Search))
-        {
-            var search = query.Search.Trim();
-            items = items
-                .Where(item => item.Name.Contains(search, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-        }
 
         return Result<List<IndicatorDefinitionDto>>.Success(items);
     }

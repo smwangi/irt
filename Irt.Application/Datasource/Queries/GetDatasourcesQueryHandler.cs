@@ -10,7 +10,7 @@ namespace Irt.Application.Datasource.Queries
     internal class GetDatasourceQueryHandler(
         IReadOnlyRepository<Core.Datasources.Datasource> datasourceRepository,
         IProjection<CoreDatasource, DatasourceDto> projection)
-        : IODataQueryHandler<GetDatasourceQuery, Result<IQueryable<DatasourceDto>>>
+        : IQueryableQueryHandler<GetDatasourceQuery, Result<IQueryable<DatasourceDto>>>
     {
         public Task<Result<IQueryable<DatasourceDto>>> HandleAsync(GetDatasourceQuery request,
             CancellationToken cancellationToken)

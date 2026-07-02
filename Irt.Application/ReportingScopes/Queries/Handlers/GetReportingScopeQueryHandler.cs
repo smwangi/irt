@@ -1,5 +1,6 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Irt.Application.Common;
 using Irt.Application.Configuration.Queries;
 using Irt.Core.ReportingScopes;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
@@ -19,17 +20,9 @@ internal sealed class GetReportingScopeQueryHandler(
     {
         var items = await repository
             .Query(scope => !scope.IsDeleted)
+            .WhereContainsInsensitive(query.Search, scope => scope.Name.Value)
             .ProjectTo<ReportingScopeDto>(mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
-
-        if (!string.IsNullOrWhiteSpace(query.Search))
-        {
-            var search = query.Search.Trim();
-
-            items = items
-                .Where(item => item.Name.Contains(search, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-        }
 
         return Result<List<ReportingScopeDto>>.Success(items);
     }

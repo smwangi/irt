@@ -22,7 +22,7 @@ public class QueryDispatcher(IServiceProvider serviceProvider) : IQueryDispatche
         where TQuery : IODataQuery<TResult>
     {
         query.Options = queryOptions ?? throw new ArgumentNullException(nameof(queryOptions));
-        var handler = _serviceProvider.GetRequiredService<IODataQueryHandler<TQuery, TResult>>();
+        var handler = _serviceProvider.GetRequiredService<IQueryableQueryHandler<TQuery, TResult>>();
         return await handler.HandleAsync(query, cancellationToken);
     }
 }

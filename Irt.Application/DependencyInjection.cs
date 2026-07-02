@@ -31,10 +31,10 @@ public static class DependencyInjection
 
         services.AddValidatorsFromAssembly(assembly);
 
-        services.AddScoped<IODataQueryHandler<GetDatasetsQuery, Result<IQueryable<DatasetDto>>>, GetAllDatasetsQueryHandler>();
+        services.AddScoped<IQueryableQueryHandler<GetDatasetsQuery, Result<IQueryable<DatasetDto>>>, GetAllDatasetsQueryHandler>();
         
-        //services.AddScoped<IODataQueryHandler<GetDatasourceQuery, DatasourceDto>, GetDatasourceQueryHandler>();
-        //services.AddScoped<IODataQueryHandler<GetReportingScopeQuery, ReportingScopeDto>, GetReportingScopeQueryHandler>();
+        //services.AddScoped<IQueryableQueryHandler<GetDatasourceQuery, DatasourceDto>, GetDatasourceQueryHandler>();
+        //services.AddScoped<IQueryableQueryHandler<GetReportingScopeQuery, ReportingScopeDto>, GetReportingScopeQueryHandler>();
         //services.AddScoped<IQueryHandler<GetDatasetsByIdQuery, DatasetDto>, GetDatasetsByIdQueryHandler>();
         
         services.AddLogging(config => config.AddConsole()); // Console logging

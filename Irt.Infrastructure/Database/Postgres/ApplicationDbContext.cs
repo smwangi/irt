@@ -30,6 +30,7 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Dataset> Datasets { get; set; }
     public DbSet<Datasource> Datasources { get; set; }
+    public DbSet<UnitOfMeasure> UnitOfMeasures { get; set; }
     public DbSet<IndicatorMainCategory> IndicatorMainCategories { get; set; }
     public DbSet<IndicatorCategory> IndicatorCategories { get; set; }
     public DbSet<ReportingScope> ReportingScopes { get; set; }

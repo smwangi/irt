@@ -1,9 +1,7 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
+using Irt.Application.Dispatchers;
 using Irt.Application.ReportingScopes;
-using Irt.Core.ReportingScopes;
-using Irt.Infrastructure.Database.Postgres;
-using Microsoft.EntityFrameworkCore;
+using Irt.Application.ReportingScopes.Queries;
+using Result = Irt.SharedKernel.Results.Result<System.Linq.IQueryable<Irt.Application.ReportingScopes.ReportingScopeDto>>;
 
 namespace IrtWeb.GraphQL.ReportingScopes;
 
@@ -11,51 +9,26 @@ namespace IrtWeb.GraphQL.ReportingScopes;
 public sealed class ReportingScopeQueries
 {
     [UseProjection, UseFiltering, UseSorting]
-    public IQueryable<ReportingScopeDto> GetReportingScopes(
-        [Service] ApplicationDbContext db,
-        [Service] IMapper mapper,
-        string? search = null)
+    public async Task<IQueryable<ReportingScopeDto>> GetReportingScopes(
+        [Service] IQueryDispatcher dispatcher,
+        string? search = null,
+        CancellationToken cancellationToken = default)
     {
-        IQueryable<ReportingScope> query;
-
-        if (string.IsNullOrWhiteSpace(search))
-        {
-            query = db.ReportingScopes
-                .AsNoTracking()
-                .Where(x => !x.IsDeleted);
-        }
-        else
-        {
-            var pattern = $"%{EscapeLikePattern(search.Trim())}%";
-
-            query = db.ReportingScopes
-                .FromSqlInterpolated($@"SELECT *
-FROM irt.reporting_scopes
-WHERE ""IsDeleted"" = FALSE
-AND ""Name"" ILIKE {pattern} ESCAPE '\'")
-                .AsNoTracking();
-        }
-
-        return query.ProjectTo<ReportingScopeDto>(mapper.ConfigurationProvider);
+        var result = await dispatcher
+            .DispatchAsync<QueryReportingScopes, Result>(
+                new QueryReportingScopes(search), cancellationToken);
+        return result.ValueOrThrow();
     }
-    
+
     [UseProjection]
-    public IQueryable<ReportingScopeDto> GetReportingScopeById(
-        [Service] ApplicationDbContext db,
-        [Service] IMapper mapper,
-        string id)
+    public async Task<IQueryable<ReportingScopeDto>> GetReportingScopeById(
+        [Service] IQueryDispatcher dispatcher,
+        string id,
+        CancellationToken cancellationToken = default)
     {
-        var reportingScopeId = ReportingScopeId.Create(id);
-
-        return db.ReportingScopes
-            .AsNoTracking()
-            .Where(x => !x.IsDeleted && x.Id == reportingScopeId)
-            .ProjectTo<ReportingScopeDto>(mapper.ConfigurationProvider);
+        var result = await dispatcher
+            .DispatchAsync<QueryReportingScopeById, Result>(
+                new QueryReportingScopeById(id), cancellationToken);
+        return result.ValueOrThrow();
     }
-
-    private static string EscapeLikePattern(string value) =>
-        value
-            .Replace("\\", "\\\\")
-            .Replace("%", "\\%")
-            .Replace("_", "\\_");
 }

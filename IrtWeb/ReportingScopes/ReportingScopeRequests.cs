@@ -16,6 +16,6 @@ public sealed record UpdateReportingScopeRequest(string Name, string Description
 
 public sealed record PatchReportingScopeRequest(string Name, string Description)
 {
-    public PatchReportingScopeCommand ToCommand(string? id)
-        => new(Name, Description) { Id = id ?? string.Empty };
+    public PatchReportingScopeCommand ToCommand(string? key)
+        => new(Name, Description) { Id = key ?? string.Empty };
 }

@@ -12,3 +12,7 @@ Irt.Application/obj
 Irt.Application/bin
 Irt.SharedKernel/obj
 
+# Build artifacts (all projects)
+**/bin/
+**/obj/
+

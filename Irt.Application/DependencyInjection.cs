@@ -3,7 +3,6 @@ using Irt.Application.Common;
 using Irt.Application.Configuration.Behaviors;
 using Irt.Application.Configuration.Commands;
 using Irt.Application.Configuration.ContextAccessor;
-using Irt.Application.Configuration.Emails;
 using Irt.Application.Configuration.Queries;
 using Irt.Application.Datasets;
 using Irt.Application.Datasets.Queries;
@@ -32,9 +31,6 @@ public static class DependencyInjection
 
         services.AddValidatorsFromAssembly(assembly);
 
-        // using the <,> notation to specify the behavior that can be used for any generic type parameters
-        
-        services.AddScoped<IEmailSender, EmailSender>();
         services.AddScoped<IODataQueryHandler<GetDatasetsQuery, Result<IQueryable<DatasetDto>>>, GetAllDatasetsQueryHandler>();
         
         //services.AddScoped<IODataQueryHandler<GetDatasourceQuery, DatasourceDto>, GetDatasourceQueryHandler>();
@@ -67,20 +63,6 @@ public static class DependencyInjection
         .WithScopedLifetime());
         
         services.AddFeatureManagement();
-        /*services.AddMassTransit(x =>
-        {
-            x.UsingRabbitMq((context, cfg) =>
-            {
-                cfg.Host("rabbitmq://localhost:5672", "/", h =>
-                {
-                    h.Username("guest");
-                    h.Password("guest");
-                });
-                cfg.ConfigureEndpoints(context);
-                cfg.Durable = true;
-            });
-        });*/
-
         services.AddMassTransit(x =>
         {
             x.UsingInMemory();
@@ -92,35 +74,10 @@ public static class DependencyInjection
                     k.Host("localhost:9092");
 
 
-                    // Configure producers
-                    /*k.TopicProducer<ExampleConsumer>(c =>
-                    {
-                        c.TopicName = "your-topic-name";
-                    });*/
-
-                    // Configure producer
-                    /*k.TopicEndpoint<ExampleConsumer>("example-topic", "producer-group", e =>
-                    {
-                        e.ConfigureConsumer<ExampleConsumer>(context);
-                        
-                    });*/
                 });
-                /*cfg.Host("localhost:9092");
-
-                // Configure a consumer for a topic
-                cfg.TopicEndpoint<string>("example-topic", "consumer-group", e =>
-                {
-                    e.ConfigureConsumer<ExampleConsumer>(context);
-                });*/
             });
-
-            // Register consumer
-            //x.AddConsumer<ExampleConsumer>();
         });
 
-        //services.AddScoped(typeof(IScopedBusContextProvider<>), typeof(ScopedBusContextProvider<>));
-        //var busControl = services.BuildServiceProvider().GetRequiredService<IBusControl>();
-        //busControl.StartAsync().GetAwaiter().GetResult();
         services.AddAutoMapper(typeof(DatasetMappingProfile));
         services.AddHttpContextAccessor();
         services.AddScoped<IOperationContextAccessor, OperationContextAccessor>();

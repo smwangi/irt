@@ -12,6 +12,7 @@ using Irt.Application.ReportingScopes;
 using Irt.Infrastructure.Database.Postgres;
 using IrtWeb.Configuration;
 using IrtWeb.GraphQL;
+using IrtWeb.GraphQL.IndicatorDefinitions;
 using IrtWeb.GraphQL.ReportingScopes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
@@ -66,13 +67,13 @@ builder.Services
     .AddMutationType()
     .AddTypeExtension<ReportingScopeMutations>()
     .AddTypeExtension<ReportingScopeQueries>()
+    .AddTypeExtension<IndicatorDefinitionMutations>()
+    .AddTypeExtension<IndicatorDefinitionQueries>()
     .AddProjections()
     .AddFiltering()
     .AddSorting()
     .ModifyRequestOptions(o => o.IncludeExceptionDetails = builder.Environment.IsDevelopment())
-    .AddErrorFilter(err => builder.Environment.IsDevelopment() && err.Exception is not null
-        ? err.WithMessage(err.Exception.GetBaseException().Message + " | " + err.Exception.GetType().Name)
-        : err);
+    .AddErrorFilter(error => GraphQlErrorFilter.OnError(error, builder.Environment.IsDevelopment()));
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithThreadId()

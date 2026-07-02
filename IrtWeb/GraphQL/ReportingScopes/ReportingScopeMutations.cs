@@ -1,6 +1,7 @@
 using Irt.Application.Dispatchers;
 using Irt.Application.ReportingScopes;
 using Irt.Application.ReportingScopes.Commands;
+using IrtWeb.GraphQL;
 
 namespace IrtWeb.GraphQL.ReportingScopes;
 
@@ -14,9 +15,7 @@ public sealed class ReportingScopeMutations
         var result = await dispatcher
             .DispatchCommandAsync<CreateReportingScopeCommand, Irt.SharedKernel.Results.Result<ReportingScopeDto>>(input, cancellationToken);
         
-        return result.IsSuccess
-            ? result.Value!
-            : throw new GraphQLException(result.IrtError!.Message);
+        return result.ValueOrThrow();
     }
     
     public async Task<ReportingScopeDto> PatchReportingScope(
@@ -26,9 +25,7 @@ public sealed class ReportingScopeMutations
         var result = await dispatcher
             .DispatchCommandAsync<PatchReportingScopeCommand, Irt.SharedKernel.Results.Result<ReportingScopeDto>>(input, cancellationToken);
         
-        return result.IsSuccess
-            ? result.Value!
-            : throw new GraphQLException(result.IrtError!.Message);
+        return result.ValueOrThrow();
     }
     
     public async Task<ReportingScopeDto> UpdateReportingScope(
@@ -38,8 +35,6 @@ public sealed class ReportingScopeMutations
         var result = await dispatcher
             .DispatchCommandAsync<UpdateReportingScopeCommand, Irt.SharedKernel.Results.Result<ReportingScopeDto>>(input, cancellationToken);
         
-        return result.IsSuccess
-            ? result.Value!
-            : throw new GraphQLException(result.IrtError!.Message);
+        return result.ValueOrThrow();
     }
 }

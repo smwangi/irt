@@ -18,12 +18,18 @@ internal sealed class GetIndicatorDefinitionQueryHandler(
     public async Task<Result<List<IndicatorDefinitionDto>>> HandleAsync(
         GetIndicatorDefinitionQuery query, CancellationToken cancellationToken)
     {
-        var items = await repository
+        var queryable = repository
             .Query(e => !e.IsDeleted)
-            .WhereContainsInsensitive(query.Search, e => e.Name.Value)
-            .ProjectTo<IndicatorDefinitionDto>(mapper.ConfigurationProvider)
-            .ToListAsync(cancellationToken);
+            .ProjectTo<IndicatorDefinitionDto>(mapper.ConfigurationProvider);
 
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            var search = query.Search.Trim().ToLower();
+            queryable = queryable
+                .Where(item => item.Name.ToLower().Contains(search));
+        }
+
+        var items = await queryable.ToListAsync(cancellationToken);
         return Result<List<IndicatorDefinitionDto>>.Success(items);
     }
 }

@@ -1,6 +1,7 @@
 // Purpose: Contains tests for the Datasource controller.
 
 using System.Text.Json;
+using Irt.IntegrationTest;
 using Irt.IntegrationTest.Setup;
 
 namespace Irt.IntegrationTest.Tests;

@@ -54,7 +54,7 @@ public class DomainEventsDispatcher(IServiceProvider serviceProvider) : IDomainE
             }
             
             // Call the HandleAsync method on the handler
-            await (Task)handleMethod.Invoke(handler, new object[] { domainEvent, cancellationToken });
+            await (Task)handleMethod.Invoke(handler, [domainEvent, cancellationToken]);
         }
     }
 }

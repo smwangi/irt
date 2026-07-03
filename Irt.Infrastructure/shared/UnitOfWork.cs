@@ -10,7 +10,7 @@ public class UnitOfWork(ApplicationDbContext context) : IUnitOfWork
 {
     private readonly ApplicationDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
     private IDbContextTransaction? _transaction;
-    private readonly Dictionary<Type, object> _repositories = new();
+    private readonly Dictionary<Type, object> _repositories = [];
     
     public void Dispose()
     {

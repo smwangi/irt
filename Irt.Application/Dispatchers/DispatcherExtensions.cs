@@ -4,10 +4,13 @@ namespace Irt.Application.Dispatchers;
 
 public static class DispatcherExtensions
 {
-    public static IServiceCollection AddDispatchers(this IServiceCollection serviceCollection)
+    extension(IServiceCollection serviceCollection)
     {
-        serviceCollection.AddScoped<ICommandDispatcher, CommandDispatcher>();
-        serviceCollection.AddScoped<IQueryDispatcher, QueryDispatcher>();
-        return serviceCollection;
+        public IServiceCollection AddDispatchers()
+        {
+            serviceCollection.AddScoped<ICommandDispatcher, CommandDispatcher>();
+            serviceCollection.AddScoped<IQueryDispatcher, QueryDispatcher>();
+            return serviceCollection;
+        }
     }
 }

@@ -1,5 +1,6 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Irt.Application.Common;
 using Irt.Application.Configuration.Queries;
 using Irt.Core.ReportingScopes;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
@@ -30,7 +31,6 @@ internal sealed class GetReportingScopeQueryHandler(
         }
 
         var items = await queryable.ToListAsync(cancellationToken);
-
         return Result<List<ReportingScopeDto>>.Success(items);
     }
 }

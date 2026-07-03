@@ -75,7 +75,7 @@ public sealed class UnauthorizedException(
             }
 
             var mergedDetails = details is null
-                ? new Dictionary<string, object>()
+                ? []
                 : new Dictionary<string, object>(details);
 
             mergedDetails["retryAfter"] = retryAfterSeconds.Value;

@@ -5,9 +5,8 @@ using Irt.Core.ValueObjects;
 
 namespace Irt.Core.IndicatorCategories
 {
-    public class IndicatorCategory : Entity<IndicatorCategoryId>
+    public class IndicatorCategory : NamedMetadataEntity<IndicatorCategoryId>
     {
-        public string Description { get; private set; }
         public IndicatorMainCategory IndicatorMainCategory { get; private set; }
         
         private IndicatorCategory() { }
@@ -17,10 +16,8 @@ namespace Irt.Core.IndicatorCategories
             Name name,
             string description,
             IndicatorMainCategory indicatorMainCategory)
+            : base(id, name, description)
         {
-            Id = id;
-            Name = name;
-            Description = description;
             IndicatorMainCategory = indicatorMainCategory;
         }
 
@@ -34,6 +31,17 @@ namespace Irt.Core.IndicatorCategories
                 name, 
                 description,
                 indicatorMainCategory);
+        }
+
+        public void Update(
+            string name,
+            string description,
+            IndicatorMainCategory indicatorMainCategory)
+        {
+            ArgumentNullException.ThrowIfNull(indicatorMainCategory);
+
+            base.Update(name, description);
+            IndicatorMainCategory = indicatorMainCategory;
         }
     }
 }

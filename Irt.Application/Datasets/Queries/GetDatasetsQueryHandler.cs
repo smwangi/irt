@@ -10,7 +10,7 @@ namespace Irt.Application.Datasets.Queries;
 internal class GetAllDatasetsQueryHandler(
     IReadOnlyRepository<Dataset> repository,
     IProjection<Dataset, DatasetDto> projection)
-    : IODataQueryHandler<GetDatasetsQuery, Result<IQueryable<DatasetDto>>>
+    : IQueryableQueryHandler<GetDatasetsQuery, Result<IQueryable<DatasetDto>>>
 {
     public Task<Result<IQueryable<DatasetDto>>> HandleAsync(GetDatasetsQuery request,
         CancellationToken cancellationToken)

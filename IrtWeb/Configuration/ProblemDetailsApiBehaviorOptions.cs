@@ -6,14 +6,17 @@ namespace IrtWeb.Configuration;
 
 public static class ProblemDetailsApiBehaviorOptions
 {
-    public static void UseProblemDetailsValidationResponse(this ApiBehaviorOptions options)
+    extension(ApiBehaviorOptions options)
     {
-        options.InvalidModelStateResponseFactory = context =>
+        public void UseProblemDetailsValidationResponse()
         {
-            return IrtError.Validation(
-                    "One or more validation errors occurred.",
-                    details: ValidationErrorDetails.FromModelState(context.ModelState))
-                .ToProblemDetailsResult(context.HttpContext);
-        };
+            options.InvalidModelStateResponseFactory = context =>
+            {
+                return IrtError.Validation(
+                        "One or more validation errors occurred.",
+                        details: ValidationErrorDetails.FromModelState(context.ModelState))
+                    .ToProblemDetailsResult(context.HttpContext);
+            };
+        }
     }
 }

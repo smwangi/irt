@@ -3,10 +3,8 @@ using Irt.Core.SharedKernel;
 using Irt.Core.ValueObjects;
 namespace Irt.Core.UnitOfMeasurements
 {
-    public class UnitOfMeasure : Entity<UnitOfMeasureId>
+    public class UnitOfMeasure : NamedMetadataEntity<UnitOfMeasureId>
     {
-        public string Description { get; private set; }
-
         private UnitOfMeasure()
         {
         }
@@ -15,11 +13,14 @@ namespace Irt.Core.UnitOfMeasurements
             Name name,
             string description,
             UnitOfMeasureId id)
+            : base(id, name, description)
         {
-            Id = id;
-            Name = name;
-            Description = description;
         }
+
+        public static UnitOfMeasure Create(
+            Name name,
+            string description)
+            => CreateUnitOfMeasure(name, description);
 
         public static UnitOfMeasure CreateUnitOfMeasure(
             Name name,
@@ -35,13 +36,12 @@ namespace Irt.Core.UnitOfMeasurements
             string name,
             string description)
         {
-            Name.Of(name);
-            Description = description;
+            Update(name, description);
         }
 
         public void DeleteUnitOfMeasure()
         {
-            //IsDeleted = true;
+            MarkAsDeleted();
         }
 
         public void ApproveUnitOfMeasure()

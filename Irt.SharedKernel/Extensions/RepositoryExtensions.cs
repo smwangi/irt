@@ -8,49 +8,49 @@ namespace Irt.SharedKernel.Extensions;
 
 public static class RepositoryExtensions
 {
-    public static async Task<Result<T>> FindByIdAsync<T>(
-        this IReadOnlyRepository<T> repository,
-        object id,
-        CancellationToken cancellationToken = default) where T : class
+    extension<T>(IReadOnlyRepository<T> repository) where T : class
     {
-        var entity = await repository.FindByIdAsync(id, cancellationToken);
-        return entity is not null
-            ? Result<T>.Success(entity)
-            : Result.Failure<T>(IrtError.NotFound($"Entity with id {id} was not found."));
-    }
+        public async Task<Result<T>> FindByIdAsync(
+            object id,
+            CancellationToken cancellationToken = default)
+        {
+            var entity = await repository.FindByIdAsync(id, cancellationToken);
+            return entity is not null
+                ? Result<T>.Success(entity)
+                : Result.Failure<T>(IrtError.NotFound($"Entity with id {id} was not found."));
+        }
 
-    public static Result<IQueryable<TDto>> QuerySafely<TEntity, TDto>(
-        this IReadOnlyRepository<TEntity> repository,
-        Expression<Func<TEntity, TDto>> projection) where TEntity : class
-    {
-        try
+        public Result<IQueryable<TDto>> QuerySafely<TDto>(
+            Expression<Func<T, TDto>> projection)
         {
-            var query = repository.Query().Select(projection);
-            return Result<IQueryable<TDto>>.Success(query);
+            try
+            {
+                var query = repository.Query().Select(projection);
+                return Result<IQueryable<TDto>>.Success(query);
+            }
+            catch (Exception e)
+            {
+                return Result.Failure<IQueryable<TDto>>(
+                    IrtError.BadRequest($"Failed to query for {typeof(T).Name}. {e.Message}"));
+            }
         }
-        catch (Exception e)
+        
+        public Result<IQueryable<TDto>> QuerySafely<TDto>(
+            Expression<Func<T, bool>> filter,
+            Expression<Func<T, TDto>> projection)
         {
-            return Result.Failure<IQueryable<TDto>>(
-                IrtError.BadRequest($"Failed to query for {typeof(TEntity).Name}. {e.Message}"));
-        }
-    }
-    
-    public static Result<IQueryable<TDto>> QuerySafely<TEntity, TDto>(
-        this IReadOnlyRepository<TEntity> repository,
-        Expression<Func<TEntity, bool>> filter,
-        Expression<Func<TEntity, TDto>> projection) where TEntity : class
-    {
-        try
-        {
-            var query = repository
-                .Query(filter)
-                .Select(projection);
-            return Result<IQueryable<TDto>>.Success(query);
-        }
-        catch (Exception e)
-        {
-            return Result.Failure<IQueryable<TDto>>(
-                IrtError.BadRequest($"Failed to query for {typeof(TEntity).Name}. {e.Message}"));
+            try
+            {
+                var query = repository
+                    .Query(filter)
+                    .Select(projection);
+                return Result<IQueryable<TDto>>.Success(query);
+            }
+            catch (Exception e)
+            {
+                return Result.Failure<IQueryable<TDto>>(
+                    IrtError.BadRequest($"Failed to query for {typeof(T).Name}. {e.Message}"));
+            }
         }
     }
 }

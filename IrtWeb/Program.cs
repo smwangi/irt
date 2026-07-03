@@ -12,8 +12,11 @@ using Irt.Application.ReportingScopes;
 using Irt.Infrastructure.Database.Postgres;
 using IrtWeb.Configuration;
 using IrtWeb.GraphQL;
+using IrtWeb.GraphQL.IndicatorCategories;
 using IrtWeb.GraphQL.IndicatorDefinitions;
+using IrtWeb.GraphQL.IndicatorMainCategories;
 using IrtWeb.GraphQL.ReportingScopes;
+using IrtWeb.GraphQL.UnitOfMeasurements;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 
@@ -69,6 +72,12 @@ builder.Services
     .AddTypeExtension<ReportingScopeQueries>()
     .AddTypeExtension<IndicatorDefinitionMutations>()
     .AddTypeExtension<IndicatorDefinitionQueries>()
+    .AddTypeExtension<UnitOfMeasureMutations>()
+    .AddTypeExtension<UnitOfMeasureQueries>()
+    .AddTypeExtension<IndicatorMainCategoryMutations>()
+    .AddTypeExtension<IndicatorMainCategoryQueries>()
+    .AddTypeExtension<IndicatorCategoryMutations>()
+    .AddTypeExtension<IndicatorCategoryQueries>()
     .AddProjections()
     .AddFiltering()
     .AddSorting()

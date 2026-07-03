@@ -1,9 +1,7 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
+using Irt.Application.Dispatchers;
 using Irt.Application.IndicatorDefinitions;
-using Irt.Core.IndicatorDefinitions;
-using Irt.Infrastructure.Database.Postgres;
-using Microsoft.EntityFrameworkCore;
+using Irt.Application.IndicatorDefinitions.Queries;
+using Result = Irt.SharedKernel.Results.Result<System.Linq.IQueryable<Irt.Application.IndicatorDefinitions.IndicatorDefinitionDto>>;
 
 namespace IrtWeb.GraphQL.IndicatorDefinitions;
 
@@ -11,42 +9,26 @@ namespace IrtWeb.GraphQL.IndicatorDefinitions;
 public sealed class IndicatorDefinitionQueries
 {
     [UseProjection, UseFiltering, UseSorting]
-    public IQueryable<IndicatorDefinitionDto> GetIndicatorDefinitions(
-        [Service] ApplicationDbContext db,
-        [Service] IMapper mapper,
-        string? search = null)
+    public async Task<IQueryable<IndicatorDefinitionDto>> GetIndicatorDefinitions(
+        [Service] IQueryDispatcher dispatcher,
+        string? search = null,
+        CancellationToken cancellationToken = default)
     {
-        var query = db.IndicatorDefinitions
-            .AsNoTracking()
-            .Where(x => !x.IsDeleted);
-
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            var pattern = $"%{EscapeLikePattern(search.Trim())}%";
-
-            query = query.Where(x => EF.Functions.ILike(x.Name.Value, pattern, "\\"));
-        }
-
-        return query.ProjectTo<IndicatorDefinitionDto>(mapper.ConfigurationProvider);
+        var result = await dispatcher
+            .DispatchAsync<QueryIndicatorDefinitions, Result>(
+                new QueryIndicatorDefinitions(search), cancellationToken);
+        return result.ValueOrThrow();
     }
 
     [UseProjection]
-    public IQueryable<IndicatorDefinitionDto> GetIndicatorDefinitionById(
-        [Service] ApplicationDbContext db,
-        [Service] IMapper mapper,
-        string id)
+    public async Task<IQueryable<IndicatorDefinitionDto>> GetIndicatorDefinitionById(
+        [Service] IQueryDispatcher dispatcher,
+        string id,
+        CancellationToken cancellationToken = default)
     {
-        var indicatorDefinitionId = IndicatorDefinitionId.Create(id);
-
-        return db.IndicatorDefinitions
-            .AsNoTracking()
-            .Where(x => !x.IsDeleted && x.Id == indicatorDefinitionId)
-            .ProjectTo<IndicatorDefinitionDto>(mapper.ConfigurationProvider);
+        var result = await dispatcher
+            .DispatchAsync<QueryIndicatorDefinitionById, Result>(
+                new QueryIndicatorDefinitionById(id), cancellationToken);
+        return result.ValueOrThrow();
     }
-
-    private static string EscapeLikePattern(string value) =>
-        value
-            .Replace("\\", "\\\\")
-            .Replace("%", "\\%")
-            .Replace("_", "\\_");
 }

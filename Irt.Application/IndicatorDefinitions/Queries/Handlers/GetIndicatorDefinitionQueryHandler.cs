@@ -1,5 +1,6 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Irt.Application.Common;
 using Irt.Application.Configuration.Queries;
 using Irt.Core.IndicatorDefinitions;
 using Irt.SharedKernel.ErrorHandling.Exceptions;
@@ -29,7 +30,6 @@ internal sealed class GetIndicatorDefinitionQueryHandler(
         }
 
         var items = await queryable.ToListAsync(cancellationToken);
-
         return Result<List<IndicatorDefinitionDto>>.Success(items);
     }
 }

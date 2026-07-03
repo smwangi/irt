@@ -48,11 +48,11 @@
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AWebApplication_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2024_002E3_003Fresharper_002Dhost_003FDecompilerCache_003Fdecompiler_003F3126e2df05e6424f972b3aefc266110316e00_003Fa7_003F793c370d_003FWebApplication_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=1ecd351f_002Dd297_002D44d5_002D8866_002Dc615bc73d978/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
-    &lt;TestId&gt;xUnit::23ADBB00-3E90-40D8-AA44-D9127CDBCB58::net9.0::Irt.IntegrationTest.DatasourceTests.Test1&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::23ADBB00-3E90-40D8-AA44-D9127CDBCB58::net10.0::Irt.IntegrationTest.DatasourceTests.Test1&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=6b771cfe_002D6ee4_002D41fd_002Da1b6_002Df3179e8accf8/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Test1 #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
-    &lt;TestId&gt;xUnit::23ADBB00-3E90-40D8-AA44-D9127CDBCB58::net9.0::Irt.IntegrationTest.DatasourceTests.Test1&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::23ADBB00-3E90-40D8-AA44-D9127CDBCB58::net10.0::Irt.IntegrationTest.DatasourceTests.Test1&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

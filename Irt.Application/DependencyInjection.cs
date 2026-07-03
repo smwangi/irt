@@ -25,62 +25,65 @@ namespace Irt.Application;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        var assembly = typeof(DependencyInjection).Assembly;
-
-        services.AddValidatorsFromAssembly(assembly);
-
-        services.AddScoped<IQueryableQueryHandler<GetDatasetsQuery, Result<IQueryable<DatasetDto>>>, GetAllDatasetsQueryHandler>();
-        
-        //services.AddScoped<IQueryableQueryHandler<GetDatasourceQuery, DatasourceDto>, GetDatasourceQueryHandler>();
-        //services.AddScoped<IQueryableQueryHandler<GetReportingScopeQuery, ReportingScopeDto>, GetReportingScopeQueryHandler>();
-        //services.AddScoped<IQueryHandler<GetDatasetsByIdQuery, DatasetDto>, GetDatasetsByIdQueryHandler>();
-        
-        services.AddLogging(config => config.AddConsole()); // Console logging
-
-        services.AddHttpContextAccessor();
-        services.AddScoped<IUserDetails, HttpContextUserDetails>();
-        services.Scan(scan => scan
-            .FromApplicationDependencies()
-            .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<,>)), publicOnly: false)
-            .AsImplementedInterfaces()
-            .WithScopedLifetime());
-
-        services.Decorate(typeof(ICommandHandler<,>), typeof(UnitOfWorkCommandHandlerDecorator<,>));
-        services.Decorate(typeof(ICommandHandler<,>), typeof(ValidationBehavior<,>));
-
-        services.Scan(scan => scan
-            .FromApplicationDependencies()
-            .AddClasses(classes => classes.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)
-            .AsImplementedInterfaces()
-            .WithScopedLifetime());
-        
-        services.Scan(scan => scan
-            .FromAssembliesOf(typeof(IProjection<,>))
-            .AddClasses(classes => classes.AssignableTo(typeof(IProjection<,>)))
-            .AsImplementedInterfaces()
-        .WithScopedLifetime());
-        
-        services.AddFeatureManagement();
-        services.AddMassTransit(x =>
+        public IServiceCollection AddApplication()
         {
-            x.UsingInMemory();
-            x.AddRider(rider =>
+            var assembly = typeof(DependencyInjection).Assembly;
+
+            services.AddValidatorsFromAssembly(assembly);
+
+            services.AddScoped<IQueryableQueryHandler<GetDatasetsQuery, Result<IQueryable<DatasetDto>>>, GetAllDatasetsQueryHandler>();
+            
+            //services.AddScoped<IQueryableQueryHandler<GetDatasourceQuery, DatasourceDto>, GetDatasourceQueryHandler>();
+            //services.AddScoped<IQueryableQueryHandler<GetReportingScopeQuery, ReportingScopeDto>, GetReportingScopeQueryHandler>();
+            //services.AddScoped<IQueryHandler<GetDatasetsByIdQuery, DatasetDto>, GetDatasetsByIdQueryHandler>();
+            
+            services.AddLogging(config => config.AddConsole()); // Console logging
+
+            services.AddHttpContextAccessor();
+            services.AddScoped<IUserDetails, HttpContextUserDetails>();
+            services.Scan(scan => scan
+                .FromApplicationDependencies()
+                .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<,>)), publicOnly: false)
+                .AsImplementedInterfaces()
+                .WithScopedLifetime());
+
+            services.Decorate(typeof(ICommandHandler<,>), typeof(UnitOfWorkCommandHandlerDecorator<,>));
+            services.Decorate(typeof(ICommandHandler<,>), typeof(ValidationBehavior<,>));
+
+            services.Scan(scan => scan
+                .FromApplicationDependencies()
+                .AddClasses(classes => classes.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)
+                .AsImplementedInterfaces()
+                .WithScopedLifetime());
+            
+            services.Scan(scan => scan
+                .FromAssembliesOf(typeof(IProjection<,>))
+                .AddClasses(classes => classes.AssignableTo(typeof(IProjection<,>)))
+                .AsImplementedInterfaces()
+            .WithScopedLifetime());
+            
+            services.AddFeatureManagement();
+            services.AddMassTransit(x =>
             {
-                rider.UsingKafka((context, k) =>
+                x.UsingInMemory();
+                x.AddRider(rider =>
                 {
-                    // Configure the broker
-                    k.Host("localhost:9092");
+                    rider.UsingKafka((context, k) =>
+                    {
+                        // Configure the broker
+                        k.Host("localhost:9092");
 
 
+                    });
                 });
             });
-        });
 
-        services.AddAutoMapper(typeof(DatasetMappingProfile));
-        services.AddHttpContextAccessor();
-        services.AddScoped<IOperationContextAccessor, OperationContextAccessor>();
-        return services;
+            services.AddAutoMapper(typeof(DatasetMappingProfile));
+            services.AddHttpContextAccessor();
+            services.AddScoped<IOperationContextAccessor, OperationContextAccessor>();
+            return services;
+        }
     }
 }

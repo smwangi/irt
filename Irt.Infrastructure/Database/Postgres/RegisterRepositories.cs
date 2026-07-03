@@ -11,16 +11,19 @@ namespace Irt.Infrastructure.Database.Postgres;
 
 public static class RegisterRepositories
 {
-    public static IServiceCollection AddRepositories(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        //services.AddScoped<IGenericRepository<Dataset>, GenericRepository<Dataset>>();
-        //services.AddScoped<IGenericRepository<Datasource>, GenericRepository<Datasource>>();
-        //services.AddScoped<IGenericRepository<IndicatorDefinition>, GenericRepository<IndicatorDefinition>>();
-        
-        services.AddScoped(typeof(IReadOnlyRepository<>), typeof(ReadOnlyRepository<>));
-        services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
-        services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
-        return services;
+        public IServiceCollection AddRepositories()
+        {
+            //services.AddScoped<IGenericRepository<Dataset>, GenericRepository<Dataset>>();
+            //services.AddScoped<IGenericRepository<Datasource>, GenericRepository<Datasource>>();
+            //services.AddScoped<IGenericRepository<IndicatorDefinition>, GenericRepository<IndicatorDefinition>>();
+            
+            services.AddScoped(typeof(IReadOnlyRepository<>), typeof(ReadOnlyRepository<>));
+            services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            return services;
+        }
     }
 }

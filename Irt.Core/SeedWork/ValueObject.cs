@@ -4,10 +4,10 @@ namespace Irt.Core.SeedWork
 {
     public abstract class ValueObject : IEquatable<ValueObject>
     {
-        private List<PropertyInfo> _properties;
-        private List<FieldInfo> _fields;
+        private List<PropertyInfo>? _properties;
+        private List<FieldInfo>? _fields;
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == null || GetType() != obj.GetType()) return false;
             return GetProperties().All(p => PropertiesAreEqual(obj, p))
@@ -74,31 +74,21 @@ namespace Irt.Core.SeedWork
 
         private IEnumerable<PropertyInfo> GetProperties()
         {
-            if (this._properties == null)
-            {
-                this._properties = GetType()
+            return _properties ??= GetType()
                     .GetProperties(BindingFlags.Instance | BindingFlags.Public)
                     .Where(p => p.GetCustomAttribute(typeof(IgnoreMemberAttribute)) == null)
                     .ToList();
-            }
-
-            return this._properties;
         }
 
         private IEnumerable<FieldInfo> GetFields()
         {
-            if (this._fields == null)
-            {
-                this._fields = GetType()
+            return _fields ??= GetType()
                     .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                     .Where(p => p.GetCustomAttribute(typeof(IgnoreMemberAttribute)) == null)
                     .ToList();
-            }
-
-            return this._fields;
         }
     
-        private static int HashValue(int seed, object value)
+        private static int HashValue(int seed, object? value)
         {
             var currentHash = value?.GetHashCode() ?? 0;
 

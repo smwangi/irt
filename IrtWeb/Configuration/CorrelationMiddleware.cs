@@ -12,10 +12,7 @@ namespace IrtWeb.Configuration
         public async Task Invoke(HttpContext context)
         {
             var correlationId = Guid.NewGuid(); //context.Request.Headers[CorrelationIdHeader];
-            if (context.Request != null)
-            {
-                context.Request.Headers[CorrelationIdHeaderKey] = correlationId.ToString();
-            }
+            context.Request?.Headers[CorrelationIdHeaderKey] = correlationId.ToString();
 
             await _next(context);
         }

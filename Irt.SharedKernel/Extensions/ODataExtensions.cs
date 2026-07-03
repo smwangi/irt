@@ -6,25 +6,26 @@ namespace Irt.SharedKernel.Extensions;
 
 public static class ODataExtensions
 {
-    public static Result<IQueryable<T>> ApplyODataSafely<T>(
-        this IQueryable<T> query,
-        ODataQueryOptions? options)
+    extension<T>(IQueryable<T> query)
     {
-        if (options == null)
+        public Result<IQueryable<T>> ApplyODataSafely(ODataQueryOptions? options)
         {
-            return Result.Success(query);
-        }
-        
-        // Validate OData options before applying
-        var validationResult = ValidateODataOptions(options);
-        if (validationResult.IsFailure)
-        {
-            return Result.Failure<IQueryable<T>>(validationResult.IrtError);
-        }
+            if (options == null)
+            {
+                return Result.Success(query);
+            }
+            
+            // Validate OData options before applying
+            var validationResult = ValidateODataOptions(options);
+            if (validationResult.IsFailure)
+            {
+                return Result.Failure<IQueryable<T>>(validationResult.IrtError);
+            }
 
-        return options.ApplyTo(query) is IQueryable<T> appliedQuery
-            ? Result.Success(appliedQuery) 
-            : Result.Failure<IQueryable<T>>(IrtError.BadRequest("Failed to apply OData options."));
+            return options.ApplyTo(query) is IQueryable<T> appliedQuery
+                ? Result.Success(appliedQuery) 
+                : Result.Failure<IQueryable<T>>(IrtError.BadRequest("Failed to apply OData options."));
+        }
     }
 
     private static Result ValidateODataOptions(ODataQueryOptions? options)

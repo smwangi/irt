@@ -23,45 +23,46 @@ namespace Irt.Infrastructure;
 
 public static class DependencyInjection
 {
-    
-
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    extension(IServiceCollection services)
     {
-        services.AddDispatchers();
-        services.AddRepositories();
-        
-        services.AddDbContext<ApplicationDbContext>(opt =>
-            opt.UseNpgsql(configuration.GetConnectionString("PostgresConnection")));
-        services.AddScoped(typeof(IEntityRepository), typeof(EntityRepository));
-        services.AddScoped<IDomainEventInterface.IDomainEventDispatcher, DomainEvents_DomainEventsDispatcher>();
-        // Audit (CreatedBy/LastModifiedBy) is centrally applied by ApplicationDbContext.SaveChangesAsync
-        // via IUserDetails, so the legacy EntityCreated/Modified event handlers are intentionally
-        // not registered to avoid clobbering audit values with stale ctor-time data.
-        
-        services.AddScoped<INameUniquenessChecker<Datasource, DatasourceId>>(sp =>
-            new GenericNameUniquenessChecker<Datasource, DatasourceId>(
-                sp.GetRequiredService<ApplicationDbContext>()));
+        public IServiceCollection AddInfrastructure(IConfiguration configuration)
+        {
+            services.AddDispatchers();
+            services.AddRepositories();
+            
+            services.AddDbContext<ApplicationDbContext>(opt =>
+                opt.UseNpgsql(configuration.GetConnectionString("PostgresConnection")));
+            services.AddScoped(typeof(IEntityRepository), typeof(EntityRepository));
+            services.AddScoped<IDomainEventInterface.IDomainEventDispatcher, DomainEvents_DomainEventsDispatcher>();
+            // Audit (CreatedBy/LastModifiedBy) is centrally applied by ApplicationDbContext.SaveChangesAsync
+            // via IUserDetails, so the legacy EntityCreated/Modified event handlers are intentionally
+            // not registered to avoid clobbering audit values with stale ctor-time data.
+            
+            services.AddScoped<INameUniquenessChecker<Datasource, DatasourceId>>(sp =>
+                new GenericNameUniquenessChecker<Datasource, DatasourceId>(
+                    sp.GetRequiredService<ApplicationDbContext>()));
 
-        services.AddScoped<INameUniquenessChecker<ReportingScope, ReportingScopeId>>(sp =>
-            new GenericNameUniquenessChecker<ReportingScope, ReportingScopeId>(
-                sp.GetRequiredService<ApplicationDbContext>()));
+            services.AddScoped<INameUniquenessChecker<ReportingScope, ReportingScopeId>>(sp =>
+                new GenericNameUniquenessChecker<ReportingScope, ReportingScopeId>(
+                    sp.GetRequiredService<ApplicationDbContext>()));
 
-        services.AddScoped<INameUniquenessChecker<IndicatorDefinition, IndicatorDefinitionId>>(sp =>
-            new GenericNameUniquenessChecker<IndicatorDefinition, IndicatorDefinitionId>(
-                sp.GetRequiredService<ApplicationDbContext>()));
+            services.AddScoped<INameUniquenessChecker<IndicatorDefinition, IndicatorDefinitionId>>(sp =>
+                new GenericNameUniquenessChecker<IndicatorDefinition, IndicatorDefinitionId>(
+                    sp.GetRequiredService<ApplicationDbContext>()));
 
-        services.AddScoped<INameUniquenessChecker<UnitOfMeasure, UnitOfMeasureId>>(sp =>
-            new GenericNameUniquenessChecker<UnitOfMeasure, UnitOfMeasureId>(
-                sp.GetRequiredService<ApplicationDbContext>()));
+            services.AddScoped<INameUniquenessChecker<UnitOfMeasure, UnitOfMeasureId>>(sp =>
+                new GenericNameUniquenessChecker<UnitOfMeasure, UnitOfMeasureId>(
+                    sp.GetRequiredService<ApplicationDbContext>()));
 
-        services.AddScoped<INameUniquenessChecker<IndicatorMainCategory, IndicatorMainCategoryId>>(sp =>
-            new GenericNameUniquenessChecker<IndicatorMainCategory, IndicatorMainCategoryId>(
-                sp.GetRequiredService<ApplicationDbContext>()));
+            services.AddScoped<INameUniquenessChecker<IndicatorMainCategory, IndicatorMainCategoryId>>(sp =>
+                new GenericNameUniquenessChecker<IndicatorMainCategory, IndicatorMainCategoryId>(
+                    sp.GetRequiredService<ApplicationDbContext>()));
 
-        services.AddScoped<INameUniquenessChecker<IndicatorCategory, IndicatorCategoryId>>(sp =>
-            new GenericNameUniquenessChecker<IndicatorCategory, IndicatorCategoryId>(
-                sp.GetRequiredService<ApplicationDbContext>()));
+            services.AddScoped<INameUniquenessChecker<IndicatorCategory, IndicatorCategoryId>>(sp =>
+                new GenericNameUniquenessChecker<IndicatorCategory, IndicatorCategoryId>(
+                    sp.GetRequiredService<ApplicationDbContext>()));
 
-        return services;
+            return services;
+        }
     }
 }

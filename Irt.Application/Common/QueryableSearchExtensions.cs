@@ -17,33 +17,35 @@ public static class QueryableSearchExtensions
     private static readonly PropertyInfo FunctionsProperty =
         typeof(EF).GetProperty(nameof(EF.Functions))!;
 
-    /// <summary>
-    /// Applies a case-insensitive, SQL-translated substring filter on the projected string.
-    /// LIKE wildcards in <paramref name="search"/> are escaped so user input is treated literally.
-    /// Returns the source unchanged when <paramref name="search"/> is null or whitespace.
-    /// </summary>
-    public static IQueryable<T> WhereContainsInsensitive<T>(
-        this IQueryable<T> source,
-        string? search,
-        Expression<Func<T, string>> selector)
+    extension<T>(IQueryable<T> source)
     {
-        if (string.IsNullOrWhiteSpace(search))
+        /// <summary>
+        /// Applies a case-insensitive, SQL-translated substring filter on the projected string.
+        /// LIKE wildcards in <paramref name="search"/> are escaped so user input is treated literally.
+        /// Returns the source unchanged when <paramref name="search"/> is null or whitespace.
+        /// </summary>
+        public IQueryable<T> WhereContainsInsensitive(
+            string? search,
+            Expression<Func<T, string>> selector)
         {
-            return source;
+            if (string.IsNullOrWhiteSpace(search))
+            {
+                return source;
+            }
+
+            var pattern = $"%{EscapeLikePattern(search.Trim().ToLower())}%";
+
+            var toLowered = Expression.Call(selector.Body, ToLowerMethod);
+            var functions = Expression.Property(null, FunctionsProperty);
+            var likeCall = Expression.Call(
+                LikeMethod,
+                functions,
+                toLowered,
+                Expression.Constant(pattern));
+
+            var predicate = Expression.Lambda<Func<T, bool>>(likeCall, selector.Parameters);
+            return source.Where(predicate);
         }
-
-        var pattern = $"%{EscapeLikePattern(search.Trim().ToLower())}%";
-
-        var toLowered = Expression.Call(selector.Body, ToLowerMethod);
-        var functions = Expression.Property(null, FunctionsProperty);
-        var likeCall = Expression.Call(
-            LikeMethod,
-            functions,
-            toLowered,
-            Expression.Constant(pattern));
-
-        var predicate = Expression.Lambda<Func<T, bool>>(likeCall, selector.Parameters);
-        return source.Where(predicate);
     }
 
     private static string EscapeLikePattern(string value)

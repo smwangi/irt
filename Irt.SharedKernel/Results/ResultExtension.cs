@@ -6,51 +6,108 @@ namespace Irt.SharedKernel.Results;
 
 public static class ResultExtension
 {
-    public static IActionResult ToActionResult<T>(this Result<T> result)
-        => result.IsSuccess
-            ? new OkObjectResult(result.Value)
-            : result.ErrorOrThrow().ToProblemDetailsResult();
-
-    public static IActionResult ToActionResult(this Result result)
-        => result.IsSuccess
-            ? new OkResult()
-            : result.ErrorOrThrow().ToProblemDetailsResult();
-
-    public static ProblemDetails ToProblemDetails(this IrtError irtError)
+    extension<T>(Result<T> result)
     {
-        var problem = new ProblemDetails
-        {
-            Title = irtError.Code,
-            Detail = irtError.Message,
-            Status = (int)irtError.StatusCode,
-            Type = $"https://httpstatuses.com/{(int)irtError.StatusCode}"
-        };
+        public IActionResult ToActionResult()
+            => result.IsSuccess
+                ? new OkObjectResult(result.Value)
+                : result.ErrorOrThrow().ToProblemDetailsResult();
 
-        problem.Extensions["code"] = irtError.Code;
-        problem.Extensions["errorType"] = irtError.Type;
-
-        foreach (var kv in irtError.Details)
+        // Execute action on success
+        public Result<T> OnSuccess(Action<T> action)
         {
-            problem.Extensions[kv.Key] = kv.Value;
+            if (result.IsSuccess)
+                action(result.Value!);
+            
+            return result;
+        }
+        
+        // Execute action on failure
+        public Result<T> OnFailure(Action<IrtError> action)
+        {
+            if (result.IsFailure)
+                action(result.IrtError!);
+            
+            return result;
+        }
+        // Ensure (add validation)
+        public Result<T> Ensure(Func<T, bool> predicate, IrtError error)
+        {
+            if (result.IsFailure)
+                return result;
+            
+            return predicate(result.Value!) 
+                ? result 
+                : Result<T>.Failure(error);
+        }
+        
+        // Async ensure
+        public async Task<Result<T>> EnsureAsync(Func<T, Task<bool>> predicate, IrtError error)
+        {
+            if (result.IsFailure)
+                return result;
+            
+            return await predicate(result.Value!) 
+                ? result 
+                : Result<T>.Failure(error);
+        }
+    }
+
+    extension<T>(Result<T> result) where T : struct
+    {
+        // Convert to nullable
+        public T? ToNullable()
+        {
+            return result.IsSuccess ? result.Value : null;
+        }
+    }
+
+    extension(Result result)
+    {
+        public IActionResult ToActionResult()
+            => result.IsSuccess
+                ? new OkResult()
+                : result.ErrorOrThrow().ToProblemDetailsResult();
+    }
+
+    extension(IrtError irtError)
+    {
+        public ProblemDetails ToProblemDetails()
+        {
+            var problem = new ProblemDetails
+            {
+                Title = irtError.Code,
+                Detail = irtError.Message,
+                Status = (int)irtError.StatusCode,
+                Type = $"https://httpstatuses.com/{(int)irtError.StatusCode}"
+            };
+
+            problem.Extensions["code"] = irtError.Code;
+            problem.Extensions["errorType"] = irtError.Type;
+
+            foreach (var kv in irtError.Details)
+            {
+                problem.Extensions[kv.Key] = kv.Value;
+            }
+
+            return problem;
         }
 
-        return problem;
+        public ProblemDetails ToProblemDetails(HttpContext context)
+        {
+            var problem = irtError.ToProblemDetails();
+            problem.Instance = context.Request.Path;
+            problem.Extensions["traceId"] = context.TraceIdentifier;
+
+            return problem;
+        }
+
+        public ObjectResult ToProblemDetailsResult()
+            => new ProblemDetailsObjectResult(irtError);
+
+        public ObjectResult ToProblemDetailsResult(HttpContext context)
+            => new(irtError.ToProblemDetails(context)) { StatusCode = (int)irtError.StatusCode };
     }
-
-    public static ProblemDetails ToProblemDetails(this IrtError irtError, HttpContext context)
-    {
-        var problem = irtError.ToProblemDetails();
-        problem.Instance = context.Request.Path;
-        problem.Extensions["traceId"] = context.TraceIdentifier;
-
-        return problem;
-    }
-
-    public static ObjectResult ToProblemDetailsResult(this IrtError irtError)
-        => new ProblemDetailsObjectResult(irtError);
-
-    public static ObjectResult ToProblemDetailsResult(this IrtError irtError, HttpContext context)
-        => new(irtError.ToProblemDetails(context)) { StatusCode = (int)irtError.StatusCode };
 
     private sealed class ProblemDetailsObjectResult : ObjectResult
     {
@@ -99,51 +156,5 @@ public static class ResultExtension
         var combinedError = IrtError.BadRequest($"Multiple errors occurred: {combinedMessage}");
         
         return Result<T[]>.Failure(combinedError);
-    }
-    
-    // Execute action on success
-    public static Result<T> OnSuccess<T>(this Result<T> result, Action<T> action)
-    {
-        if (result.IsSuccess)
-            action(result.Value!);
-        
-        return result;
-    }
-    
-    // Execute action on failure
-    public static Result<T> OnFailure<T>(this Result<T> result, Action<IrtError> action)
-    {
-        if (result.IsFailure)
-            action(result.IrtError!);
-        
-        return result;
-    }
-    
-    // Convert to nullable
-    public static T? ToNullable<T>(this Result<T> result) where T : struct
-    {
-        return result.IsSuccess ? result.Value : null;
-    }
-    
-    // Ensure (add validation)
-    public static Result<T> Ensure<T>(this Result<T> result, Func<T, bool> predicate, IrtError error)
-    {
-        if (result.IsFailure)
-            return result;
-        
-        return predicate(result.Value!) 
-            ? result 
-            : Result<T>.Failure(error);
-    }
-    
-    // Async ensure
-    public static async Task<Result<T>> EnsureAsync<T>(this Result<T> result, Func<T, Task<bool>> predicate, IrtError error)
-    {
-        if (result.IsFailure)
-            return result;
-        
-        return await predicate(result.Value!) 
-            ? result 
-            : Result<T>.Failure(error);
     }
 }

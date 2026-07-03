@@ -25,7 +25,7 @@ public readonly struct Result<T>
         IsFailure = false;
         Value = value;
         IrtError = null;
-        Metadata = metadata ?? new();
+        Metadata = metadata ?? [];
     }
 
     // Failure constructor
@@ -34,7 +34,7 @@ public readonly struct Result<T>
         IsFailure = true;
         Value = default;
         IrtError = irtError;
-        Metadata = metadata ?? new();
+        Metadata = metadata ?? [];
     }
 
     // Factory methods
@@ -149,7 +149,7 @@ public readonly struct Result
     {
         IsFailure = false;
         IrtError = null;
-        Metadata = metadata ?? new();
+        Metadata = metadata ?? [];
     }
     
     // Failure constructor
@@ -157,7 +157,7 @@ public readonly struct Result
     {
         IsFailure = true;
         IrtError = irtError;
-        Metadata = metadata ?? new();
+        Metadata = metadata ?? [];
     }
     
     // Factory methods

@@ -35,10 +35,10 @@ public class EntityRepository(ApplicationDbContext dbContext) : IEntityRepositor
         }
         
         // Convert the string ID to the typed ID
-        var typedId = forMethod.Invoke(null, new object[] { id });
+        var typedId = forMethod.Invoke(null, [id]);
 
         // Create a generic method to call DbSet<T>.FindAsync
-        var dbSetMethod = typeof(DbContext).GetMethod("Set", new Type[0]).MakeGenericMethod(entityClrType);
+        var dbSetMethod = typeof(DbContext).GetMethod("Set", []).MakeGenericMethod(entityClrType);
         var dbSet = dbSetMethod.Invoke(dbContext, null);
 
         /*var findMethod = dbSet.GetType().GetMethod("FindAsync", new[] { typeof(object[]), typeof(CancellationToken) });
@@ -51,7 +51,7 @@ public class EntityRepository(ApplicationDbContext dbContext) : IEntityRepositor
         //var resultProperty = task.GetType().GetProperty("Result");
         //return (IEntity)resultProperty.GetValue(task);
         var findMethod = dbSet.GetType().GetMethod("FindAsync", new[] { typeof(object[]), typeof(CancellationToken) });
-        dynamic result = findMethod.Invoke(dbSet, new object[] { new[] { typedId }, cancellationToken });
+        dynamic result = findMethod.Invoke(dbSet, [new[] { typedId }, cancellationToken]);
 
         // Get the result from the ValueTask<Datasource>
         var entity = await result;

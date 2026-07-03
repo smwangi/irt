@@ -16,3 +16,6 @@ Irt.SharedKernel/obj
 **/bin/
 **/obj/
 
+
+# ReSharper/Rider user-specific settings
+*.DotSettings.user

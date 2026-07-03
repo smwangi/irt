@@ -25,10 +25,11 @@ public static class RepositoryExtensions
     extension<T>(IQueryable<T> query) where T : class
     {
         public async Task<Result<T>> FirstOrDefaultAsync(
-            Func<T, bool> predicate,
-            IrtError? notFoundError = null)
+            Expression<Func<T, bool>> predicate,
+            IrtError? notFoundError = null,
+            CancellationToken cancellationToken = default)
         {
-            var entity = query.FirstOrDefault(predicate);
+            var entity = await EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(query, predicate, cancellationToken);
             return entity is not null
                 ? Result<T>.Success(entity)
                 : Result<T>.Failure(notFoundError ?? IrtError.NotFound($"{typeof(T).Name} not found"));

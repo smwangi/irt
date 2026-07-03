@@ -1,0 +1,26 @@
+@IrtWeb_HostAddress = https://localhost:5001
+
+###
+POST {{IrtWeb_HostAddress}}/irt/api/v1/datasources
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "{{$guid}} - datasource",
+  "description": "{{$guid}} - datasource description" 
+}
+
+###
+GET {{IrtWeb_HostAddress}}/irt/api/v1/datasources?$count=true
+Content-Type: application/json
+Accept: application/json
+
+###
+GET {{IrtWeb_HostAddress}}/irt/api/v1/datasources
+Content-Type: application/json
+Accept: application/json
+
+###
+GET {{IrtWeb_HostAddress}}/irt/api/v1/datasources/66b731139c4d5c3af33e3f59
+Content-Type: application/json
+Accept: application/json

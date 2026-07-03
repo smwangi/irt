@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Compiled class file
 *.class
 
@@ -22,3 +23,26 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+=======
+IrtWeb/bin
+Irt.UnitTests/bin
+Irt.IntegrationTest/bin
+Irt.Core/bin
+Irt.Core/obj
+IrtWeb/obj
+Irt.UnitTests/obj
+Irt.IntegrationTest/obj
+Irt.Infrastructure/obj
+Irt.Infrastructure/bin
+Irt.Application/obj
+Irt.Application/bin
+Irt.SharedKernel/obj
+
+# Build artifacts (all projects)
+**/bin/
+**/obj/
+
+
+# ReSharper/Rider user-specific settings
+*.DotSettings.user
+>>>>>>> origin/main

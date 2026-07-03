@@ -1,0 +1,25 @@
+
+using FluentValidation;
+using Irt.Application.Configuration.Commands;
+using Irt.SharedKernel.Results;
+
+namespace Irt.Application.Datasets.Commands;
+
+public record CreateDatasetCommand(
+    string Name,
+    string Description,
+    string DatasourceId,
+    string DatasetType,
+    string IndicatorDefinitionId) : ICommand<Result<DatasetDto>>;
+
+
+public class CreateDatasetCommandValidator : AbstractValidator<CreateDatasetCommand>
+{
+    public CreateDatasetCommandValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().WithMessage("Name is required.");
+        RuleFor(x => x.DatasourceId).NotEmpty().WithMessage("DatasourceId is required.");
+        RuleFor(x => x.IndicatorDefinitionId).NotEmpty().WithMessage("IndicatorDefinitionId is required.");
+        RuleFor(x => x.DatasetType).NotEmpty().WithMessage("DatasetType is required.");
+    }
+}
